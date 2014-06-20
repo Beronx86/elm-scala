@@ -1,0 +1,102 @@
+/*
+elm-scala: an implementation of ELM in Scala using MTJ
+Copyright (C) 2014 Davi Pereira dos Santos
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+package ml.classifiers
+
+import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
+
+import scala.util.Random
+import ml.models.{Model, ELMOnlineModel}
+import ml.neural.elm.Data._
+import ml.mtj.ResizableDenseMatrix
+import ml.neural.elm.{ConvexIELMTrait, IELMTrait, ELM}
+import ml.Pattern
+import util.Tempo
+
+/**
+ * CI-ELM
+ * Created by davi on 19/05/14.
+ */
+case class CIELM(initialL: Int, seed: Int = 0, size: Int = 1, callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ()) extends ConvexIELMTrait {
+  override val toString = "CIELM"
+
+  def build(trSet: Seq[Pattern]) = {
+    Tempo.start
+    val rnd = new Random(seed)
+    val ninsts = checkEmptyness(trSet)
+    val natts = trSet.head.nattributes
+    val nclasses = trSet.head.nclasses
+    val X = patterns2matrix(trSet, ninsts)
+    val biases = Array.fill(initialL)(0d)
+    val Alfat = new ResizableDenseMatrix(initialL, natts)
+    val Beta = new ResizableDenseMatrix(initialL, nclasses)
+    val (t, e) = patterns2te(trSet, ninsts)
+    var l = 0
+    while (l < initialL) {
+      Alfat.resizeRows(l + 1) //needed to call f()
+      Beta.resizeRows(l + 1)
+      val (weights, b) = newNode(natts, rnd) //mutates rnd!! No problem here since old ELMOnlineModel is deallocated every iteration
+      val (h, beta) = addNodeForConvexUpdate(weights, b, X, t, e)
+      biases(l) = b
+      updateNetwork(l, weights, beta, Beta, Alfat)
+      l += 1
+      val te = Tempo.stop
+      Tempo.start
+      f(ELMOnlineModel(rnd, Alfat, biases, null, null, Beta), te)
+    }
+    //    Alfat.resizeRows(l)
+    //    Beta.resizeRows(l)
+    val model = ELMOnlineModel(rnd, Alfat, biases, null, null, Beta)
+    model
+  }
+
+  /**
+   * Mutate e
+   * @return
+   */
+  def addNodeForConvexUpdate(weights: Array[Double], bias: Double, X: DenseMatrix, t: Array[DenseVector], e: Array[DenseVector]) = {
+    val nclasses = t.size
+    //Generate node and calculate h.
+    val alfa = new DenseVector(weights, false)
+    val beta = new Array[Double](nclasses)
+    val h = feedHidden(X, alfa, bias)
+    val hneg = h.copy()
+    hneg.scale(-1)
+    var o = 0
+    while (o < nclasses) {
+      //Calculate new weight.
+      val t_h = t(o).copy()
+      t_h.add(hneg)
+      val a = t_h.copy()
+      a.scale(-1)
+      a.add(e(o))
+      val nume = e(o).dot(a)
+      val deno = a.dot(a)
+      val b = nume / deno
+      beta(o) = b
+
+      //Recalculate residual error.
+      e(o).scale(1 - b)
+      t_h.scale(b)
+      e(o).add(t_h)
+
+      o += 1
+    }
+    (h, beta)
+  }
+}
+

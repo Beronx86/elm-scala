@@ -37,7 +37,6 @@ object OSELMExample extends App {
 
   println("Warming up JVM-BLAS interface...")
   IELM(initialL = 15, seed = currentSeed).build(data)
-???
   Seq("iris", "banana") foreach { dataset =>
     println("Comparing all ELMs in " + dataset + " dataset...")
 //    elms foreach { elm =>

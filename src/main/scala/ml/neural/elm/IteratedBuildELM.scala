@@ -29,7 +29,7 @@ import ml.neural.elm.Data._
 /**
  * Created by davi on 21/05/14.
  */
-trait IteratedBuildELM extends BatchELM {//todo: correct this, extending BatchELM is very inefficient!
+trait IteratedBuildELM extends BatchELM {//todo: correct this, extending BatchELM is very inefficient for update()!
   val f: (ELMOnlineModel, Double) => Unit
   val initialL: Int
   val callf: Boolean

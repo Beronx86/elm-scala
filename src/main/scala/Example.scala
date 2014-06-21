@@ -1,4 +1,4 @@
-import ml.classifiers.{OSELM, NB}
+import ml.classifiers._
 import util.{Tempo, Datasets}
 
 /*
@@ -25,18 +25,42 @@ object Example extends App {
  This program comes with ABSOLUTELY NO WARRANTY.
  This is free software, and you are welcome to redistribute it
  under certain conditions.
- Refer to LICENSE file for details.     """)
+ Refer to LICENSE file for details.
+           """)
 
-  val data = Datasets.arff(bina = true)("iris.arff") match {
+  val warmingdata = Datasets.arff(bina = true)("banana.arff") match {
     case Right(x) => x
     case Left(str) => println("Could not load iris dataset from the program path: " + str); sys.exit(0)
   }
-  val seed = (System.currentTimeMillis() % 1000).toInt
-  util.Datasets.kfoldCV(data, k = 10, parallel = true) { (trainingSet, testingSet, fold, _) =>
-    val (model, t) = Tempo.timev(OSELM(L = 15, seed * fold).build(trainingSet))
-    val acc = model.accuracy(testingSet).formatted("%2.2f")
+  val currentSeed = (System.currentTimeMillis() % 1000).toInt
 
-    println("Fold " + fold + ": " + acc + " in " + t + "ms.")
+  val elms = Seq(
+    IELM(initialL = 80, seed = currentSeed),
+    EIELM(initialL = 80, seed = currentSeed),
+    CIELM(initialL = 80, seed = currentSeed),
+    ECIELM(initialL = 80, seed = currentSeed),
+    OSELM(L = 16, seed = currentSeed)
+  )
+
+  println("Warming up JVM-BLAS interface...")
+  IELM(initialL = 15, seed = currentSeed).build(warmingdata)
+
+  Seq("iris", "banana") foreach { dataset =>
+    println("Comparing all ELMs in " + dataset + " dataset...")
+    val data = Datasets.arff(bina = true)("banana.arff") match {
+      case Right(x) => x
+      case Left(str) => println("Could not load iris dataset from the program path: " + str); sys.exit(0)
+    }
+    elms foreach { elm =>
+      println(elm)
+
+      util.Datasets.kfoldCV(data, k = 10, parallel = true) { (trainingSet, testingSet, fold, _) =>
+        val (model, t) = Tempo.timev(elm.build(trainingSet))
+        val acc = model.accuracy(testingSet).formatted("%2.2f")
+        println("Fold " + fold + ": " + acc + " in " + t + "ms.")
+      }
+
+      println("")
+    }
   }
-
 }

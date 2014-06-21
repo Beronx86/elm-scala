@@ -130,7 +130,7 @@ case class OSELM(L: Int, seed: Int = 0) extends ELM {
     }
 
     //todo: atualizar H? H fica mais comprido a cada update!
-    ELMOnlineModel(rnd, Alfat, biases, H, P1, Beta1)
+    ELMOnlineModel(rnd, Alfat, biases, null, P1, Beta1)
   }
 
   def updateAll(model: Model, fast_mutable: Boolean)(patterns: Seq[Pattern]) = ???

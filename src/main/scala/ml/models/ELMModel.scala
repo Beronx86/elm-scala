@@ -37,5 +37,5 @@ trait ELMModel extends Model {
 case class ELMOnlineModel(rnd: Random, Alfat: DenseMatrix, biases: Array[Double], H: DenseMatrix, PReady: DenseMatrix, Beta: DenseMatrix)
   extends ELMModel
 
-case class ELMBatchModel(rnd: Random, Alfat: DenseMatrix, biases: Array[Double], H: DenseMatrix, PReady: DenseMatrix, Beta: DenseMatrix, training_set: Vector[Pattern])
-  extends ELMModel
+//case class ELMBatchModel(rnd: Random, Alfat: DenseMatrix, biases: Array[Double], H: DenseMatrix, PReady: DenseMatrix, Beta: DenseMatrix, training_set: Vector[Pattern])
+//  extends ELMModel

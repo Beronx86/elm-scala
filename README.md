@@ -31,7 +31,7 @@ Use as a library
     object MyBuild extends Build {
 
       lazy val root = Project("root", file(".")) dependsOn(elmsProj)
-      lazy val elmsProj = RootProject(uri("git://github.com/extreme-learning-machine/elm-scala.git"))
+      lazy val elmsProj = RootProject(uri("https://github.com/extreme-learning-machine/elm-scala.git"))
 
     }
 ```

@@ -39,16 +39,16 @@ object OSELMExample extends App {
   IELM(initialL = 15, seed = currentSeed).build(data)
   Seq("iris", "banana") foreach { dataset =>
     println("Comparing all ELMs in " + dataset + " dataset...")
-//    elms foreach { elm =>
-//      println(elm)
-//
-//      util.Datasets.kfoldCV(data, k = 10, parallel = true) { (trainingSet, testingSet, fold, _) =>
-//        val (model, t) = Tempo.timev(elm.build(trainingSet))
-//        val acc = model.accuracy(testingSet).formatted("%2.2f")
-//        println("Fold " + fold + ": " + acc + " in " + t + "ms.")
-//      }
-//
-//      println("")
-//    }
+    elms foreach { elm =>
+      println(elm)
+
+      util.Datasets.kfoldCV(data, k = 10, parallel = true) { (trainingSet, testingSet, fold, _) =>
+        val (model, t) = Tempo.timev(elm.build(trainingSet))
+        val acc = model.accuracy(testingSet).formatted("%2.2f")
+        println("Fold " + fold + ": " + acc + " in " + t + "ms.")
+      }
+
+      println("")
+    }
   }
 }

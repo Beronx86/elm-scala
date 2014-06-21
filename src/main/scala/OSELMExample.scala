@@ -28,27 +28,35 @@ object OSELMExample extends App {
  Refer to LICENSE file for details.
            """)
 
+  println("Warming up JVM-BLAS interface...")
+  val warmingdata = Datasets.arff(bina = true)("banana.arff") match {
+    case Right(x) => x
+    case Left(str) => println("Could not load iris dataset from the program path: " + str); sys.exit(0)
+  }
+  IELM(initialL = 15, seed = currentSeed).build(warmingdata)
+
+  val currentSeed = (System.currentTimeMillis() % 1000).toInt
+
   val data = Datasets.arff(bina = true)("banana.arff") match {
     case Right(x) => x
     case Left(str) => println("Could not load iris dataset from the program path: " + str); sys.exit(0)
   }
-  val currentSeed = (System.currentTimeMillis() % 1000).toInt
-  val oselm = OSELM(L = 16, seed = currentSeed)
 
-  println("Warming up JVM-BLAS interface...")
-  IELM(initialL = 15, seed = currentSeed).build(data)
-  Seq("iris", "banana") foreach { dataset =>
-    println("Comparing all ELMs in " + dataset + " dataset...")
-    elms foreach { elm =>
-      println(elm)
+  util.Datasets.kfoldCV(data, k = 10, parallel = true) { (trainingSet, testingSet, fold, _) =>
+    val elm = OSELM(L = 16, seed = currentSeed)
+    val oselm = OSELM(L = 16, seed = currentSeed)
 
-      util.Datasets.kfoldCV(data, k = 10, parallel = true) { (trainingSet, testingSet, fold, _) =>
-        val (model, t) = Tempo.timev(elm.build(trainingSet))
-        val acc = model.accuracy(testingSet).formatted("%2.2f")
-        println("Fold " + fold + ": " + acc + " in " + t + "ms.")
-      }
+    val (model, t) = Tempo.timev(elm.build(trainingSet))
+    val acc = model.accuracy(testingSet).formatted("%2.2f")
 
-      println("")
+    val (osmodel, ost) = Tempo.timev {
+      val firstModel = oselm.build(trainingSet.take(20))
+      trainingSet.drop(20).foldLeft(firstModel)((m, p) => oselm.update(m)(p))
     }
+    val osacc = osmodel.accuracy(testingSet).formatted("%2.2f")
+    println("Fold " + fold + ".  OSELM: " + osacc + " in " + ost + "ms.    " + "ELM: " + acc + " in " + t + "ms.")
   }
+
+  println("Note that OS-ELM can be faster than ELM due to cache scarcity in the processor." +
+    "When there are no numerical instability, they should behave exactly the same in terms of accuracy.")
 }

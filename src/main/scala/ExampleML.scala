@@ -18,7 +18,7 @@ Copyright (C) 2014 Davi Pereira dos Santos
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-object Example extends App {
+object ExampleML extends App {
   println( """
  elm-scala Copyright (C) 2014 Davi Pereira dos Santos
 

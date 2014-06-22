@@ -43,8 +43,8 @@ object OSELMExample extends App {
   }
 
   util.Datasets.kfoldCV(data, k = 10, parallel = true) { (trainingSet, testingSet, fold, _) =>
-    val elm = OSELM(L = 16, seed = currentSeed)
-    val oselm = OSELM(L = 16, seed = currentSeed)
+    val elm = OSELM(Lbuild = 16, seed = currentSeed)
+    val oselm = OSELM(Lbuild = 16, seed = currentSeed)
 
     val (model, t) = Tempo.timev(elm.build(trainingSet))
     val acc = model.accuracy(testingSet).formatted("%2.2f")

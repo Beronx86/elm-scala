@@ -26,56 +26,22 @@ import no.uib.cipr.matrix.{DenseVector, DenseMatrix}
 
 import scala.util.Random
 import ml.models.{ELMOnlineModel, Model}
-import ml.neural.elm.{ELMUtils, ELM}
+import ml.neural.elm.{ConvergentELM, ELMUtils, ELM}
 
-case class OSELM(L: Int, seed: Int = 0) extends ELM {
+/**
+ * Updates weights at each instance arrival.
+ * The topology is fixed.
+ * @param L
+ * @param seed
+ */
+case class OSELM(L: Int, seed: Int = 0) extends ConvergentELM {
   override val toString = "OSELM"
+  val Lbuild = L
 
   protected def cast(model: Model) = model match {
     case m: ELMOnlineModel => m
     case _ => println("ELM and variants require ELMModel.")
       sys.exit(0)
-  }
-
-  /**
-   * This is not a problem for I-ELM and variants, but is needed for OS-ELM (and EM-ELM?).
-   * At the moment the test is fast, i.e. it doesn't really check the rank.
-   * @param trSet
-   * @param ninsts
-   * @return
-   */
-  protected def checkFullRankness(trSet: Seq[Pattern], ninsts: Int) {
-    if (ninsts < L) {
-      println("ERROR: Training set size (" + ninsts + ") is lesser than L (" + L + ")!")
-      sys.exit(0)
-    }
-  }
-
-  def build(trSet: Seq[Pattern]) = {
-    val rnd = new Random(seed)
-
-    val ninsts = checkEmptyness(trSet)
-    checkFullRankness(trSet, ninsts)
-    val natts = trSet.head.nattributes
-    val nclasses = trSet.head.nclasses
-    val t = patterns2matrices(trSet,ninsts)
-    val Xt = t._1
-    val Y = t._2
-    val biasesArray = new Array[Double](L)
-    val Alfat = new DenseMatrix(L, natts)
-    initializeWeights(Alfat, biasesArray, rnd)
-
-    val H = feedHiddent(Xt, Alfat, biasesArray)
-    val Ht = new DenseMatrix(L, ninsts)
-    H.transpose(Ht)
-    val HtH = new DenseMatrix(L, L)
-    Ht.mult(H, HtH)
-    val P = inv(HtH)
-    val pinvH = new DenseMatrix(L, ninsts)
-    P.mult(Ht, pinvH)
-    val Beta = new DenseMatrix(L, nclasses)
-    pinvH.mult(Y, Beta)
-    ELMOnlineModel(rnd, Alfat, biasesArray, H, P, Beta)
   }
 
   def update(model: Model, fast_mutable: Boolean = false)(pattern: Pattern) = {

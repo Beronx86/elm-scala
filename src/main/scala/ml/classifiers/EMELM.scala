@@ -22,20 +22,22 @@ import ml.models.Model
 import ml.neural.elm.{ConvergentELM, ELM}
 
 /**
- * Grows network from 1 to Lmax according to arriving instances.
+ * Grows network from 1 to Lmax.
+ * It performs batch learning, i.e. retrains from scratch to accomodate new instances.
  * @param Lmax
  * @param seed
  */
-case class interaELM(Lmax: Int, seed: Int = 0) extends ConvergentELM {
-  override val toString = "interaELM"
+case class EMELM(Lmax: Int, seed: Int = 0) extends ConvergentELM {
+  override val toString = "EMELM"
   val Lbuild = Lmax
+
   ??? //todo:cuidado com a mutabilidade de rnd no update()!
 
   def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = ???
 
-  //  def updateAll(model: Model, fast_mutable: Boolean = false)(patterns: Seq[Pattern]): Model
   def updateAll(model: Model, fast_mutable: Boolean)(patterns: Seq[Pattern]) = ???
 }
+  //override val toString = "interaELM"
 //
 //  def build(trSet: Seq[Pattern]) = {
 ////    val m = super.build(trSet)

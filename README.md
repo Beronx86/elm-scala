@@ -3,6 +3,10 @@ elm-scala
 
 ELM implementation in Scala using MTJ/netlib-java/BLAS/LAPACK
 Based on [machine-learning-scala](https://github.com/machine-learning-scala/mls "mls") framework.
+This is result of research.
+Therefore, if you use this software in your own research,
+please cite properly the github repository URL.
+
 
 Installation
 ------------

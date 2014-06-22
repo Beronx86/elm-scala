@@ -1,4 +1,3 @@
-/*
 import sbt._
 
 object MyBuild extends Build {
@@ -7,4 +6,3 @@ object MyBuild extends Build {
   lazy val mlsProj = RootProject(uri("https://github.com/machine-learning-scala/mls.git"))
 
 }
-*/

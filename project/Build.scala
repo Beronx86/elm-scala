@@ -17,6 +17,6 @@ object Builds extends Build {
     )
 */
 
-  lazy val root = Project("root", file(".")) dependsOn(mlsProj)
+  lazy val elmScala = Project("elm", file(".")) dependsOn(mlsProj)
   lazy val mlsProj = RootProject(uri("https://github.com/machine-learning-scala/mls.git"))
 }

@@ -1,4 +1,4 @@
-name := "elm-scala"
+name := "elm"
 
 version := "0.1"
 

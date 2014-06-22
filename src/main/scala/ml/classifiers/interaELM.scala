@@ -1,39 +1,31 @@
+
+
+/*
+elm-scala: an implementation of ELM in Scala using MTJ
+Copyright (C) 2014 Davi Pereira dos Santos
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+package ml.classifiers
+
 import ml.Pattern
 import ml.models.Model
 import ml.neural.elm.ELM
 
-///*
-//elm-scala: an implementation of ELM in Scala using MTJ
-//Copyright (C) 2014 Davi Pereira dos Santos
-//
-//  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
-//  the Free Software Foundation, either version 3 of the License, or
-//  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//*/
-//package ml.classifiers
-//
-//import ml.neural.elm.Data._
-//import ml.neural.elm.Math._
-//import ml.Pattern
-//import scala.util.Random
-//import ml.models.Model
-//import no.uib.cipr.matrix.{Matrices, DenseVector, DenseMatrix}
-//import ml.mtj.DenseMatrix2
-//import ml.neural.elm.ELM
-//import util.Tempo
-//
-///**
-// *
-// */
+/**
+*
+*/
 case class interaELM(Lmax: Int, seed: Int = 0) extends ELM {
   ??? //todo:cuidado com a mutabilidade de rnd no update()!
   /**

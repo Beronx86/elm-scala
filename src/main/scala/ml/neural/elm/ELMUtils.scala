@@ -92,52 +92,5 @@ object ELMUtils {
   //  }
   //
 
-  //
-  //  def PRESSaccuracy(Yt: DenseMatrix, Beta: DenseMatrix, H: DenseMatrix, Ht: DenseMatrix, P: DenseMatrix, label: Seq[Double]) = {
-  //    val Pred = feedOutput(H, Beta)
-  //    val PredT = new DenseMatrix(Pred.numColumns(), Pred.numRows())
-  //    Pred.transpose(PredT)
-  //    val Preddata = PredT.getData
-  //    val Ydata = Yt.getData
-  //    val Hdata = Ht.getData
-  //    val size = Hdata.size //cagada?
-  //    val L = Ht.numRows()
-  //    val ninsts = Ht.numColumns()
-  //    val nclasses = Yt.numRows()
-  //    var iH = 0
-  //    var iY = 0
-  //    val harray = new Array[Double](L)
-  //    val yarray = new Array[Double](nclasses)
-  //    val parray = new Array[Double](nclasses)
-  //    val hm = new DenseMatrix2(harray)
-  //    hm.resize(1, L)
-  //    val y = new DenseVector(yarray, false)
-  //    val p = new DenseVector(parray, false)
-  //    val h = new DenseVector(harray, false)
-  //    var hits = 0
-  //    var i = 0
-  //    while (iH < size) {
-  //      System.arraycopy(Hdata, iH, harray, 0, L)
-  //      val hmPt = new DenseMatrix(1, L)
-  //      hm.mult(P, hmPt)
-  //      val hP = new DenseVector(hmPt.getData, false)
-  //      val hPh = hP.dot(h)
-  //      val den = 1 - hPh
-  //
-  //      System.arraycopy(Ydata, iY, yarray, 0, nclasses)
-  //      System.arraycopy(Preddata, iY, parray, 0, nclasses)
-  //      p.scale(-1)
-  //      p.add(y)
-  //      val diffs = p //esperado - predito
-  //      diffs.scale(-1 / den)
-  //      y.add(diffs)
-  //      if (y.getData.zipWithIndex.max._2 == label(i)) hits += 1 //cagada?
-  //      iH += L
-  //      iY += nclasses
-  //      i += 1
-  //    }
-  //    hits / i.toDouble
-  //  }
-  //
 
 }//rnd ok

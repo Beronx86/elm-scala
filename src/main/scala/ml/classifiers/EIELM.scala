@@ -69,6 +69,7 @@ case class EIELM(initialL: Int, seed: Int = 0, size: Int = 1, callf: Boolean = f
 
         o += 1
       }
+      //todo: check if this is the correct way to aggregate multiclass errors
       val err = newe.map(x => math.sqrt(x.dot(x))).sum
       (err, weights, bias, h, beta, newe)
     }

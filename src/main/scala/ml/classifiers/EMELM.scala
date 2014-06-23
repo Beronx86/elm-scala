@@ -197,16 +197,3 @@ case class EMELM(Lmax: Int, seed: Int = 0) extends ConvergentELM {
 }
 
 //rnd ok
-
-//override val toString = "interaELM"
-//
-//  def build(trSet: Seq[Pattern]) = {
-////    val m = super.build(trSet)
-//    //calcula PRESS
-//    //cresce até PRESS parar de aumentar
-//
-//    //retorna modelo atualizado (recalcular P somente se cresceu).
-//    ???
-//  }
-//
-

@@ -35,11 +35,11 @@ object ELMExample extends App {
   val currentSeed = (System.currentTimeMillis() % 1000000).toInt
 
   val elms = Seq(
-    IELM(initialL = 80, seed = currentSeed),
-    EIELM(initialL = 80, seed = currentSeed),
-    CIELM(initialL = 80, seed = currentSeed),
-    ECIELM(initialL = 80, seed = currentSeed),
-    OSELM(L = 16, seed = currentSeed)
+    //    IELM(initialL = 80, seed = currentSeed),
+    EIELM(initialL = 80, seed = currentSeed)
+    //    CIELM(initialL = 80, seed = currentSeed),
+    //    ECIELM(initialL = 80, seed = currentSeed),
+    //    OSELM(L = 16, seed = currentSeed)
   )
 
   println("Warming up JVM-BLAS interface...")
@@ -47,7 +47,7 @@ object ELMExample extends App {
 
   Seq("iris", "banana") foreach { dataset =>
     println("Comparing all ELMs in " + dataset + " dataset...")
-    val data = Datasets.arff(bina = true)("banana.arff") match {
+    val data = Datasets.arff(bina = true)(dataset) match {
       case Right(x) => x
       case Left(str) => println("Could not load iris dataset from the program path: " + str); sys.exit(0)
     }

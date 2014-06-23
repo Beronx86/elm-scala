@@ -18,8 +18,8 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.models
 
 import ml.Pattern
-import no.uib.cipr.matrix.{DenseVector, DenseMatrix}
-import ml.neural.elm.{ELMUtils, ELM}
+import no.uib.cipr.matrix.{DenseMatrix, Matrices, DenseVector}
+import ml.neural.elm.{Math, ELMUtils, ELM}
 import util.XSRandom
 import scala.util.Random
 
@@ -36,7 +36,14 @@ trait ELMModel extends Model {
 }
 
 case class ELMGenericModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], H: DenseMatrix, PReady: DenseMatrix, Beta: DenseMatrix,
-                           X: DenseMatrix, Y: DenseMatrix, Hinv: DenseMatrix) extends ELMModel
+                           X: DenseMatrix, Y: DenseMatrix, Hinv: DenseMatrix, HHinv: DenseMatrix = null) extends ELMModel {
+  lazy val I = Math.identity(H.numRows())
+//  lazy val HHinv = if (HHinvReady == null) {
+//    val r =
+//    r
+//  } else HHinvReady
+}
+
 
 //training_set: Vector[Pattern])
 //case class ELMBatchModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], H: DenseMatrix, PReady: DenseMatrix, Beta: DenseMatrix,

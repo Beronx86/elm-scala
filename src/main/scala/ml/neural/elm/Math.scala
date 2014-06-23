@@ -19,10 +19,20 @@ package ml.neural.elm
 
 import no.uib.cipr.matrix.{DenseVector, Matrices, DenseMatrix}
 
+import scala.collection.mutable
+
 /**
  * Created by davi on 23/05/14.
  */
 object Math {
+  val IMap = mutable.Map[Int, DenseMatrix]()
+
+  /**
+   * The identity matrix is immutable by definition.
+   * @param n
+   */
+  def identity(n: Int) = IMap.getOrElse(n, Matrices.identity(n))
+
   def sigm(x: Double) = 1.0 / (1 + math.exp(-x))
 
   def sigm2(x: Double) = (1.0 / (1 + math.exp(-x)) - 0.5) * 2d //better to avoid numerical instability
@@ -75,4 +85,6 @@ object Math {
     }
   }
 
-}//rnd ok
+}
+
+//rnd ok

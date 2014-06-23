@@ -59,10 +59,17 @@ trait ConvergentELM extends ELM {
     val Beta = new DenseMatrix(Lbuild, nclasses)
     pinvH.mult(Y, Beta)
 
-    //todo:X is calculated even when it is useless!
+    //todo:X and HHinv are calculated even when it is useless! lazy is ineffective in call-by-value
     lazy val X = new DenseMatrix(Xt.numColumns(), Xt.numRows())
     Xt.transpose(X)
-    ELMGenericModel(rnd, Alfat, biasesArray, H, P, Beta, X, Y, pinvH)
+
+    lazy val HHinv = {
+      val r = new DenseMatrix(H.numRows(), H.numRows())
+      H.mult(pinvH, r)
+      r
+    }
+
+    ELMGenericModel(rnd, Alfat, biasesArray, H, P, Beta, X, Y, pinvH, HHinv)
   }
 
   /**

@@ -344,9 +344,9 @@ case class EMELM(patterns: Seq[Pattern], seed: Int, SVD: Boolean = false) {
 //rnd ok mutable
 
 object EMTest extends App {
-  val dataset = "banana.arff"
+  val dataset = "iris.arff"
   val data = Datasets.arff(bina = true)(dataset) match {
-    case Right(x) => x.take(1000)
+    case Right(x) => x.take(10)
     case Left(str) => println("Could not load " + dataset + " dataset from the program path: " + str); sys.exit(0)
   }
   1 to 10 foreach { _ =>
@@ -358,29 +358,32 @@ object EMTest extends App {
     //    println(m.accuracy(data))
   }
 
-  val n =10000/data.length
+  val n = 5000 / data.length
 
   Tempo.start
+  val e1 = ml.classifiers.EMELM(999, 1)
+  var m = e1.build(data)
   1 to n foreach { _ =>
     val e1 = ml.classifiers.EMELM(999, 1)
-    var m = e1.build(data)
+    m = e1.build(data)
     1 to 100 foreach { _ =>
-      m = e1.growByOne(m, true)
+      m = e1.growByOne(m)
     }
-    //    println(m.accuracy(data))
   }
+  println(m.accuracy(data))
   Tempo.print_stop
   println("")
 
   Tempo.start
+  var e0 = EMELM(data, 1)
   1 to n foreach { _ =>
-    val e0 = EMELM(data, 1)
+    e0 = EMELM(data, 1)
     1 to 100 foreach { _ =>
       e0.grow
     }
   }
   Tempo.print_stop
-  //    println(e0.accuracy(data))
+  println(e0.accuracy(data))
 
   println("")
 }

@@ -133,37 +133,6 @@ case class EMELM(Lmax: Int, seed: Int = 0) extends ConvergentELM {
     (newAlfat, newNeuron, newBiases, newRnd)
   }
 
-  //  protected def addNeuron(rnd: XSRandom, Alfa: DenseMatrix, Alfat: DenseMatrix, biases: DenseVector) = {
-//    val newRnd = rnd.clone()
-//    val newAlfa = new DenseMatrix(Alfa.numRows(), Alfa.numColumns() + 1)
-//    val newAlfat = new DenseMatrix(newAlfa.numColumns(), newAlfa.numRows())
-//    System.arraycopy(Alfat.getData, 0, newAlfat.getData, 0, Alfat.getData.size)
-//    val newBiases = new DenseVector(newAlfa.numColumns())
-//    val newNeuron = new DenseVector(newAlfa.numRows())
-//    var i = 0
-//    var j = 0
-//    while (i < Alfa.numRows) {
-//      j = 0
-//      while (j < Alfa.numColumns()) {
-//        val v = Alfa.get(i, j)
-//        newAlfa.set(i, j, v)
-//        j += 1
-//      }
-//      i += 1
-//    }
-//    i = 0
-//    while (i < Alfa.numRows()) {
-//      val v = newRnd.nextDouble() * 2 - 1
-//      newAlfa.set(i, j, v)
-//      newAlfat.set(j, i, v)
-//      newNeuron.set(i, v)
-//      i += 1
-//    }
-//    System.arraycopy(biases.getData, 0, newBiases.getData, 0, biases.size)
-//    newBiases.set(j, newRnd.nextDouble() * 2 - 1)
-//    (newAlfa, newAlfat, newNeuron, newBiases, newRnd)
-//  }
-
   protected def resizeH(H: DenseMatrix, X: DenseMatrix, lastNeuron: DenseVector, biases: DenseVector) = {
     val newH = new DenseMatrix(H.numRows(), H.numColumns + 1)
     //    val newHt = new DenseMatrix(H.numColumns + 1, H.numRows())

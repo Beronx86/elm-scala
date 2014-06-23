@@ -69,12 +69,17 @@ case class EIELM(initialL: Int, seed: Int = 0, size: Int = 1, callf: Boolean = f
 
         o += 1
       }
-      //todo: check if this is the correct way to aggregate multiclass errors
-      val err = newe.map(x => math.sqrt(x.dot(x))).sum
+      //todo: check if this is the correct way to aggregate multiclass errors and propagate to CIELM or others
+      val err = newe.map { x =>
+        val sq = x.dot(x)
+        sq * sq
+      }.sum
       (err, weights, bias, h, beta, newe)
     }
     val (_, weights, bias, h, beta, newe) = candidates.minBy(_._1)
     e.zip(newe).foreach { case (a, b) => a.set(b)}
     (weights, bias, h, beta)
   }
-}//rnd ok
+}
+
+//rnd ok

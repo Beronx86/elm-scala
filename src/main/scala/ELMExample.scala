@@ -1,3 +1,5 @@
+import java.io.File
+
 import ml.classifiers._
 import util.{Tempo, Datasets}
 
@@ -41,11 +43,13 @@ object ELMExample extends App {
     //    ECIELM(initialL = 80, seed = currentSeed),
     //    OSELM(L = 16, seed = currentSeed)
   )
+  val appPath = new File(".").getCanonicalPath + "/"
+  println(appPath)
 
   println("Warming up JVM-BLAS interface...")
   IELM(initialL = 15, seed = currentSeed).build(warmingdata)
 
-  Seq("iris", "banana") foreach { dataset =>
+  Seq("iris.arff") foreach { dataset =>
     println("Comparing all ELMs in " + dataset + " dataset...")
     val data = Datasets.arff(bina = true)(dataset) match {
       case Right(x) => x

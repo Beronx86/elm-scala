@@ -39,7 +39,7 @@ object ExampleML extends App {
     EIELM(initialL = 80, seed = currentSeed),
     CIELM(initialL = 80, seed = currentSeed),
     ECIELM(initialL = 80, seed = currentSeed),
-    OSELM(Lbuild = 16, seed = currentSeed)
+    OSELM(L = 16, seed = currentSeed)
   )
 
   println("Warming up JVM-BLAS interface...")

@@ -39,7 +39,9 @@ case class EMELM(Lmax: Int, seed: Int = 0) extends ConvergentELM {
   def updateAll(model: Model, fast_mutable: Boolean)(patterns: Seq[Pattern]) = ???
 
   def growByOne(model: Model, fast_mutable: Boolean=false) = {
-    if (fast_mutable) ???
+    if (fast_mutable) {
+      lazy val bla = ???
+    } else Unit
     val m = cast(model)
 
     //immutable fields (if no more instances are added!)

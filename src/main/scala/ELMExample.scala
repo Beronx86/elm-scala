@@ -49,7 +49,7 @@ object ELMExample extends App {
   println("Warming up JVM-BLAS interface...")
   IELM(initialL = 15, seed = currentSeed).build(warmingdata)
 
-  Seq("iris.arff") foreach { dataset =>
+  Seq("banana.arff", "iris.arff") foreach { dataset =>
     println("Comparing all ELMs in " + dataset + " dataset...")
     val data = Datasets.arff(bina = true)(dataset) match {
       case Right(x) => x

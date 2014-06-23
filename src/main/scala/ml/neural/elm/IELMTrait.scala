@@ -17,25 +17,22 @@ Copyright (C) 2014 Davi Pereira dos Santos
 */
 package ml.neural.elm
 
-import ml.models.{ELMOnlineModel, Model}
+import ml.models.{ELMGenericModel, Model}
 import no.uib.cipr.matrix.{DenseVector, DenseMatrix}
 import ml.Pattern
 import ml.neural.elm.Math._
 import scala.util.Random
 import ml.mtj.{ResizableDenseMatrix, DenseMatrix2}
 import ml.neural.elm.Data._
-import util.Tempo
+import util.{XSRandom, Tempo}
 
 /**
  * Created by davi on 21/05/14.
  */
 trait IELMTrait extends IteratedBuildELM {
-//  val f: (ELMModel, Double) => Unit
-//  val L: Int
-//  val callf: Boolean
-//
+
   def build(trSet: Seq[Pattern]) = {
-    val rnd = new Random(seed)
+    val rnd = new XSRandom(seed)
     Tempo.start
     val ninsts = checkEmptyness(trSet: Seq[Pattern])
     val natts = trSet.head.nattributes
@@ -60,7 +57,7 @@ trait IELMTrait extends IteratedBuildELM {
         Beta.addRow(beta)
         val te = Tempo.stop
         Tempo.start
-        f(ELMOnlineModel(rnd, Alfat, biases, null, null, Beta), te)
+        f(ELMGenericModel(rnd.clone(), Alfat, biases, null, null, Beta, null, null, null), te)
       }
     } else {
       while (l < initialL) {
@@ -74,13 +71,13 @@ trait IELMTrait extends IteratedBuildELM {
       Alfat.resizeRows(l)
       Beta.resizeRows(l)
     }
-    ELMOnlineModel(rnd, Alfat, biases, H, null, Beta) //todo: se nao crescer, manter P e H anteriores?
+    ELMGenericModel(rnd, Alfat, biases, H, null, Beta, null, null, null) //todo: se nao crescer, manter P e H anteriores?
   }
 
-  protected def buildCore(rnd: Random, X: DenseMatrix, e: Array[DenseVector], tmp: DenseVector): (Array[Double], Double, DenseVector, Array[Double])
+  protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Array[DenseVector], tmp: DenseVector): (Array[Double], Double, DenseVector, Array[Double])
 
 //
 //
 //
 
-}
+}//rnd ok

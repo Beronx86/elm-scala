@@ -20,10 +20,11 @@ package ml.models
 import ml.Pattern
 import no.uib.cipr.matrix.{DenseVector, DenseMatrix}
 import ml.neural.elm.{ELMUtils, ELM}
+import util.XSRandom
 import scala.util.Random
 
 trait ELMModel extends Model {
-  val rnd: Random
+  val rnd: XSRandom
   val Alfat: DenseMatrix
   val biases: Array[Double]
   val H: DenseMatrix
@@ -34,8 +35,11 @@ trait ELMModel extends Model {
   def distribution(pattern: Pattern) = ELMUtils.distribution(ELMUtils.test(pattern, Alfat, biases, Beta))
 }
 
-case class ELMOnlineModel(rnd: Random, Alfat: DenseMatrix, biases: Array[Double], H: DenseMatrix, PReady: DenseMatrix, Beta: DenseMatrix)
-  extends ELMModel
+case class ELMGenericModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], H: DenseMatrix, PReady: DenseMatrix, Beta: DenseMatrix,
+                           X: DenseMatrix, Y: DenseMatrix, Hinv: DenseMatrix) extends ELMModel
 
-//case class ELMBatchModel(rnd: Random, Alfat: DenseMatrix, biases: Array[Double], H: DenseMatrix, PReady: DenseMatrix, Beta: DenseMatrix, training_set: Vector[Pattern])
-//  extends ELMModel
+//training_set: Vector[Pattern])
+//case class ELMBatchModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], H: DenseMatrix, PReady: DenseMatrix, Beta: DenseMatrix,
+//                         X: DenseMatrix, Y: DenseMatrix, Hinv: DenseMatrix)  extends ELMModel
+
+//rnd ok

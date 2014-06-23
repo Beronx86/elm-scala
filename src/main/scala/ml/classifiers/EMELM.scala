@@ -18,12 +18,11 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.classifiers
 
 import ml.Pattern
-import ml.models.Model
-import ml.neural.elm.{ConvergentELM, ELM}
+import ml.models.{ELMGenericModel, Model}
+import ml.neural.elm.ConvergentELM
 import ml.neural.elm.Math._
-import no.uib.cipr.matrix.{Matrices, DenseVector, DenseMatrix}
-
-import scala.util.Random
+import no.uib.cipr.matrix.{DenseMatrix, DenseVector, Matrices}
+import util.XSRandom
 
 /**
  * Grows network from 1 to Lmax.
@@ -33,29 +32,56 @@ import scala.util.Random
  */
 case class EMELM(Lmax: Int, seed: Int = 0) extends ConvergentELM {
   override val toString = "EMELM"
-  val Lbuild = Lmax
-
-  ???
-
-  //todo:cuidado com a mutabilidade de rnd no update()!
+  val Lbuild = 1
 
   def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = ???
 
   def updateAll(model: Model, fast_mutable: Boolean)(patterns: Seq[Pattern]) = ???
 
-  def grow(rnd: Random, H: DenseMatrix, X: DenseMatrix, Y: DenseMatrix, Hinv: DenseMatrix, Alfat: DenseMatrix, biases: Array[Double]) = {
+  def growByOne(model: Model, fast_mutable: Boolean) = {
+    val m = cast(model)
+
+    //immutable fields (if no more instances are added!)
+    val xm = m.X
+    val ym = m.Y
+
+    //mutable fields
+    val rnd = m.rnd
+    val Alfat = m.Alfat
+//    val Alfa = m.Alfa
+    val biases = m.biases
+    val hminv = m.Hinv
+    val H = m.H
+
+    //useless fields
+//    lazy val P0 = m.P
+//    lazy val Beta0 = m.Beta
+
+    //mutability is handled inside grow(...)
+    val (newAlfat, newBiases, newH, newHinv, newBeta, newRnd) = grow(rnd, H, xm, ym, hminv, Alfat, biases)
+    ELMGenericModel(newRnd, newAlfat, newBiases.getData, newH, null, newBeta, xm, ym, newHinv)
+  }
+
+  def growTo(desiredL: Int, model: Model, fast_mutable: Boolean = false) = {
+    //todo: foldLeft is way slower than a good while
+    (2 to desiredL).foldLeft(model)((m, p) => growByOne(m, fast_mutable))
+  }
+
+  protected def grow(rnd: XSRandom, H: DenseMatrix, X: DenseMatrix, Y: DenseMatrix, Hinv: DenseMatrix, Alfat: DenseMatrix, biases: Array[Double]) = {
     val HHinv = new DenseMatrix(H.numRows(), Hinv.numColumns())
     H.mult(Hinv, HHinv)
-    val (newAlfat, newNeuron, newBiases) = addNeuron(rnd, Alfat, new DenseVector(biases, false))
+    val (newAlfat, newNeuron, newBiases, newRnd) = addNeuron(rnd, Alfat, new DenseVector(biases, false))
     val (newH, newh) = resizeH(H, X, newNeuron, newBiases)
 
     val I = Matrices.identity(HHinv.numRows())
     val I_HHinv = HHinv.add(-1, I)
-    val tmp = new DenseMatrix(newh, true)
-    tmp.transpose()
+    val tmp = new DenseMatrix(newh, false)
+    val tmpt = new DenseMatrix(1, tmp.numRows())
+    tmp.transpose(tmpt)
+
     val num = new DenseMatrix(1, H.numRows())
-    tmp.mult(I_HHinv, num)
-    val tmp2 = new DenseVector(newh.size())
+    tmpt.mult(I_HHinv, num)
+    val tmp2 = new DenseVector(1)
     num.mult(newh, tmp2)
     val factor = 1 / tmp2.get(0)
     num.scale(factor)
@@ -71,39 +97,72 @@ case class EMELM(Lmax: Int, seed: Int = 0) extends ConvergentELM {
     val U = tmp3 //LxN
 
     val newHinv = stackUD(U, D)
-    val newBetat = updateBeta(newAlfat, Y, newHinv)
+    val newBeta = updateBeta(Y, newHinv)
 
-    (newAlfat, newBiases, newH, newHinv, newBetat)
+    (newAlfat, newBiases, newH, newHinv, newBeta, newRnd)
   }
 
-  protected def addNeuron(rnd: Random, Alfat: DenseMatrix, biases: DenseVector) = {
-    val newHiddenLayer = new DenseMatrix(Alfat.numRows + 1, Alfat.numColumns())
+  protected def addNeuron(rnd: XSRandom, alfat: DenseMatrix, biases: DenseVector) = {
+    val newRnd = rnd.clone()
+    val newAlfat = new DenseMatrix(alfat.numRows + 1, alfat.numColumns())
     val newBiases = new DenseVector(biases.size + 1)
-    val newNeuron = new DenseVector(Alfat.numColumns())
+    val newNeuron = new DenseVector(alfat.numColumns())
     var i = 0
     var j = 0
-    while (i < Alfat.numRows) {
+    while (i < alfat.numRows) {
       j = 0
-      while (j < Alfat.numColumns()) {
-        newHiddenLayer.set(i, j, Alfat.get(i, j))
+      while (j < alfat.numColumns()) {
+        newAlfat.set(i, j, alfat.get(i, j))
         j += 1
       }
       newBiases.set(i, biases.get(i))
       i += 1
     }
     j = 0
-    while (j < Alfat.numColumns()) {
-      val v = rnd.nextDouble() * 2 - 1
-      newHiddenLayer.set(i, j, v)
+    while (j < alfat.numColumns()) {
+      val v = newRnd.nextDouble() * 2 - 1
+      newAlfat.set(i, j, v)
       newNeuron.set(j, v)
       j += 1
     }
-    newBiases.set(i, rnd.nextDouble() * 2 - 1)
-    (newHiddenLayer, newNeuron, newBiases)
+    newBiases.set(i, newRnd.nextDouble() * 2 - 1)
+    (newAlfat, newNeuron, newBiases, newRnd)
   }
+
+  //  protected def addNeuron(rnd: XSRandom, Alfa: DenseMatrix, Alfat: DenseMatrix, biases: DenseVector) = {
+//    val newRnd = rnd.clone()
+//    val newAlfa = new DenseMatrix(Alfa.numRows(), Alfa.numColumns() + 1)
+//    val newAlfat = new DenseMatrix(newAlfa.numColumns(), newAlfa.numRows())
+//    System.arraycopy(Alfat.getData, 0, newAlfat.getData, 0, Alfat.getData.size)
+//    val newBiases = new DenseVector(newAlfa.numColumns())
+//    val newNeuron = new DenseVector(newAlfa.numRows())
+//    var i = 0
+//    var j = 0
+//    while (i < Alfa.numRows) {
+//      j = 0
+//      while (j < Alfa.numColumns()) {
+//        val v = Alfa.get(i, j)
+//        newAlfa.set(i, j, v)
+//        j += 1
+//      }
+//      i += 1
+//    }
+//    i = 0
+//    while (i < Alfa.numRows()) {
+//      val v = newRnd.nextDouble() * 2 - 1
+//      newAlfa.set(i, j, v)
+//      newAlfat.set(j, i, v)
+//      newNeuron.set(i, v)
+//      i += 1
+//    }
+//    System.arraycopy(biases.getData, 0, newBiases.getData, 0, biases.size)
+//    newBiases.set(j, newRnd.nextDouble() * 2 - 1)
+//    (newAlfa, newAlfat, newNeuron, newBiases, newRnd)
+//  }
 
   protected def resizeH(H: DenseMatrix, X: DenseMatrix, lastNeuron: DenseVector, biases: DenseVector) = {
     val newH = new DenseMatrix(H.numRows(), H.numColumns + 1)
+    //    val newHt = new DenseMatrix(H.numColumns + 1, H.numRows())
     val h = new DenseVector(H.numRows())
     var i = 0
     var j = 0
@@ -112,6 +171,7 @@ case class EMELM(Lmax: Int, seed: Int = 0) extends ConvergentELM {
       while (j < H.numColumns()) {
         val v = H.get(i, j)
         newH.set(i, j, v)
+        //        newHt.set(j, i, v)
         j += 1
       }
       i += 1
@@ -121,6 +181,7 @@ case class EMELM(Lmax: Int, seed: Int = 0) extends ConvergentELM {
     while (i < H.numRows()) {
       val v = sigm2(h.get(i) + biases.get(j))
       newH.set(i, j, v)
+      //      newHt.set(j, i, v)
       h.set(i, v)
       i += 1
     }
@@ -147,14 +208,22 @@ case class EMELM(Lmax: Int, seed: Int = 0) extends ConvergentELM {
     UD
   }
 
-  protected def updateBeta(Alfat: DenseMatrix, Y: DenseMatrix, Hinv: DenseMatrix) = {
-    val outputLayer = new DenseMatrix(Alfat.numRows(), Y.numColumns()) //LxO
-    val outputLayert = new DenseMatrix(Y.numColumns(), Alfat.numRows()) //OxL
-    Hinv.mult(Y, outputLayer)
-    outputLayer.transpose(outputLayert)
-    outputLayert
+  protected def updateBeta(Y: DenseMatrix, Hinv: DenseMatrix) = {
+    val Beta = new DenseMatrix(Hinv.numRows(), Y.numColumns()) //LxO
+//    val Betat = new DenseMatrix(Y.numColumns(), Hinv.numRows()) //OxL
+    Hinv.mult(Y, Beta)
+//    Beta.transpose(Betat)
+    Beta
+  }
+
+  protected def cast(model: Model) = model match {
+    case m: ELMGenericModel => m
+    case _ => println("EMELM and variants require ELMGenericModel.")
+      sys.exit(0)
   }
 }
+
+//rnd ok
 
 //override val toString = "interaELM"
 //

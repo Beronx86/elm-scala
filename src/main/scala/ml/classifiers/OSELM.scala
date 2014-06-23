@@ -25,7 +25,7 @@ import ml.neural.elm.Math._
 import no.uib.cipr.matrix.{DenseVector, DenseMatrix}
 
 import scala.util.Random
-import ml.models.{ELMOnlineModel, Model}
+import ml.models.{ELMGenericModel, Model}
 import ml.neural.elm.{ConvergentELM, ELMUtils, ELM}
 
 /**
@@ -37,12 +37,6 @@ import ml.neural.elm.{ConvergentELM, ELMUtils, ELM}
 case class OSELM(L: Int, seed: Int = 0) extends ConvergentELM {
   override val toString = "OSELM"
   val Lbuild = L
-
-  protected def cast(model: Model) = model match {
-    case m: ELMOnlineModel => m
-    case _ => println("ELM and variants require ELMModel.")
-      sys.exit(0)
-  }
 
   def update(model: Model, fast_mutable: Boolean = false)(pattern: Pattern) = {
     val m = cast(model)
@@ -96,8 +90,15 @@ case class OSELM(L: Int, seed: Int = 0) extends ConvergentELM {
     }
 
     //todo: atualizar H? H fica mais comprido a cada update!
-    ELMOnlineModel(rnd, Alfat, biases, null, P1, Beta1)
+    ELMGenericModel(rnd, Alfat, biases, null, P1, Beta1, null, null, null)
   }
 
   def updateAll(model: Model, fast_mutable: Boolean)(patterns: Seq[Pattern]) = ???
-}
+
+
+  protected def cast(model: Model) = model match {
+    case m: ELMGenericModel => m
+    case _ => println("OSELM and variants require ELMOnlineModel.")
+      sys.exit(0)
+  }
+}//rnd ok

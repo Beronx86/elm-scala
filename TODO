@@ -1,0 +1,4 @@
+implement update and updateall for intera, EM and OS
+implement fast_mutable in all ELMs
+optimize update for "weak" ELMs (as a replacement for the present full rebuild)
+test whether batch update() is working

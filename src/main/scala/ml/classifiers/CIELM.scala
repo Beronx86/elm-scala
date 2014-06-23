@@ -20,12 +20,12 @@ package ml.classifiers
 import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
 
 import scala.util.Random
-import ml.models.{Model, ELMOnlineModel}
+import ml.models.{Model, ELMGenericModel}
 import ml.neural.elm.Data._
 import ml.mtj.ResizableDenseMatrix
 import ml.neural.elm.{ConvexIELMTrait, IELMTrait, ELM}
 import ml.Pattern
-import util.Tempo
+import util.{XSRandom, Tempo}
 
 /**
  * CI-ELM
@@ -36,7 +36,7 @@ case class CIELM(initialL: Int, seed: Int = 0, size: Int = 1, callf: Boolean = f
 
   def build(trSet: Seq[Pattern]) = {
     Tempo.start
-    val rnd = new Random(seed)
+    val rnd = new XSRandom(seed)
     val ninsts = checkEmptyness(trSet)
     val natts = trSet.head.nattributes
     val nclasses = trSet.head.nclasses
@@ -49,20 +49,21 @@ case class CIELM(initialL: Int, seed: Int = 0, size: Int = 1, callf: Boolean = f
     while (l < initialL) {
       Alfat.resizeRows(l + 1) //needed to call f()
       Beta.resizeRows(l + 1)
-      val (weights, b) = newNode(natts, rnd) //mutates rnd!! No problem here since old ELMOnlineModel is deallocated every iteration
+      val (weights, b, newRnd) = newNode(natts, rnd)
+      rnd.setSeed(newRnd.getSeed)
       val (h, beta) = addNodeForConvexUpdate(weights, b, X, t, e)
       biases(l) = b
       updateNetwork(l, weights, beta, Beta, Alfat)
       l += 1
       val te = Tempo.stop
       Tempo.start
-      f(ELMOnlineModel(rnd, Alfat, biases, null, null, Beta), te)
+      f(ELMGenericModel(newRnd, Alfat, biases, null, null, Beta, null, null, null), te)
     }
     //    Alfat.resizeRows(l)
     //    Beta.resizeRows(l)
-    val model = ELMOnlineModel(rnd, Alfat, biases, null, null, Beta)
+    val model = ELMGenericModel(rnd, Alfat, biases, null, null, Beta, null, null, null)
     model
-  }
+  }//rnd ok
 
   /**
    * Mutate e

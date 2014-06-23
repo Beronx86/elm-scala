@@ -1,3 +1,5 @@
+import java.io.File
+
 import ml.classifiers._
 import util.{Tempo, Datasets}
 
@@ -27,19 +29,21 @@ object OSELMExample extends App {
  under certain conditions.
  Refer to LICENSE file for details.
            """)
+  val appPath = new File(".").getCanonicalPath + "/"
+  println(appPath)
 
   println("Warming up JVM-BLAS interface...")
   val warmingdata = Datasets.arff(bina = true)("banana.arff") match {
     case Right(x) => x
     case Left(str) => println("Could not load iris dataset from the program path: " + str); sys.exit(0)
   }
+  val currentSeed = (System.currentTimeMillis() % 1000000).toInt
   IELM(initialL = 15, seed = currentSeed).build(warmingdata)
 
-  val currentSeed = (System.currentTimeMillis() % 1000).toInt
 
   val data = Datasets.arff(bina = true)("banana.arff") match {
     case Right(x) => x
-    case Left(str) => println("Could not load iris dataset from the program path: " + str); sys.exit(0)
+    case Left(str) => println("Could not load banana dataset from the program path: " + str); sys.exit(0)
   }
 
   util.Datasets.kfoldCV(data, k = 10, parallel = true) { (trainingSet, testingSet, fold, _) =>
@@ -59,4 +63,4 @@ object OSELMExample extends App {
 
   println("Note that OS-ELM can be faster than ELM due to cache scarcity in the processor." +
     "When there are no numerical instability, they should behave exactly the same in terms of accuracy.")
-}
+}//rnd ok

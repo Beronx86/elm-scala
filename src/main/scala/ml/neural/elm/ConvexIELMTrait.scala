@@ -17,7 +17,7 @@ Copyright (C) 2014 Davi Pereira dos Santos
 */
 package ml.neural.elm
 
-import ml.models.{ELMOnlineModel, Model}
+import ml.models.{ELMGenericModel, Model}
 import no.uib.cipr.matrix.{DenseVector, DenseMatrix}
 import ml.Pattern
 import ml.neural.elm.Math._
@@ -50,4 +50,4 @@ trait ConvexIELMTrait extends IteratedBuildELM {
       i += 1
     }
   }
-}
+}//rnd ok

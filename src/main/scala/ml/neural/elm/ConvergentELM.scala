@@ -18,10 +18,11 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.neural.elm
 
 import ml.classifiers.Learner
-import ml.models.{ELMOnlineModel, Model}
+import ml.models.{ELMGenericModel, Model}
 import no.uib.cipr.matrix.{Matrices, DenseVector, DenseMatrix}
 import ml.Pattern
 import ml.neural.elm.Math._
+import util.XSRandom
 import scala.util.Random
 import ml.mtj.{ResizableDenseMatrix, DenseMatrix2}
 import ml.neural.elm.Data._
@@ -31,8 +32,9 @@ import ml.neural.elm.Data._
  */
 trait ConvergentELM extends ELM {
   val Lbuild: Int
+
   def build(trSet: Seq[Pattern]) = {
-    val rnd = new Random(seed)
+    val rnd = new XSRandom(seed)
 
     val ninsts = checkEmptyness(trSet)
     checkFullRankness(trSet, ninsts)
@@ -42,6 +44,7 @@ trait ConvergentELM extends ELM {
     val Xt = t._1
     val Y = t._2
     val biasesArray = new Array[Double](Lbuild)
+//    val Alfa = new DenseMatrix(Lbuild, natts)
     val Alfat = new DenseMatrix(Lbuild, natts)
     initializeWeights(Alfat, biasesArray, rnd)
 
@@ -55,7 +58,11 @@ trait ConvergentELM extends ELM {
     P.mult(Ht, pinvH)
     val Beta = new DenseMatrix(Lbuild, nclasses)
     pinvH.mult(Y, Beta)
-    ELMOnlineModel(rnd, Alfat, biasesArray, H, P, Beta)
+
+    //todo:X is calculated even when it is useless!
+    lazy val X = new DenseMatrix(Xt.numColumns(), Xt.numRows())
+    Xt.transpose(X)
+    ELMGenericModel(rnd, Alfat, biasesArray, H, P, Beta, X, Y, pinvH)
   }
 
   /**
@@ -72,3 +79,5 @@ trait ConvergentELM extends ELM {
     }
   }
 }
+
+//rnd ok

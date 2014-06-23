@@ -1,3 +1,5 @@
+package ml.neural.elm
+
 /*
 elm-scala: an implementation of ELM in Scala using MTJ
 Copyright (C) 2014 Davi Pereira dos Santos
@@ -15,23 +17,10 @@ Copyright (C) 2014 Davi Pereira dos Santos
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package ml.neural.elm
-
-import ml.Pattern
-import ml.models.{BatchModel, Model}
-
-/**
- * A call to update performs total rebuild.
- * Created by davi on 21/05/14.
- */
-trait BatchELM extends ELM {
-  private def cast2batmodel(model: Model) = model match {
-    case m: BatchModel => m
-    case _ => throw new Exception("BatchLearner requires BatchModel.")
+object Tests extends App{
+  lazy val a = {
+    println("bla")
+    5
   }
-
-  def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = build(pattern +: cast2batmodel(model).training_set)
-
-  def updateAll(model: Model, fast_mutable: Boolean)(patterns: Seq[Pattern]) = build(patterns ++ cast2batmodel(model).training_set)
+  println("--------")
 }
-//rnd ok

@@ -19,12 +19,12 @@ package ml.classifiers
 
 import ml.Pattern
 import scala.util.Random
-import ml.models.{ELMOnlineModel, Model}
+import ml.models.{ELMGenericModel, Model}
 import no.uib.cipr.matrix.{DenseVector, DenseMatrix}
 import ml.neural.elm.Data._
 import ml.mtj.{DenseMatrix2, ResizableDenseMatrix}
 import ml.neural.elm.{ConvexIELMTrait, ELM}
-import util.Tempo
+import util.{XSRandom, Tempo}
 
 case class ECIELM(initialL: Int, seed: Int = 0, size: Int = 1, callf:Boolean=false, f: (Model, Double) => Unit = (_, _) => ()) extends ConvexIELMTrait{
   override val toString = "ECIELM"
@@ -32,7 +32,7 @@ case class ECIELM(initialL: Int, seed: Int = 0, size: Int = 1, callf:Boolean=fal
 
   override def build(trSet: Seq[Pattern]) = {
     Tempo.start
-    val rnd = new Random(seed)
+    val rnd = new XSRandom(seed)
     val ninsts = checkEmptyness(trSet)
     val nclasses = trSet.head.nclasses
     val natts = trSet.head.nattributes
@@ -49,7 +49,7 @@ case class ECIELM(initialL: Int, seed: Int = 0, size: Int = 1, callf:Boolean=fal
     while (l < initialL) {
       Alfat.resizeRows(l + 1) //needed to call f()
       Beta.resizeRows(l + 1)
-      val (weights, bias, h, beta) = createNodeForConvexUpdateAmongCandidates(rnd, X, t, e, tmp, tmp2) //mutates rnd!! No problem here since old ELMOnlineModel is deallocated every iteration
+      val (weights, bias, h, beta) = createNodeForConvexUpdateAmongCandidates(rnd, X, t, e, tmp, tmp2)
       H.addCol(h)
       biases(l) = bias
       updateNetwork(l, weights, beta, Beta, Alfat)
@@ -58,12 +58,12 @@ case class ECIELM(initialL: Int, seed: Int = 0, size: Int = 1, callf:Boolean=fal
       l += 1
       val te = Tempo.stop
       Tempo.start
-      f(ELMOnlineModel(rnd, Alfat, biases, null, null, Beta), te)
+      f(ELMGenericModel(rnd.clone(), Alfat, biases, null, null, Beta, null, null, null), te)
     }
     //    Alfat.resizeRows(l)
     //    Beta.resizeRows(l)
     //    ELMModel(Alfat, biases.take(Beta.numRows()), new DenseMatrix(1, 1), Beta)
-    val model = ELMOnlineModel(rnd, Alfat, biases, null, null, Beta)
+    val model = ELMGenericModel(rnd, Alfat, biases, null, null, Beta, null, null, null)
     model
   }
 
@@ -71,13 +71,14 @@ case class ECIELM(initialL: Int, seed: Int = 0, size: Int = 1, callf:Boolean=fal
      * Mutate e and rnd
      * @return
      */
-    def createNodeForConvexUpdateAmongCandidates(rnd: Random, X: DenseMatrix, t: Array[DenseVector], e: Array[DenseVector], tmp: DenseVector, tmp2: DenseVector) = {
+    def createNodeForConvexUpdateAmongCandidates(rnd: XSRandom, X: DenseMatrix, t: Array[DenseVector], e: Array[DenseVector], tmp: DenseVector, tmp2: DenseVector) = {
       val nclasses = t.size
       val natts = X.numColumns()
       val ninsts = X.numRows()
       val candidates = 0 until CANDIDATES map { idx =>
         val newe = Array.fill(nclasses)(new DenseVector(ninsts))
-        val (weights, bias) = newNode(natts, rnd)
+        val (weights, bias, newRnd) = newNode(natts, rnd)
+        rnd.setSeed(newRnd.getSeed)
         val alfa = new DenseVector(weights, false)
         val beta = new Array[Double](nclasses)
         val h = feedHidden(X, alfa, bias)
@@ -114,6 +115,5 @@ case class ECIELM(initialL: Int, seed: Int = 0, size: Int = 1, callf:Boolean=fal
       e.zip(newe).foreach { case (a, b) => a.set(b)}
       (weights, bias, h, beta)
     }
-//
-}
+}//rnd ok
 

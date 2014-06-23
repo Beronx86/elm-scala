@@ -1,5 +1,5 @@
 import ml.classifiers._
-import util.{Tempo, Datasets}
+import util.{Datasets, Tempo}
 
 /*
 elm-scala: an implementation of ELM in Scala using MTJ
@@ -18,7 +18,7 @@ Copyright (C) 2014 Davi Pereira dos Santos
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-object ExampleML extends App {
+object EMELMExample extends App {
   println( """
  elm-scala Copyright (C) 2014 Davi Pereira dos Santos
 
@@ -28,39 +28,38 @@ object ExampleML extends App {
  Refer to LICENSE file for details.
            """)
 
+  println("Warming up JVM-BLAS interface...")
   val warmingdata = Datasets.arff(bina = true)("banana.arff") match {
     case Right(x) => x
     case Left(str) => println("Could not load iris dataset from the program path: " + str); sys.exit(0)
   }
-  val currentSeed = (System.currentTimeMillis() % 1000).toInt
-
-  val elms = Seq(
-    IELM(initialL = 80, seed = currentSeed),
-    EIELM(initialL = 80, seed = currentSeed),
-    CIELM(initialL = 80, seed = currentSeed),
-    ECIELM(initialL = 80, seed = currentSeed),
-    OSELM(L = 16, seed = currentSeed)
-  )
-
-  println("Warming up JVM-BLAS interface...")
+  val currentSeed = (System.currentTimeMillis() % 1000000).toInt
   IELM(initialL = 15, seed = currentSeed).build(warmingdata)
 
-  Seq("iris", "banana") foreach { dataset =>
-    println("Comparing all ELMs in " + dataset + " dataset...")
-    val data = Datasets.arff(bina = true)("banana.arff") match {
-      case Right(x) => x
-      case Left(str) => println("Could not load iris dataset from the program path: " + str); sys.exit(0)
-    }
-    elms foreach { elm =>
-      println(elm)
-
-      util.Datasets.kfoldCV(data, k = 10, parallel = true) { (trainingSet, testingSet, fold, _) =>
-        val (model, t) = Tempo.timev(elm.build(trainingSet))
-        val acc = model.accuracy(testingSet).formatted("%2.2f")
-        println("Fold " + fold + ": " + acc + " in " + t + "ms.")
-      }
-
-      println("")
-    }
+  println("seed " + currentSeed)
+  val dataset = "iris.arff"
+  val data = Datasets.arff(bina = true)(dataset) match {
+    case Right(x) => x
+    case Left(str) => println("Could not load " + dataset + " dataset from the program path: " + str); sys.exit(0)
   }
+
+  util.Datasets.kfoldCV(data, k = 10, parallel = true) { (trainingSet, testingSet, fold, _) =>
+    val elm = OSELM(L = 16, seed = currentSeed)
+    val emelm = EMELM(Lmax = 1, seed = currentSeed)
+
+    val (model, t) = Tempo.timev(elm.build(trainingSet))
+    val acc = model.accuracy(testingSet).formatted("%2.2f")
+
+    val (emmodel, ost) = Tempo.timev {
+      val m = emelm.build(trainingSet)
+      emelm.growTo(16, m)
+    }
+    val osacc = emmodel.accuracy(testingSet).formatted("%2.2f")
+    println("Fold " + fold + ".  OSELM: " + osacc + " in " + ost + "ms.    " + "ELM: " + acc + " in " + t + "ms.")
+  }
+
+  println("Note that OS-ELM can be faster than ELM due to cache scarcity in the processor." +
+    "When there are no numerical instability, they should behave exactly the same in terms of accuracy.")
 }
+
+//rnd ok

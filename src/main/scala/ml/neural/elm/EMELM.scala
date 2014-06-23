@@ -19,14 +19,20 @@ package ml.neural.elm
 
 import no.uib.cipr.matrix._
 import ml.Pattern
-import util.Tempo
+import util.{Datasets, XSRandom, Tempo}
 import scala.util.Random
 
+/**
+ * Stateful EMELM
+ * @param patterns
+ * @param seed
+ * @param SVD
+ */
 case class EMELM(patterns: Seq[Pattern], seed: Int, SVD: Boolean = false) {
   val nattributes = patterns.head.nattributes
   val nclasses = patterns.head.nclasses
   val ninsts = patterns.length
-  val rnd = new Random(seed)
+  val rnd = new XSRandom(seed)
 
   protected val T = new DenseMatrix(ninsts, nclasses)
   protected val Tt = new DenseMatrix(nclasses, ninsts)
@@ -41,7 +47,6 @@ case class EMELM(patterns: Seq[Pattern], seed: Int, SVD: Boolean = false) {
       val hinv = pinvSVD(mH)
 
       //Calculate P for PRESS and also OS-ELM.
-      Tempo.start
       val mHinvt = new DenseMatrix(mH.numColumns(), hinv.numRows())
       mH.transpose(mHinvt)
       val P = new DenseMatrix(hinv.numRows(), mHinvt.numColumns())
@@ -56,7 +61,7 @@ case class EMELM(patterns: Seq[Pattern], seed: Int, SVD: Boolean = false) {
       val hinv = pinvpre(mH, Ht, HtH_LxL)
 
       //Calculate P for PRESS and also OS-ELM.
-//      val P = inv(HtH_LxL)
+      //      val P = inv(HtH_LxL)
 
       (hinv, mH) //TODO: trocar mH por P
     }
@@ -72,7 +77,7 @@ case class EMELM(patterns: Seq[Pattern], seed: Int, SVD: Boolean = false) {
       A.solve(Matrices.identity(A.numRows()), tmp)
       tmp
     } catch {
-      case e:MatrixSingularException => println("L=" + A.numRows() + "N=" + ninsts + ". Singular matrix:\n" + A)
+      case e: MatrixSingularException => println("L=" + A.numRows() + "N=" + ninsts + ". Singular matrix:\n" + A)
         sys.exit(0)
     }
   }
@@ -95,13 +100,13 @@ case class EMELM(patterns: Seq[Pattern], seed: Int, SVD: Boolean = false) {
   val tmp2 = new DenseVector(1)
 
   def grow() {
-    Tempo.start
     mH.mult(mHinv, HHinv) //64
     val (newHiddenLayer, newNeuron, newBiases) = addNeuron(hiddenLayer, biases) //66
     val (newH, newh) = resizeH(mH, newNeuron, newBiases) //h_j in the paper is the newh 70
 
     val I_HHinv = HHinv.add(-1, I) //285
     val tmp = new DenseMatrix(newh, false) //285
+
     tmp.transpose(lastAddedHColumnt) //286
     val num = new DenseMatrix(1, ninsts) //286
     lastAddedHColumnt.mult(I_HHinv, num) //419
@@ -129,15 +134,15 @@ case class EMELM(patterns: Seq[Pattern], seed: Int, SVD: Boolean = false) {
 
     mHinv = newHinv
     outputLayert = newOutputLayert
-//    Tempo.print_stop
+    //    Tempo.print_stop
 
     //Calculate P for PRESS and also OS-ELM.
-//    Tempo.start
-//    val mHinvt = new DenseMatrix(mHinv.numColumns(), mHinv.numRows())
-//    mHinv.transpose(mHinvt)
-//    p = new DenseMatrix(mHinv.numRows(), mHinvt.numColumns())
-//    mHinv.mult(mHinvt, p)
-//    Tempo.print_stop
+    //    Tempo.start
+    //    val mHinvt = new DenseMatrix(mHinv.numColumns(), mHinv.numRows())
+    //    mHinv.transpose(mHinvt)
+    //    p = new DenseMatrix(mHinv.numRows(), mHinvt.numColumns())
+    //    mHinv.mult(mHinvt, p)
+    //    Tempo.print_stop
   }
 
   private def stackUD(U: DenseMatrix, D: DenseMatrix) = {
@@ -202,12 +207,12 @@ case class EMELM(patterns: Seq[Pattern], seed: Int, SVD: Boolean = false) {
     }
     j = 0
     while (j < nattributes) {
-      val v = rnd.nextDouble() *2 -1
+      val v = rnd.nextDouble() * 2 - 1
       newHiddenLayer.set(i, j, v)
       newNeuron.set(j, v)
       j += 1
     }
-    newBiases.set(i, rnd.nextDouble() *2 -1)
+    newBiases.set(i, rnd.nextDouble() * 2 - 1)
     (newHiddenLayer, newNeuron, newBiases)
   }
 
@@ -336,4 +341,46 @@ case class EMELM(patterns: Seq[Pattern], seed: Int, SVD: Boolean = false) {
   }
 }
 
+//rnd ok mutable
 
+object EMTest extends App {
+  val dataset = "banana.arff"
+  val data = Datasets.arff(bina = true)(dataset) match {
+    case Right(x) => x.take(1000)
+    case Left(str) => println("Could not load " + dataset + " dataset from the program path: " + str); sys.exit(0)
+  }
+  1 to 10 foreach { _ =>
+    val e1 = ml.classifiers.EMELM(999, 1)
+    var m = e1.build(data)
+    m = e1.growByOne(m, true)
+    m = e1.growByOne(m, true)
+    m = e1.growByOne(m, true)
+    //    println(m.accuracy(data))
+  }
+
+  val n =10000/data.length
+
+  Tempo.start
+  1 to n foreach { _ =>
+    val e1 = ml.classifiers.EMELM(999, 1)
+    var m = e1.build(data)
+    1 to 100 foreach { _ =>
+      m = e1.growByOne(m, true)
+    }
+    //    println(m.accuracy(data))
+  }
+  Tempo.print_stop
+  println("")
+
+  Tempo.start
+  1 to n foreach { _ =>
+    val e0 = EMELM(data, 1)
+    1 to 100 foreach { _ =>
+      e0.grow
+    }
+  }
+  Tempo.print_stop
+  //    println(e0.accuracy(data))
+
+  println("")
+}

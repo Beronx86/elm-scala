@@ -18,7 +18,7 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.neural.elm
 
 import ml.classifiers.Learner
-import ml.models.{ELMOnlineModel, Model}
+import ml.models.{ELMGenericModel, Model}
 import no.uib.cipr.matrix.{Matrices, DenseVector, DenseMatrix}
 import ml.Pattern
 import ml.neural.elm.Math._
@@ -31,6 +31,10 @@ import ml.neural.elm.Data._
  */
 trait ELM extends Learner {
   val seed: Int
+  if (seed == 0) {
+    println("Seed cannot be 0 because the fast random algorithm (XS) would produce only 0s.")
+    sys.exit(0)
+  }
 
   def EMC(model: Model)(patterns: Seq[Pattern]) = ???
 
@@ -61,13 +65,21 @@ trait ELM extends Learner {
     ninsts
   }
 
+  /**
+   * mutates rnd!
+   * @param Alfat
+   * @param biases
+   * @param rnd
+   */
   protected def initializeWeights(Alfat: DenseMatrix, biases: Array[Double], rnd: Random) {
     var i = 0
     var j = 0
     while (i < Alfat.numRows()) {
       j = 0
       while (j < Alfat.numColumns()) {
-        Alfat.set(i, j, rnd.nextDouble() * 2 - 1)
+        val v = rnd.nextDouble() * 2 - 1
+//        Alfa.set(j, i, v)
+        Alfat.set(i, j, v)
         j += 1
       }
       biases(i) = rnd.nextDouble() * 2 - 1
@@ -150,3 +162,5 @@ trait ELM extends Learner {
   //
   //  def build(trSet: Seq[Pattern]): ELMModel
 }
+
+//rnd ok

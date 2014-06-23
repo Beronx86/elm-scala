@@ -23,17 +23,19 @@ import ml.models.Model
 import ml.neural.elm.Data._
 import ml.mtj.ResizableDenseMatrix
 import no.uib.cipr.matrix.{DenseVector, DenseMatrix}
+import util.XSRandom
 import scala.util.Random
 
 /**
  * Created by davi on 24/05/14.
  */
 case class IELM(initialL: Int, seed: Int = 0, callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ())
-  extends Learner with IELMTrait {
+  extends IELMTrait {
   override val toString = "IELM"
 
-  protected def buildCore(rnd: Random, X: DenseMatrix, e: Array[DenseVector], tmp: DenseVector) = {
-    val (weights, bias) = newNode(X.numColumns(), rnd)
+  protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Array[DenseVector], tmp: DenseVector) = {
+    val (weights, bias, newRnd) = newNode(X.numColumns(), rnd)
+    rnd.setSeed(newRnd.getSeed)
     val (h, beta) = addNode(weights, bias, X, e, tmp)
     (weights, bias, h, beta)
   }
@@ -61,4 +63,4 @@ case class IELM(initialL: Int, seed: Int = 0, callf: Boolean = false, f: (Model,
     }
     (h, beta)
   }
-}
+}//rnd ok

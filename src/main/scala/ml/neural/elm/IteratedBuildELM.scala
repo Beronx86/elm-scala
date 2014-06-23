@@ -18,10 +18,11 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.neural.elm
 
 import ml.classifiers.Learner
-import ml.models.{ELMOnlineModel, Model}
+import ml.models.{ELMGenericModel, Model}
 import no.uib.cipr.matrix.{Matrices, DenseVector, DenseMatrix}
 import ml.Pattern
 import ml.neural.elm.Math._
+import util.XSRandom
 import scala.util.Random
 import ml.mtj.{ResizableDenseMatrix, DenseMatrix2}
 import ml.neural.elm.Data._
@@ -30,18 +31,19 @@ import ml.neural.elm.Data._
  * Created by davi on 21/05/14.
  */
 trait IteratedBuildELM extends BatchELM {//todo: correct this, extending BatchELM is very inefficient for update()!
-  val f: (ELMOnlineModel, Double) => Unit
+  val f: (ELMGenericModel, Double) => Unit
   val initialL: Int
   val callf: Boolean
 
   /**
-   * mutates rnd!
    * @param natts
    * @param rnd
    * @return
    */
-  protected def newNode(natts: Int, rnd: Random) = {
-    val w = Array.fill(natts)(rnd.nextDouble() * 2 - 1)
-    (w, rnd.nextDouble() * 2 - 1)
+  protected def newNode(natts: Int, rnd: XSRandom) = {
+    val newRnd = rnd.clone()
+    val w = Array.fill(natts)(newRnd.nextDouble() * 2 - 1)
+    val b = newRnd.nextDouble() * 2 - 1
+    (w, b, newRnd)
   }
-}
+}//rnd ok

@@ -19,33 +19,35 @@ package ml.classifiers
 
 import ml.neural.elm.{IELMTrait, ELM}
 import ml.Pattern
-import ml.models.{ELMOnlineModel, Model}
+import ml.models.{ELMGenericModel, Model}
 import ml.neural.elm.Data._
 import ml.mtj.ResizableDenseMatrix
 import no.uib.cipr.matrix.{DenseVector, DenseMatrix}
+import util.XSRandom
 import scala.util.Random
 
 /**
  * Created by davi on 24/05/14.
  */
-case class EIELM(initialL: Int, seed: Int = 0, size: Int = 1, callf: Boolean = false, f: (ELMOnlineModel, Double) => Unit = (tmp: Model, tmpt: Double) => ())
+case class EIELM(initialL: Int, seed: Int = 0, size: Int = 1, callf: Boolean = false, f: (ELMGenericModel, Double) => Unit = (tmp: Model, tmpt: Double) => ())
   extends IELMTrait {
   override val toString = "EIELM"
   val CANDIDATES = 100
 
-  protected def buildCore(rnd: Random, X: DenseMatrix, e: Array[DenseVector], tmp: DenseVector) = createNodeAmongCandidates(rnd, X, e, tmp)
+  protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Array[DenseVector], tmp: DenseVector) = createNodeAmongCandidates(rnd, X, e, tmp)
 
   /**
    * Mutate e, tmp, tmp2 and rnd
    * @return
    */
-  def createNodeAmongCandidates(rnd: Random, X: DenseMatrix, e: Array[DenseVector], tmp: DenseVector) = {
+  def createNodeAmongCandidates(rnd: XSRandom, X: DenseMatrix, e: Array[DenseVector], tmp: DenseVector) = {
     val nclasses = e.size
     val natts = X.numColumns()
     val ninsts = X.numRows()
     val candidates = 0 until CANDIDATES map { idx =>
       val newe = Array.fill(nclasses)(new DenseVector(ninsts))
-      val (weights, bias) = newNode(natts, rnd)
+      val (weights, bias, newRnd) = newNode(natts, rnd)
+      rnd.setSeed(newRnd.getSeed)
       val alfa = new DenseVector(weights, false)
       val beta = new Array[Double](nclasses)
       val h = feedHidden(X, alfa, bias)
@@ -74,4 +76,4 @@ case class EIELM(initialL: Int, seed: Int = 0, size: Int = 1, callf: Boolean = f
     e.zip(newe).foreach { case (a, b) => a.set(b)}
     (weights, bias, h, beta)
   }
-}
+}//rnd ok

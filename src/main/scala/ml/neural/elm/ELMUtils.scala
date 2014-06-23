@@ -17,7 +17,7 @@ Copyright (C) 2014 Davi Pereira dos Santos
 */
 package ml.neural.elm
 
-import ml.models.{ELMOnlineModel, Model}
+import ml.models.{ELMGenericModel, Model}
 import no.uib.cipr.matrix.{Matrices, DenseVector, DenseMatrix}
 import ml.Pattern
 import ml.neural.elm.Math._
@@ -46,9 +46,9 @@ object ELMUtils {
   }
 
   protected def feedOutput(H: DenseMatrix, Beta: DenseMatrix) = {
-    val O = new DenseMatrix(H.numRows(), Beta.numColumns())
-    H.mult(Beta, O)
-    O
+    val Y = new DenseMatrix(H.numRows(), Beta.numColumns())
+    H.mult(Beta, Y)
+    Y
   }
 
   def calculateP(H: DenseMatrix) = {
@@ -140,4 +140,4 @@ object ELMUtils {
   //  }
   //
 
-}
+}//rnd ok

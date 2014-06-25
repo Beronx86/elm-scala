@@ -57,7 +57,7 @@ trait IELMTrait extends IteratedBuildELM {
         Beta.addRow(beta)
         val te = Tempo.stop
         Tempo.start
-        f(ELMGenericModel(rnd.clone(), Alfat, biases, null, null, Beta, null, null, null), te)
+        f(ELMGenericModel(rnd.clone(), Alfat, biases, null, null, Beta, null, null, null, null), te)
       }
     } else {
       while (l < initialL) {
@@ -71,7 +71,7 @@ trait IELMTrait extends IteratedBuildELM {
       Alfat.resizeRows(l)
       Beta.resizeRows(l)
     }
-    ELMGenericModel(rnd, Alfat, biases, H, null, Beta, null, null, null) //todo: se nao crescer, manter P e H anteriores?
+    ELMGenericModel(rnd, Alfat, biases, H, null, Beta, null, null, null, null) //todo: se nao crescer, manter P e H anteriores?
   }
 
   protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Array[DenseVector], tmp: DenseVector): (Array[Double], Double, DenseVector, Array[Double])

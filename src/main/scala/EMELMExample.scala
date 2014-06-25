@@ -1,4 +1,5 @@
 import ml.classifiers._
+import ml.classifiers.interaELMExample._
 import util.{Datasets, Tempo}
 
 /*
@@ -37,11 +38,11 @@ object EMELMExample extends App {
   IELM(initialL = 15, seed = currentSeed).build(warmingdata)
 
   println("seed " + currentSeed)
-  val dataset = "iris.arff"
-  val data = Datasets.arff(bina = true)(dataset) match {
+  val dataset = "banana.arff"
+  val data = (Datasets.arff(bina = true)(dataset) match {
     case Right(x) => x
     case Left(str) => println("Could not load " + dataset + " dataset from the program path: " + str); sys.exit(0)
-  }
+  }).take(1000)
 
   util.Datasets.kfoldCV(data, k = 10, parallel = true) { (trainingSet, testingSet, fold, _) =>
     val elm = OSELM(L = 16, seed = currentSeed)
@@ -54,9 +55,21 @@ object EMELMExample extends App {
       val m = emelm.build(trainingSet)
       emelm.growTo(16, m)
     }
-    val osacc = emmodel.accuracy(testingSet).formatted("%2.2f")
-    println("Fold " + fold + ".  OSELM: " + osacc + " in " + ost + "ms.    " + "ELM: " + acc + " in " + t + "ms.")
+    val emacc = emmodel.accuracy(testingSet).formatted("%2.2f")
+    println("Fold " + fold + ".  EMELM: " + emacc + " in " + ost + "ms.    " + "ELM: " + acc + " in " + t + "ms.")
   }
+
+
+//  val LOOos = Datasets.LOO(data) { (tr, p) =>
+//    if (OSELM(20) build tr hit p) 1 else 0
+//  }.sum / data.length.toDouble
+//
+//  val LOOem = Datasets.LOO(data) { (tr, p) =>
+//    if (EMELM(20) build tr hit p) 1 else 0
+//  }.sum / data.length.toDouble
+//
+//  println("os "+ LOOos)
+//  println("em "+ LOOem)
 
   println("Note that OS-ELM can be faster than ELM due to cache scarcity in the processor." +
     "When there are no numerical instability, they should behave exactly the same in terms of accuracy.")

@@ -37,7 +37,6 @@ object ELMUtils {
     data
   }
 
-
   def test(patt: Pattern, Alfat: DenseMatrix, biases: Array[Double], Beta: DenseMatrix) = {
     val (h, hm) = feedHiddenv(new DenseVector(patt.array, false), Alfat, biases)
     val O = feedOutput(hm, Beta)
@@ -45,8 +44,12 @@ object ELMUtils {
     O
   }
 
-  protected def feedOutput(H: DenseMatrix, Beta: DenseMatrix) = {
+  def feedOutput(H: DenseMatrix, Beta: DenseMatrix): DenseMatrix = {
     val Y = new DenseMatrix(H.numRows(), Beta.numColumns())
+    feedOutput(H, Beta, Y)
+  }
+
+  def feedOutput(H: DenseMatrix, Beta: DenseMatrix, Y: DenseMatrix): DenseMatrix = {
     H.mult(Beta, Y)
     Y
   }
@@ -76,6 +79,23 @@ object ELMUtils {
     (h, H)
   }
 
+  //  protected def feedHiddent(Xt: DenseMatrix, Alfat: DenseMatrix, biases: Array[Double]) = {
+  //    val Ht = new DenseMatrix(Alfat.numRows(), Xt.numColumns())
+  //    val H = new DenseMatrix(Ht.numColumns(), Ht.numRows())
+  //    Alfat.mult(Xt, Ht)
+  //    Ht.transpose(H)
+  //    addToEachLineOnMatrixAndApplyf(H, biases, sigm2)
+  //    H
+  //  }
+  //
+  //  protected def feedHidden(X: DenseMatrix, alfa: DenseVector, bias: Double) = {
+  //    val h = new DenseVector(X.numRows())
+  //    X.mult(alfa, h)
+  //    addAndApplyOnVector(h, bias, sigm2)
+  //    h
+  //  }
+
+
   //  protected def cast(model: Model) = model match {
   //    case m: ELMModel => m
   //    case _ => println("ELM requires ELMModel.")
@@ -83,14 +103,4 @@ object ELMUtils {
   //  }
   //
   //
-
-  //
-  //  protected def feedOutput(H: DenseMatrix, Beta: DenseMatrix) = {
-  //    val O = new DenseMatrix(H.numRows(), Beta.numColumns())
-  //    H.mult(Beta, O)
-  //    O
-  //  }
-  //
-
-
-}//rnd ok
+}

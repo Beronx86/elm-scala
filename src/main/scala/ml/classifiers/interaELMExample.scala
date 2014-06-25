@@ -1,3 +1,11 @@
+package ml.classifiers
+
+import java.io.File
+
+import ml.Pattern
+import ml.classifiers._
+import util.{Tempo, Datasets}
+
 /*
 elm-scala: an implementation of ELM in Scala using MTJ
 Copyright (C) 2014 Davi Pereira dos Santos
@@ -15,26 +23,20 @@ Copyright (C) 2014 Davi Pereira dos Santos
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package ml.classifiers
+object interaELMExample extends App with ExampleTemplate {
+  val dataset =
+    "banana"
+  "iris"
 
-import ml.Pattern
-import ml.models.{ELMGenericModel, Model}
-import ml.neural.elm.ConvergentELM
-import ml.neural.elm.Math._
-import no.uib.cipr.matrix.{DenseMatrix, DenseVector, Matrices}
-import util.XSRandom
+  def kfoldIteration[T](tr: Seq[Pattern], ts: Seq[Pattern], fold: Int, bla: Int) {
+    val e = interaELM(data.length / 2)
+    val m = e.build(tr)
+    println(m.accuracy(ts))
+  }
 
-/**
- * Grows network from 1 to Lmax.
- * It performs batch learning, i.e. retrains from scratch to accomodate new instances.
- * @param Lmax
- * @param seed
- */
-case class EMELM(Lmax: Int, seed: Int = 1) extends ConvergentGrowing {
-  override val toString = "EMELM"
-  val Lbuild = 1
+  //  run
 
-  def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = ???
+  println("")
+  val m = interaELM(20).build(data)
 
-  def updateAll(model: Model, fast_mutable: Boolean)(patterns: Seq[Pattern]) = ???
 }

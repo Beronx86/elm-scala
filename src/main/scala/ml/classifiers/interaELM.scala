@@ -19,7 +19,8 @@ package ml.classifiers
 
 import ml.Pattern
 import ml.models.Model
-import ml.neural.elm.{ConvergentELM, ELM}
+import ml.mtj.DenseMatrix2
+import ml.neural.elm.{ELMUtils, ConvergentELM, ELM}
 import no.uib.cipr.matrix.DenseMatrix
 
 /**
@@ -27,23 +28,38 @@ import no.uib.cipr.matrix.DenseMatrix
  * @param Lmax
  * @param seed
  */
-case class interaELM(Lmax: Int, nclasses: Int, seed: Int = 0) extends ConvergentELM {
+case class interaELM(Lmax: Int, override val seed: Int = 1) extends ConvergentIncremental with ConvergentGrowing {
   override val toString = "interaELM"
-  val Lbuild = Lmax
+  val Lbuild = 1
 
   override def build(trSet: Seq[Pattern]) = {
-    val m = super.build(trSet)
+    var model = cast(super.build(trSet))
 
-    //calcula PRESS
-    //cresce até PRESS parar de aumentar
+    //model selection
+    val (_, best, z) = 1 to Lmax map { L =>
+      if (L > 1) model = growByOne(model)
+      val H = model.H
+      val Beta = model.Beta
+      val Y = model.Y
+      val HHinv = model.HHinv
+      val Prediction = new DenseMatrix(H.numRows(), Beta.numColumns())
+      val E = Y.copy()
+      ELMUtils.feedOutput(H, Beta, Prediction)
+      E.add(-1, Prediction)
+      val press = PRESS(E)(HHinv)
+//      println("PRESS: " + press)
 
+      (LOOError(Y)(E)(HHinv), model, 1-LOOError(Y)(E)(HHinv))
+    } minBy (_._1)
+
+    println("LOOPRESS: " + z)
     //retorna modelo atualizado (recalcular P somente se cresceu).
-    ???
+    best
   }
 
-  def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = ???
+  override def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = ???
 
-  def updateAll(model: Model, fast_mutable: Boolean)(patterns: Seq[Pattern]) = ???
+  override def updateAll(model: Model, fast_mutable: Boolean)(patterns: Seq[Pattern]) = ???
 }
 
 /*

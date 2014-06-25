@@ -44,7 +44,7 @@ trait ConvergentELM extends ELM {
     val Xt = t._1
     val Y = t._2
     val biasesArray = new Array[Double](Lbuild)
-//    val Alfa = new DenseMatrix(Lbuild, natts)
+    //    val Alfa = new DenseMatrix(Lbuild, natts)
     val Alfat = new DenseMatrix(Lbuild, natts)
     initializeWeights(Alfat, biasesArray, rnd)
 
@@ -59,7 +59,7 @@ trait ConvergentELM extends ELM {
     val Beta = new DenseMatrix(Lbuild, nclasses)
     pinvH.mult(Y, Beta)
 
-    //todo:X and HHinv are calculated even when it is useless (e.g. for OS-ELM)! lazy is ineffective in call-by-value
+    //todo:X and HHinv are transposed/calculated even when it is useless (e.g. for OS-ELM)! lazy is ineffective in call-by-value
     lazy val X = new DenseMatrix(Xt.numColumns(), Xt.numRows())
     Xt.transpose(X)
 
@@ -95,7 +95,7 @@ trait ConvergentELM extends ELM {
    * @param HHinv
    * @return
    */
-  protected def LOO(Y: DenseMatrix)(E: DenseMatrix)(HHinv: DenseMatrix) = {
+  protected def LOOError(Y: DenseMatrix)(E: DenseMatrix)(HHinv: DenseMatrix) = {
     val n = HHinv.numRows()
     val nclasses = E.numColumns()
     val M = PRESSMatrix(E)(HHinv)
@@ -106,23 +106,23 @@ trait ConvergentELM extends ELM {
     var i = 0
     var max = 0d
     var cmax = 0
-    var hits=0
+    var hits = 0
     while (i < n) {
-      c = 0
       cmax = -1
-      max = -1d
+      max = Double.MinValue
+      c = 0
       while (c < nclasses) {
         val v = PredictionMatrix.get(i, c)
         if (v > max) {
           cmax = c
           max = v
         }
-        i += 1
+        c += 1
       }
       if (Y.get(i, cmax) == 1) hits += 1
-      c += 1
+      i += 1
     }
-    hits / n.toDouble
+    1 - hits / n.toDouble
   }
 
   /**
@@ -176,6 +176,12 @@ trait ConvergentELM extends ELM {
    * @return
    */
   protected def fPRESS(HATvalue: Double)(error: Double) = error / (1 - HATvalue)
+
+  protected def cast(model: Model) = model match {
+    case m: ELMGenericModel => m
+    case _ => println("Convergent ELMs require ELMGenericModel.")
+      sys.exit(0)
+  }
 }
 
 //rnd ok

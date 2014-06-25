@@ -30,7 +30,8 @@ import ml.neural.elm.Data._
 /**
  * Created by davi on 21/05/14.
  */
-trait IteratedBuildELM extends BatchELM {//todo: correct this, extending BatchELM is very inefficient for update()!
+trait IteratedBuildELM extends BatchELM {
+//todo: correct this, extending BatchELM is very inefficient for update() on incremental-friendly classifiers (I-ELM?)!
   val f: (ELMGenericModel, Double) => Unit
   val initialL: Int
   val callf: Boolean
@@ -46,4 +47,4 @@ trait IteratedBuildELM extends BatchELM {//todo: correct this, extending BatchEL
     val b = newRnd.nextDouble() * 2 - 1
     (w, b, newRnd)
   }
-}//rnd ok
+}

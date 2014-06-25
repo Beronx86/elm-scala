@@ -36,7 +36,7 @@ trait ELMModel extends Model {
 }
 
 case class ELMGenericModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], H: DenseMatrix, PReady: DenseMatrix, Beta: DenseMatrix,
-                           X: DenseMatrix, Y: DenseMatrix, Hinv: DenseMatrix, HHinv: DenseMatrix = null) extends ELMModel {
+                           X: DenseMatrix, Y: DenseMatrix, Hinv: DenseMatrix, HHinv: DenseMatrix) extends ELMModel {
   lazy val I = Math.identity(H.numRows())
 //  lazy val HHinv = if (HHinvReady == null) {
 //    val r =

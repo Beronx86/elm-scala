@@ -80,6 +80,4 @@ case class EIELM(initialL: Int, seed: Int = 0, size: Int = 1, callf: Boolean = f
     e.zip(newe).foreach { case (a, b) => a.set(b)}
     (weights, bias, h, beta)
   }
-}
-
-//rnd ok
+}//rnd ok

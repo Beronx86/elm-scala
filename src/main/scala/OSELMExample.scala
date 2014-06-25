@@ -63,4 +63,11 @@ object OSELMExample extends App {
 
   println("Note that OS-ELM can be faster than ELM due to cache scarcity in the processor." +
     "When there are no numerical instability, they should behave exactly the same in terms of accuracy.")
-}//rnd ok
+
+  //Testing equality of PRESS and LOO.
+  //  val LOO = Datasets.LOO(data) { (tr, p) =>
+  //    if (OSELM(20) build tr hit p) 1 else 0
+  //  }.sum / data.length.toDouble
+  //  println("LOO error: " + (1 - LOO))
+
+}

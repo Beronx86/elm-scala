@@ -44,7 +44,7 @@ trait ConvergentELM extends ELM {
     val Xt = t._1
     val Y = t._2
     val biasesArray = new Array[Double](Lbuild)
-//    val Alfa = new DenseMatrix(Lbuild, natts)
+    //    val Alfa = new DenseMatrix(Lbuild, natts)
     val Alfat = new DenseMatrix(Lbuild, natts)
     initializeWeights(Alfat, biasesArray, rnd)
 
@@ -59,7 +59,7 @@ trait ConvergentELM extends ELM {
     val Beta = new DenseMatrix(Lbuild, nclasses)
     pinvH.mult(Y, Beta)
 
-    //todo:X and HHinv are calculated even when it is useless! lazy is ineffective in call-by-value
+    //todo:X and HHinv are transposed/calculated even when it is useless (e.g. for OS-ELM)! lazy is ineffective in call-by-value
     lazy val X = new DenseMatrix(Xt.numColumns(), Xt.numRows())
     Xt.transpose(X)
 
@@ -84,6 +84,103 @@ trait ConvergentELM extends ELM {
       println("ERROR: Training set size (" + ninsts + ") is lesser than L (" + Lbuild + ")!")
       sys.exit(0)
     }
+  }
+
+  /**
+   * Calculates fast LOO accuracy over all instances using PRESS.
+   * (for classifiers)
+   * (assumes the correct output is the only one 1-valued)
+   * @param Y matrix of expected values NxO
+   * @param E matrix of errors (difference between expected and predicted)
+   * @param HHinv
+   * @return
+   */
+  protected def LOOError(Y: DenseMatrix)(E: DenseMatrix)(HHinv: DenseMatrix) = {
+    val n = HHinv.numRows()
+    val nclasses = E.numColumns()
+    val M = PRESSMatrix(E)(HHinv)
+    val PredictionMatrix = Y.copy()
+    PredictionMatrix.add(-1, M)
+
+    var c = 0
+    var i = 0
+    var max = 0d
+    var cmax = 0
+    var hits = 0
+    while (i < n) {
+      cmax = -1
+      max = Double.MinValue
+      c = 0
+      while (c < nclasses) {
+        val v = PredictionMatrix.get(i, c)
+        if (v > max) {
+          cmax = c
+          max = v
+        }
+        c += 1
+      }
+      if (Y.get(i, cmax) == 1) hits += 1
+      i += 1
+    }
+    1 - hits / n.toDouble
+  }
+
+  /**
+   * Calculates the PRESS statistic for all outputs/classes.
+   * (usually for regressors)
+   * @param E matrix of errors (difference between expected and predicted)
+   * @param HHinv
+   * @return
+   */
+  protected def PRESS(E: DenseMatrix)(HHinv: DenseMatrix) = {
+    //todo: this can be more efficient, because the loop is also inside PRESSMatrix()
+    val n = HHinv.numRows()
+    val nclasses = E.numColumns()
+    val M = PRESSMatrix(E)(HHinv)
+    var sum = 0d
+    var i = 0
+    while (i < n * nclasses) {
+      sum += M.getData()(i)
+      i += 1
+    }
+    sum
+  }
+
+  /**
+   * Calculates individual PRESS for each instance for each output/class.
+   * @param E matrix of errors (difference between expected and predicted)
+   * @param HHinv HAT matrix
+   * @return N x O matrix of individual PRESS values for each output
+   */
+  protected def PRESSMatrix(E: DenseMatrix)(HHinv: DenseMatrix) = {
+    val nclasses = E.numColumns()
+    val M = new DenseMatrix(E.numRows(), E.numColumns())
+    val n = HHinv.numRows()
+    var c = 0
+    var i = 0
+    while (c < nclasses) {
+      i = 0
+      while (i < n) {
+        M.set(i, c, fPRESS(HHinv.get(i, i))(E.get(i, c)))
+        i += 1
+      }
+      c += 1
+    }
+    M
+  }
+
+  /**
+   * Calculates an instance contribution to the PRESS statistic.
+   * @param HATvalue value in the respective position at the diagonal of HHinv
+   * @param error difference between expected and predicted for the respective output
+   * @return
+   */
+  protected def fPRESS(HATvalue: Double)(error: Double) = error / (1 - HATvalue)
+
+  protected def cast(model: Model) = model match {
+    case m: ELMGenericModel => m
+    case _ => println("Convergent ELMs require ELMGenericModel.")
+      sys.exit(0)
   }
 }
 

@@ -1,5 +1,3 @@
-import java.io.File
-
 import ml.classifiers._
 import util.{Tempo, Datasets}
 
@@ -37,11 +35,11 @@ object ELMExample extends App {
   val currentSeed = (System.currentTimeMillis() % 1000000).toInt
 
   val elms = Seq(
-    //    IELM(initialL = 80, seed = currentSeed),
-    EIELM(initialL = 80, seed = currentSeed)
-    //    CIELM(initialL = 80, seed = currentSeed),
-    //    ECIELM(initialL = 80, seed = currentSeed),
-    //    OSELM(L = 16, seed = currentSeed)
+    IELM(initialL = 80, seed = currentSeed),
+    EIELM(initialL = 80, seed = currentSeed),
+    CIELM(initialL = 80, seed = currentSeed),
+    ECIELM(initialL = 80, seed = currentSeed),
+    OSELM(L = 16, seed = currentSeed)
   )
   val appPath = new File(".").getCanonicalPath + "/"
   println(appPath)

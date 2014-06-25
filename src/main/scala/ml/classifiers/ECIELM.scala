@@ -58,12 +58,12 @@ case class ECIELM(initialL: Int, seed: Int = 0, size: Int = 1, callf:Boolean=fal
       l += 1
       val te = Tempo.stop
       Tempo.start
-      f(ELMGenericModel(rnd.clone(), Alfat, biases, null, null, Beta, null, null, null), te)
+      f(ELMGenericModel(rnd.clone(), Alfat, biases, null, null, Beta, null, null, null, null), te)
     }
     //    Alfat.resizeRows(l)
     //    Beta.resizeRows(l)
     //    ELMModel(Alfat, biases.take(Beta.numRows()), new DenseMatrix(1, 1), Beta)
-    val model = ELMGenericModel(rnd, Alfat, biases, null, null, Beta, null, null, null)
+    val model = ELMGenericModel(rnd, Alfat, biases, null, null, Beta, null, null, null, null)
     model
   }
 

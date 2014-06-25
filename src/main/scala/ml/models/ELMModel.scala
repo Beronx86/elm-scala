@@ -35,8 +35,20 @@ trait ELMModel extends Model {
   def distribution(pattern: Pattern) = ELMUtils.distribution(ELMUtils.test(pattern, Alfat, biases, Beta))
 }
 
-case class ELMGenericModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], H: DenseMatrix, PReady: DenseMatrix, Beta: DenseMatrix,
-                           X: DenseMatrix, Y: DenseMatrix, Hinv: DenseMatrix, HHinv: DenseMatrix) extends ELMModel {
+case class ELMGenericModel(rnd: XSRandom,
+                           Alfat: DenseMatrix,
+                           biases: Array[Double],
+                           H: DenseMatrix,
+                           PReady: DenseMatrix,
+                           Beta: DenseMatrix,
+                           X: DenseMatrix,
+                           Y: DenseMatrix,
+                           Hinv: DenseMatrix,
+                           HHinv: DenseMatrix) extends ELMModel {
+  def discard() = {
+
+  }
+
   lazy val I = Math.identity(H.numRows())
 //  lazy val HHinv = if (HHinvReady == null) {
 //    val r =
@@ -48,5 +60,3 @@ case class ELMGenericModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Doub
 //training_set: Vector[Pattern])
 //case class ELMBatchModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], H: DenseMatrix, PReady: DenseMatrix, Beta: DenseMatrix,
 //                         X: DenseMatrix, Y: DenseMatrix, Hinv: DenseMatrix)  extends ELMModel
-
-//rnd ok

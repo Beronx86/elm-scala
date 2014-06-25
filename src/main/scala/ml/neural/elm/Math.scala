@@ -25,13 +25,17 @@ import scala.collection.mutable
  * Created by davi on 23/05/14.
  */
 object Math {
-  val IMap = mutable.Map[Int, DenseMatrix]()
+  val IMap = mutable.LinkedHashMap[Int, DenseMatrix]()
 
   /**
    * The identity matrix is immutable by definition.
    * @param n
    */
-  def identity(n: Int) = IMap.getOrElse(n, Matrices.identity(n))
+  def identity(n: Int) = {
+    val r = IMap.getOrElse(n, Matrices.identity(n))
+    if (IMap.size > 20) IMap.drop(5)
+    r
+  }
 
   def sigm(x: Double) = 1.0 / (1 + math.exp(-x))
 

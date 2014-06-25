@@ -36,7 +36,7 @@ case class interaELM(Lmax: Int, override val seed: Int = 1) extends ConvergentIn
     var model = cast(super.build(trSet))
 
     //model selection
-    val (_, best, z) = 1 to Lmax map { L =>
+    val (_, best) = 1 to Lmax map { L =>
       if (L > 1) model = growByOne(model)
       val H = model.H
       val Beta = model.Beta
@@ -49,10 +49,9 @@ case class interaELM(Lmax: Int, override val seed: Int = 1) extends ConvergentIn
       val press = PRESS(E)(HHinv)
 //      println("PRESS: " + press)
 
-      (LOOError(Y)(E)(HHinv), model, 1-LOOError(Y)(E)(HHinv))
+      (press, model)
     } minBy (_._1)
 
-    println("LOOPRESS: " + z)
     //retorna modelo atualizado (recalcular P somente se cresceu).
     best
   }

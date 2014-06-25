@@ -24,19 +24,17 @@ Copyright (C) 2014 Davi Pereira dos Santos
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 object interaELMExample extends App with ExampleTemplate {
-  val dataset =
-    "banana"
-  "iris"
+  val dataset =    "banana"
+  // "iris"
 
   def kfoldIteration[T](tr: Seq[Pattern], ts: Seq[Pattern], fold: Int, bla: Int) {
-    val e = interaELM(data.length / 2)
-    val m = e.build(tr)
-    println(m.accuracy(ts))
+    val i = interaELM(50)
+    val mi = i.build(tr)
+
+    val c = C45()
+    val mc = c.build(tr)
+    println("i: " + mi.accuracy(ts) + "\tc: " + mc.accuracy(ts))
   }
 
-  //  run
-
-  println("")
-  val m = interaELM(20).build(data)
-
+  run
 }

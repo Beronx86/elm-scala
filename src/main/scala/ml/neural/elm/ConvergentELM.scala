@@ -86,7 +86,95 @@ trait ConvergentELM extends ELM {
     }
   }
 
-  protected def PRESS
+  /**
+   * Calculates fast LOO accuracy over all instances using PRESS.
+   * (for classifiers)
+   * (assumes the correct output is the only one 1-valued)
+   * @param Y matrix of expected values NxO
+   * @param E matrix of errors (difference between expected and predicted)
+   * @param HHinv
+   * @return
+   */
+  protected def LOO(Y: DenseMatrix)(E: DenseMatrix)(HHinv: DenseMatrix) = {
+    val n = HHinv.numRows()
+    val M = PRESSMatrix(E)(HHinv)
+    val PredictionMatrix = Y.copy()
+    PredictionMatrix.add(-1, M)
+
+    var c = 0
+    var i = 0
+    var max = 0d
+    var cmax = 0
+    var hits=0
+    while (i < n) {
+      c = 0
+      cmax = -1
+      max = -1d
+      while (c < nclasses) {
+        val v = PredictionMatrix.get(i, c)
+        if (v > max) {
+          cmax = c
+          max = v
+        }
+        i += 1
+      }
+      if (Y.get(i, cmax) == 1) hits += 1
+      c += 1
+    }
+    hits / n.toDouble
+  }
+
+  /**
+   * Calculates the PRESS statistic for all outputs/classes.
+   * (usually for regressors)
+   * @param E matrix of errors (difference between expected and predicted)
+   * @param HHinv
+   * @return
+   */
+  protected def PRESS(E: DenseMatrix)(HHinv: DenseMatrix) = {
+    //todo: this can be more efficient, because the loop is also inside PRESSMatrix()
+    val n = HHinv.numRows()
+    val nclasses = E.numColumns()
+    val M = PRESSMatrix(E)(HHinv)
+    var sum = 0d
+    var i = 0
+    while (i < n * nclasses) {
+      sum += M.getData()(i)
+      i += 1
+    }
+    sum
+  }
+
+  /**
+   * Calculates individual PRESS for each instance for each output/class.
+   * @param E matrix of errors (difference between expected and predicted)
+   * @param HHinv HAT matrix
+   * @return N x O matrix of individual PRESS values for each output
+   */
+  protected def PRESSMatrix(E: DenseMatrix)(HHinv: DenseMatrix) = {
+    val nclasses = E.numColumns()
+    val M = new DenseMatrix(E.numRows(), E.numColumns())
+    val n = HHinv.numRows()
+    var c = 0
+    var i = 0
+    while (c < nclasses) {
+      i = 0
+      while (i < n) {
+        M.set(i, c, fPRESS(HHinv.get(i, i))(E.get(i, c)))
+        i += 1
+      }
+      c += 1
+    }
+    M
+  }
+
+  /**
+   * Calculates an instance contribution to the PRESS statistic.
+   * @param HATvalue value in the respective position at the diagonal of HHinv
+   * @param error difference between expected and predicted for the respective output
+   * @return
+   */
+  protected def fPRESS(HATvalue: Double)(error: Double) = error / (1 - HATvalue)
 }
 
 //rnd ok

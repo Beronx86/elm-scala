@@ -20,13 +20,14 @@ package ml.classifiers
 import ml.Pattern
 import ml.models.Model
 import ml.neural.elm.{ConvergentELM, ELM}
+import no.uib.cipr.matrix.DenseMatrix
 
 /**
  * Grows network from 1 to Lmax according to arriving instances.
  * @param Lmax
  * @param seed
  */
-case class interaELM(Lmax: Int, seed: Int = 0) extends ConvergentELM {
+case class interaELM(Lmax: Int, nclasses: Int, seed: Int = 0) extends ConvergentELM {
   override val toString = "interaELM"
   val Lbuild = Lmax
 
@@ -42,7 +43,6 @@ case class interaELM(Lmax: Int, seed: Int = 0) extends ConvergentELM {
 
   def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = ???
 
-  //  def updateAll(model: Model, fast_mutable: Boolean = false)(patterns: Seq[Pattern]): Model
   def updateAll(model: Model, fast_mutable: Boolean)(patterns: Seq[Pattern]) = ???
 }
 

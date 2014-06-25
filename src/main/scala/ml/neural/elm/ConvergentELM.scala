@@ -98,9 +98,7 @@ trait ConvergentELM extends ELM {
   protected def LOOError(Y: DenseMatrix)(E: DenseMatrix)(HHinv: DenseMatrix) = {
     val n = HHinv.numRows()
     val nclasses = E.numColumns()
-    val M = PRESSMatrix(E)(HHinv)
-    val PredictionMatrix = Y.copy()
-    PredictionMatrix.add(-1, M)
+    val PredictionMatrix = PREdictions(Y)(E)(HHinv)
 
     var c = 0
     var i = 0
@@ -126,7 +124,20 @@ trait ConvergentELM extends ELM {
   }
 
   /**
-   * Calculates the PRESS statistic for all outputs/classes.
+   * Calculates individual predictions (from PRESS statistic) for each instance for each output/class.
+   * @param Y matrix of expected values NxO
+   * @param E matrix of errors (difference between expected and predicted)
+   * @param HHinv
+   * @return
+   */
+  protected def PREdictions(Y: DenseMatrix)(E: DenseMatrix)(HHinv: DenseMatrix) = {
+    val PredictionMatrix = Y.copy()
+    PredictionMatrix.add(-1, PRESSMatrix(E)(HHinv))
+    PredictionMatrix
+  }
+
+  /**
+   * Calculates the PRESS statistic (Prediction REsidual Sum of Squares) for all outputs/classes.
    * (usually for regressors)
    * @param E matrix of errors (difference between expected and predicted)
    * @param HHinv

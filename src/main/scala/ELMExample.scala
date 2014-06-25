@@ -1,5 +1,7 @@
+import java.io.File
+
 import ml.classifiers._
-import util.{Tempo, Datasets}
+import util.{Datasets, Tempo}
 
 /*
 elm-scala: an implementation of ELM in Scala using MTJ

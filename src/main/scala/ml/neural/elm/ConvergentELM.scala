@@ -97,6 +97,7 @@ trait ConvergentELM extends ELM {
    */
   protected def LOO(Y: DenseMatrix)(E: DenseMatrix)(HHinv: DenseMatrix) = {
     val n = HHinv.numRows()
+    val nclasses = E.numColumns()
     val M = PRESSMatrix(E)(HHinv)
     val PredictionMatrix = Y.copy()
     PredictionMatrix.add(-1, M)

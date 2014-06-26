@@ -26,7 +26,7 @@ import util.XSRandom
 
 trait ConvergentGrowing extends ConvergentELM {
 
-  def growByOne(model: Model, fast_mutable: Boolean=false) = {
+  def growByOne(model: Model, fast_mutable: Boolean = false) = {
     if (fast_mutable) {
       val bla = ???
     } else Unit
@@ -39,34 +39,35 @@ trait ConvergentGrowing extends ConvergentELM {
     //mutable fields
     val rnd = m.rnd
     val Alfat = m.Alfat
-//    val Alfa = m.Alfa
+    //    val Alfa = m.Alfa
     val biases = m.biases
     val hminv = m.Hinv
     val H = m.H
     val I = m.I
 
     //useless fields
-//    lazy val P0 = m.P
-//    lazy val Beta0 = m.Beta
+    //    lazy val P0 = m.P
+    //    lazy val Beta0 = m.Beta
 
     //mutability is handled inside grow(...)
-    val (newAlfat, newBiases, newH, newHinv, newBeta, newRnd, hHinv) = grow(I, rnd, H, xm, ym, hminv, Alfat, biases)
+    val (newAlfat, newBiases, newH, newHinv, newBeta, newRnd, hHinv) = grow(I, rnd, H, xm, ym, hminv, Alfat, biases, m.HHinv)
     ELMGenericModel(newRnd, newAlfat, newBiases.getData, newH, null, newBeta, xm, ym, newHinv, hHinv)
   }
 
   def growTo(desiredL: Int, model: Model, fast_mutable: Boolean = false) = {
     //todo: foldLeft is way slower than a good while
-    (2 to desiredL).foldLeft(model)((m, p) => growByOne(m, fast_mutable))
+    val m = cast(model)
+    (2 to desiredL).foldLeft(m)((m, _) => growByOne(m, fast_mutable))
   }
 
-  protected def grow(I:DenseMatrix, rnd: XSRandom, H: DenseMatrix, X: DenseMatrix, Y: DenseMatrix, Hinv: DenseMatrix, Alfat: DenseMatrix, biases: Array[Double]) = {
-    val HHinv = new DenseMatrix(H.numRows(), Hinv.numColumns())
-    H.mult(Hinv, HHinv)
+  protected def grow(I: DenseMatrix, rnd: XSRandom, H: DenseMatrix, X: DenseMatrix, Y: DenseMatrix, Hinv: DenseMatrix,
+                     Alfat: DenseMatrix, biases: Array[Double], HHinv: DenseMatrix) = {
     val (newAlfat, newNeuron, newBiases, newRnd) = addNeuron(rnd, Alfat, biases)
     val (newH, newh) = resizeH(H, X, newNeuron, newBiases)
 
-//    val I = Matrices.identity(HHinv.numRows())
-    val I_HHinv = HHinv.add(-1, I)
+    //    val I = Matrices.identity(HHinv.numRows())
+    val I_HHinv = I.copy
+    I_HHinv.add(-1, HHinv)
     val tmp = new DenseMatrix(newh, false)
     val tmpt = new DenseMatrix(1, tmp.numRows())
     tmp.transpose(tmpt)
@@ -91,7 +92,9 @@ trait ConvergentGrowing extends ConvergentELM {
     val newHinv = stackUD(U, D)
     val newBeta = updateBeta(Y, newHinv)
 
-    (newAlfat, newBiases, newH, newHinv, newBeta, newRnd, HHinv)
+    val newHHinv = new DenseMatrix(H.numRows(), Hinv.numColumns())
+    newH.mult(newHinv, newHHinv)
+    (newAlfat, newBiases, newH, newHinv, newBeta, newRnd, newHHinv)
   }
 
   protected def addNeuron(rnd: XSRandom, alfat: DenseMatrix, biases: Array[Double]) = {
@@ -171,9 +174,9 @@ trait ConvergentGrowing extends ConvergentELM {
 
   protected def updateBeta(Y: DenseMatrix, Hinv: DenseMatrix) = {
     val Beta = new DenseMatrix(Hinv.numRows(), Y.numColumns()) //LxO
-//    val Betat = new DenseMatrix(Y.numColumns(), Hinv.numRows()) //OxL
+    //    val Betat = new DenseMatrix(Y.numColumns(), Hinv.numRows()) //OxL
     Hinv.mult(Y, Beta)
-//    Beta.transpose(Betat)
+    //    Beta.transpose(Betat)
     Beta
   }
 }

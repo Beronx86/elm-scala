@@ -34,27 +34,30 @@ case class interaELM(Lmax: Int, override val seed: Int = 1) extends ConvergentIn
 
   override def build(trSet: Seq[Pattern]) = {
     var model = cast(super.build(trSet))
+    cast(growTo(16, model))
+    //    //model selection
+    //    val l = 1 to Lmax map { L =>
+    //      if (L > 1) model = growByOne(model)
+    //      val H = model.H
+    //      val Beta = model.Beta
+    //      val Y = model.Y
+    //      val HHinv = model.HHinv
+    //      val Prediction = new DenseMatrix(H.numRows(), Beta.numColumns())
+    //      val E = Y.copy()
+    //      ELMUtils.feedOutput(H, Beta, Prediction)
+    //      E.add(-1, Prediction)
+    //      val press = PRESS(E)(HHinv)
+    //            println("PRESS: " + press)
 
-    //model selection
-    val (_, best, z) = 1 to Lmax map { L =>
-      if (L > 1) model = growByOne(model)
-      val H = model.H
-      val Beta = model.Beta
-      val Y = model.Y
-      val HHinv = model.HHinv
-      val Prediction = new DenseMatrix(H.numRows(), Beta.numColumns())
-      val E = Y.copy()
-      ELMUtils.feedOutput(H, Beta, Prediction)
-      E.add(-1, Prediction)
-      val press = PRESS(E)(HHinv)
-//      println("PRESS: " + press)
+    //      (press, model, 1 - LOOError(Y)(E)(HHinv))
+    //    }
 
-      (LOOError(Y)(E)(HHinv), model, 1-LOOError(Y)(E)(HHinv))
-    } minBy (_._1)
-
-    println("LOOPRESS: " + z)
-    //retorna modelo atualizado (recalcular P somente se cresceu).
-    best
+    //    l foreach (x => println(x._2.rnd.getSeed))
+    //    val (_, best, z) = l minBy (_._1)
+    //
+    //    println("LOOPRESS: " + z + " L: " + model.H.numColumns())
+    //    //retorna modelo atualizado (recalcular P somente se cresceu).
+    //    best
   }
 
   override def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = ???

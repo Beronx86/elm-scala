@@ -18,7 +18,7 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.classifiers
 
 import ml.Pattern
-import ml.models.{ELMGenericModel, Model}
+import ml.models.Model
 import ml.mtj.DenseMatrix2
 import ml.neural.elm.{ELMUtils, ConvergentELM, ELM}
 import no.uib.cipr.matrix.DenseMatrix
@@ -41,8 +41,6 @@ case class interaELM(Lmax: Int, override val seed: Int = 1) extends ConvergentIn
     val m = cast(model)
     if (math.sqrt(m.H.numRows() + 1).toInt > math.sqrt(m.H.numRows()).toInt) modelSelection(m) else m
   }
-
-  override def updateAll(model: Model, fast_mutable: Boolean)(patterns: Seq[Pattern]) = ???
 
   protected def modelSelection(model: ELMGenericModel) = {
     var m = model

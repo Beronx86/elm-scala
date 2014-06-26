@@ -82,9 +82,8 @@ trait ConvergentIncremental  extends ConvergentELM {
   }
 
   def updateAll(model: Model, fast_mutable: Boolean = false)(patterns: Seq[Pattern]) = {
-    val elmModel = cast(model)
-    patterns foreach ???
-    sys.exit(0)
+    val m = cast(model)
+    patterns.foldLeft(model)((m, p) => update(m)(p))
   }
 
 }

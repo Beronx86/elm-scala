@@ -49,7 +49,8 @@ trait ConvergentGrowing extends ConvergentELM {
 //    lazy val P0 = m.P
 //    lazy val Beta0 = m.Beta
 
-    val (newAlfat, newBiases, newH, newHinv, newBeta, newRnd, hHinv) = grow(I, rnd, H, xm, ym, hminv, Alfat, biases, m.HHinv)
+    //mutability is handled inside grow(...)
+    val (newAlfat, newBiases, newH, newHinv, newBeta, newRnd, hHinv) = grow(I, rnd, H, xm, ym, hminv, Alfat, biases)
     ELMGenericModel(newRnd, newAlfat, newBiases.getData, newH, null, newBeta, xm, ym, newHinv, hHinv)
   }
 
@@ -58,7 +59,9 @@ trait ConvergentGrowing extends ConvergentELM {
     (2 to desiredL).foldLeft(model)((m, p) => growByOne(m, fast_mutable))
   }
 
-  protected def grow(I:DenseMatrix, rnd: XSRandom, H: DenseMatrix, X: DenseMatrix, Y: DenseMatrix, Hinv: DenseMatrix, Alfat: DenseMatrix, biases: Array[Double], HHinv:DenseMatrix) = {
+  protected def grow(I:DenseMatrix, rnd: XSRandom, H: DenseMatrix, X: DenseMatrix, Y: DenseMatrix, Hinv: DenseMatrix, Alfat: DenseMatrix, biases: Array[Double]) = {
+    val HHinv = new DenseMatrix(H.numRows(), Hinv.numColumns())
+    H.mult(Hinv, HHinv)
     val (newAlfat, newNeuron, newBiases, newRnd) = addNeuron(rnd, Alfat, biases)
     val (newH, newh) = resizeH(H, X, newNeuron, newBiases)
 
@@ -87,10 +90,8 @@ trait ConvergentGrowing extends ConvergentELM {
 
     val newHinv = stackUD(U, D)
     val newBeta = updateBeta(Y, newHinv)
-    val newHHinv = new DenseMatrix(H.numRows(), Hinv.numColumns())
-    H.mult(Hinv, newHHinv)
 
-    (newAlfat, newBiases, newH, newHinv, newBeta, newRnd, newHHinv)
+    (newAlfat, newBiases, newH, newHinv, newBeta, newRnd, HHinv)
   }
 
   protected def addNeuron(rnd: XSRandom, alfat: DenseMatrix, biases: Array[Double]) = {

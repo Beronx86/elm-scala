@@ -61,6 +61,12 @@ case class interaELM(Lmax: Int, override val seed: Int = 1) extends ConvergentIn
     ELMUtils.feedOutput(H, Beta, Prediction)
     E.add(-1, Prediction)
     E
+    //    l foreach (x => println(x._2.rnd.getSeed))
+    //    val (_, best, z) = l minBy (_._1)
+    //
+    //    println("LOOPRESS: " + z + " L: " + model.H.numColumns())
+    //    //retorna modelo atualizado (recalcular P somente se cresceu).
+    //    best
   }
 
   override def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = ???

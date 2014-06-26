@@ -26,14 +26,22 @@ Copyright (C) 2014 Davi Pereira dos Santos
 object interaELMExample extends App with ExampleTemplate {
   val dataset =    "banana"
   // "iris"
-
+  val k = 2
   def kfoldIteration[T](tr: Seq[Pattern], ts: Seq[Pattern], fold: Int, bla: Int) {
-    val i = interaELM(50)
+    val i = interaELM(16)
     val mi = i.build(tr)
 
     val c = C45()
     val mc = c.build(tr)
-    println("i: " + mi.accuracy(ts) + "\tc: " + mc.accuracy(ts))
+
+    val o = OSELM(16)
+    val mo = o.build(tr)
+
+    val e = EMELM(166)
+    var me = e.build(tr)
+    me = e.growTo(16,me)
+
+    println("i: " + mi.accuracy(ts) + "\tc: " + mc.accuracy(ts) + "\to: " + mo.accuracy(ts) + "\te: " + me.accuracy(ts))
   }
 
   run

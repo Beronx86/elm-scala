@@ -56,7 +56,7 @@ trait ConvergentGrowing extends ConvergentELM {
 
   def growTo(desiredL: Int, model: Model, fast_mutable: Boolean = false) = {
     //todo: foldLeft is way slower than a good while
-    (2 to desiredL).foldLeft(model)((m, p) => growByOne(m, fast_mutable))
+    (2 to desiredL).foldLeft(cast(model))((m, p) => growByOne(m, fast_mutable))
   }
 
   protected def grow(I:DenseMatrix, rnd: XSRandom, H: DenseMatrix, X: DenseMatrix, Y: DenseMatrix, Hinv: DenseMatrix, Alfat: DenseMatrix, biases: Array[Double]) = {

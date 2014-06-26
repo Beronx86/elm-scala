@@ -28,18 +28,18 @@ object interaELMExample extends App with ExampleTemplate {
   // "iris"
   val k = 2
   def kfoldIteration[T](tr: Seq[Pattern], ts: Seq[Pattern], fold: Int, bla: Int) {
-    val i = interaELM(16)
+    val i = interaELM(20)
     val mi = i.build(tr)
 
     val c = C45()
     val mc = c.build(tr)
 
-    val o = OSELM(16)
+    val o = OSELM(15)
     val mo = o.build(tr)
 
     val e = EMELM(166)
     var me = e.build(tr)
-    me = e.growTo(16,me)
+    me = e.growTo(15,me)
 
     println("i: " + mi.accuracy(ts) + "\tc: " + mc.accuracy(ts) + "\to: " + mo.accuracy(ts) + "\te: " + me.accuracy(ts))
   }

@@ -18,7 +18,7 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.classifiers
 
 import ml.Pattern
-import ml.models.Model
+import ml.models.{ELMGenericModel, Model}
 import ml.mtj.DenseMatrix2
 import ml.neural.elm.{ELMUtils, ConvergentELM, ELM}
 import no.uib.cipr.matrix.DenseMatrix
@@ -33,45 +33,44 @@ case class interaELM(Lmax: Int, override val seed: Int = 1) extends ConvergentIn
   val Lbuild = 1
 
   override def build(trSet: Seq[Pattern]) = {
-    var model = cast(super.build(trSet))
-
-    //model selection
-    val (_, best) = 1 to Lmax map { L =>
-      if (L > 1) model = growByOne(model)
-
-      val H = model.H.copy()
-      val Beta = model.Beta.copy()
-      val Y = model.Y.copy()
-      val HHinv = model.HHinv.copy()
-
-      val E = errorMatrix(H,Beta,Y)
-      val press = PRESS(E)(HHinv)
-            println("PRESS: " + press)
-
-      (press, model)
-    } minBy (_._1)
-
-    //retorna modelo atualizado (recalcular P somente se cresceu).
-    best
+    val model = cast(super.build(trSet))
+    modelSelection(model)
   }
 
+  override def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
+    val m = cast(model)
+    if (math.sqrt(m.H.numRows() + 1).toInt > math.sqrt(m.H.numRows()).toInt) modelSelection(m) else m
+  }
+
+  override def updateAll(model: Model, fast_mutable: Boolean)(patterns: Seq[Pattern]) = ???
+
+  protected def modelSelection(model: ELMGenericModel) = {
+    var m = model
+    val (_, best) = 1 to Lmax map { L =>
+      if (L > 1) m = growByOne(m)
+      val H = m.H
+      val Beta = m.Beta
+      val Y = m.Y
+      val HHinv = m.HHinv
+      val E = errorMatrix(H, Beta, Y)
+      val press = PRESS(E)(HHinv)
+      //      println("PRESS: " + press + " L: " + L)
+      (press, m)
+    } minBy (_._1)
+
+    //    l foreach (x => println(x._2.rnd.getSeed))
+    //    val (_, best) = l minBy (_._1)
+    //     println(" L: " + best.H.numColumns())
+    best
+  }
   protected def errorMatrix(H: DenseMatrix, Beta: DenseMatrix, Y: DenseMatrix) = {
     val Prediction = new DenseMatrix(H.numRows(), Beta.numColumns())
     val E = Y.copy()
     ELMUtils.feedOutput(H, Beta, Prediction)
     E.add(-1, Prediction)
     E
-    //    l foreach (x => println(x._2.rnd.getSeed))
-    //    val (_, best, z) = l minBy (_._1)
-    //
-    //    println("LOOPRESS: " + z + " L: " + model.H.numColumns())
-    //    //retorna modelo atualizado (recalcular P somente se cresceu).
-    //    best
   }
 
-  override def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = ???
-
-  override def updateAll(model: Model, fast_mutable: Boolean)(patterns: Seq[Pattern]) = ???
 }
 
 

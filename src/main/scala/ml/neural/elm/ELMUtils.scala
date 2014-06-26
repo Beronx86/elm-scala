@@ -47,11 +47,11 @@ object ELMUtils {
   def feedOutput(H: DenseMatrix, Beta: DenseMatrix): DenseMatrix = {
     val Y = new DenseMatrix(H.numRows(), Beta.numColumns())
     feedOutput(H, Beta, Y)
+    Y
   }
 
-  def feedOutput(H: DenseMatrix, Beta: DenseMatrix, Y: DenseMatrix): DenseMatrix = {
+  def feedOutput(H: DenseMatrix, Beta: DenseMatrix, Y: DenseMatrix) {
     H.mult(Beta, Y)
-    Y
   }
 
   def calculateP(H: DenseMatrix) = {

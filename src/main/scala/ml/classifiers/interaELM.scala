@@ -38,22 +38,29 @@ case class interaELM(Lmax: Int, override val seed: Int = 1) extends ConvergentIn
     //model selection
     val (_, best) = 1 to Lmax map { L =>
       if (L > 1) model = growByOne(model)
-      val H = model.H
-      val Beta = model.Beta
-      val Y = model.Y
-      val HHinv = model.HHinv
-      val Prediction = new DenseMatrix(H.numRows(), Beta.numColumns())
-      val E = Y.copy()
-      ELMUtils.feedOutput(H, Beta, Prediction)
-      E.add(-1, Prediction)
+
+      val H = model.H.copy()
+      val Beta = model.Beta.copy()
+      val Y = model.Y.copy()
+      val HHinv = model.HHinv.copy()
+
+      val E = errorMatrix(H,Beta,Y)
       val press = PRESS(E)(HHinv)
-//      println("PRESS: " + press)
+            println("PRESS: " + press)
 
       (press, model)
     } minBy (_._1)
 
     //retorna modelo atualizado (recalcular P somente se cresceu).
     best
+  }
+
+  protected def errorMatrix(H: DenseMatrix, Beta: DenseMatrix, Y: DenseMatrix) = {
+    val Prediction = new DenseMatrix(H.numRows(), Beta.numColumns())
+    val E = Y.copy()
+    ELMUtils.feedOutput(H, Beta, Prediction)
+    E.add(-1, Prediction)
+    E
   }
 
   override def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = ???

@@ -45,10 +45,6 @@ case class ELMGenericModel(rnd: XSRandom,
                            Y: DenseMatrix,
                            Hinv: DenseMatrix,
                            HHinv: DenseMatrix) extends ELMModel {
-  def discard() = {
-
-  }
-
   lazy val I = Math.identity(H.numRows())
 //  lazy val HHinv = if (HHinvReady == null) {
 //    val r =

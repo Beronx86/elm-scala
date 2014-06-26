@@ -18,9 +18,8 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.classifiers
 
 import ml.Pattern
-import ml.models.Model
-import ml.mtj.DenseMatrix2
-import ml.neural.elm.{ELMUtils, ConvergentELM, ELM}
+import ml.models.{ELMGenericModel, Model}
+import ml.neural.elm.ELMUtils
 import no.uib.cipr.matrix.DenseMatrix
 
 /**
@@ -61,6 +60,7 @@ case class interaELM(Lmax: Int, override val seed: Int = 1) extends ConvergentIn
     //     println(" L: " + best.H.numColumns())
     best
   }
+
   protected def errorMatrix(H: DenseMatrix, Beta: DenseMatrix, Y: DenseMatrix) = {
     val Prediction = new DenseMatrix(H.numRows(), Beta.numColumns())
     val E = Y.copy()

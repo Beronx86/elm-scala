@@ -18,10 +18,9 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.models
 
 import ml.Pattern
-import no.uib.cipr.matrix.{DenseMatrix, Matrices, DenseVector}
-import ml.neural.elm.{Math, ELMUtils, ELM}
+import ml.neural.elm.{ELMUtils, Math}
+import no.uib.cipr.matrix.DenseMatrix
 import util.XSRandom
-import scala.util.Random
 
 trait ELMModel extends Model {
   val rnd: XSRandom
@@ -43,13 +42,15 @@ case class ELMGenericModel(rnd: XSRandom,
                            Beta: DenseMatrix,
                            X: DenseMatrix,
                            Y: DenseMatrix,
-                           Hinv: DenseMatrix,
-                           HHinv: DenseMatrix) extends ELMModel {
+                           Hinv: DenseMatrix) extends ELMModel {
   lazy val I = Math.identity(H.numRows())
-//  lazy val HHinv = if (HHinvReady == null) {
-//    val r =
-//    r
-//  } else HHinvReady
+
+  //Preparing HHinv for next model (needed for updated PRESS calculation).
+  lazy val HHinv = {
+    val r = new DenseMatrix(H.numRows(), H.numRows())
+    H.mult(Hinv, r)
+    r
+  } // else HHinvReady
 }
 
 

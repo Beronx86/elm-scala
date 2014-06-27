@@ -17,14 +17,12 @@ Copyright (C) 2014 Davi Pereira dos Santos
 */
 package ml.neural.elm
 
-import ml.models.{ELMGenericModel, Model}
-import no.uib.cipr.matrix.{DenseVector, DenseMatrix}
 import ml.Pattern
-import ml.neural.elm.Math._
-import scala.util.Random
-import ml.mtj.{ResizableDenseMatrix, DenseMatrix2}
+import ml.models.ELMGenericModel
+import ml.mtj.ResizableDenseMatrix
 import ml.neural.elm.Data._
-import util.{XSRandom, Tempo}
+import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
+import util.{Tempo, XSRandom}
 
 /**
  * Created by davi on 21/05/14.
@@ -37,13 +35,13 @@ trait IELMTrait extends IteratedBuildELM {
     val ninsts = checkEmptyness(trSet: Seq[Pattern])
     val natts = trSet.head.nattributes
     val nclasses = trSet.head.nclasses
-    val X = patterns2matrix(trSet,ninsts)
+    val X = patterns2matrix(trSet, ninsts)
     val biases = Array.fill(Lbuild)(0d)
     val Alfat = new ResizableDenseMatrix(Lbuild, natts)
     val Beta = new ResizableDenseMatrix(Lbuild, nclasses)
     val H = new ResizableDenseMatrix(ninsts, Lbuild)
     H.resizeCols(0)
-    val e = patterns2t(trSet,ninsts)
+    val e = patterns2t(trSet, ninsts)
     var l = 0
     val tmp = new DenseVector(ninsts)
     if (callf) {
@@ -57,7 +55,7 @@ trait IELMTrait extends IteratedBuildELM {
         Beta.addRow(beta)
         val te = Tempo.stop
         Tempo.start
-        f(ELMGenericModel(rnd.clone(), Alfat, biases, null, null, Beta, null, null, null, null), te)
+        f(ELMGenericModel(rnd.clone(), Alfat, biases, null, null, Beta, null, null, null), te)
       }
     } else {
       while (l < Lbuild) {
@@ -71,13 +69,15 @@ trait IELMTrait extends IteratedBuildELM {
       Alfat.resizeRows(l)
       Beta.resizeRows(l)
     }
-    ELMGenericModel(rnd, Alfat, biases, H, null, Beta, null, null, null, null) //todo: se nao crescer, manter P e H anteriores?
+    ELMGenericModel(rnd, Alfat, biases, H, null, Beta, null, null, null) //todo: se nao crescer, manter P e H anteriores?
   }
 
   protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Array[DenseVector], tmp: DenseVector): (Array[Double], Double, DenseVector, Array[Double])
 
-//
-//
-//
+  //
+  //
+  //
 
-}//rnd ok
+}
+
+//rnd ok

@@ -3,8 +3,7 @@ package ml.classifiers
 import java.io.File
 
 import ml.Pattern
-import ml.classifiers._
-import util.{Tempo, Datasets}
+import util.Datasets
 
 /*
 elm-scala: an implementation of ELM in Scala using MTJ
@@ -25,15 +24,17 @@ Copyright (C) 2014 Davi Pereira dos Santos
 */
 trait ExampleTemplate {
   val dataset: String
+  val k: Int
   lazy val data = (Datasets.arff(bina = true)(dataset + ".arff") match {
     case Right(x) => x
     case Left(str) => println("Could not load banana dataset from the program path: " + str); sys.exit(0)
   }).take(1000)
 
   def kfoldIteration[T](tr: Seq[Pattern], ts: Seq[Pattern], fold: Int, bla: Int)
+
   def run {
     println(
-    """
+      """
  elm-scala Copyright (C) 2014 Davi Pereira dos Santos
 
  This program comes with ABSOLUTELY NO WARRANTY.
@@ -52,6 +53,6 @@ trait ExampleTemplate {
     val currentSeed = (System.currentTimeMillis() % 1000000).toInt
     IELM(Lbuild = 15, seed = currentSeed).build(warmingdata)
 
-    util.Datasets.kfoldCV(data, k = 10, parallel = true)(kfoldIteration)
+    util.Datasets.kfoldCV(data, k, parallel = true)(kfoldIteration)
   }
 }

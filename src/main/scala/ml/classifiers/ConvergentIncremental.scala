@@ -19,11 +19,10 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.classifiers
 
 import ml.Pattern
-import ml.models.{WekaIncModel, ELMGenericModel, Model}
+import ml.models.{ELMGenericModel, Model}
 import ml.mtj.DenseMatrix2
 import ml.neural.elm.{ConvergentELM, ELMUtils}
 import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
-import weka.classifiers.{UpdateableClassifier, Classifier}
 
 trait ConvergentIncremental  extends ConvergentELM {
   def update(model: Model, fast_mutable: Boolean = false)(pattern: Pattern) = {
@@ -78,7 +77,7 @@ trait ConvergentIncremental  extends ConvergentELM {
     }
 
     //todo: atualizar H? H fica mais comprido a cada update!
-    ELMGenericModel(rnd, Alfat, biases, null, P1, Beta1, null, null, null, null)
+    ELMGenericModel(rnd, Alfat, biases, null, P1, Beta1, null, null, null)
   }
 
   def updateAll(model: Model, fast_mutable: Boolean = false)(patterns: Seq[Pattern]) = {

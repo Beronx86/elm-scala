@@ -17,15 +17,13 @@ Copyright (C) 2014 Davi Pereira dos Santos
 */
 package ml.classifiers
 
-import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
-
-import scala.util.Random
-import ml.models.{Model, ELMGenericModel}
-import ml.neural.elm.Data._
-import ml.mtj.ResizableDenseMatrix
-import ml.neural.elm.{ConvexIELMTrait, IELMTrait, ELM}
 import ml.Pattern
-import util.{XSRandom, Tempo}
+import ml.models.{ELMGenericModel, Model}
+import ml.mtj.ResizableDenseMatrix
+import ml.neural.elm.ConvexIELMTrait
+import ml.neural.elm.Data._
+import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
+import util.{Tempo, XSRandom}
 
 /**
  * CI-ELM
@@ -57,11 +55,11 @@ case class CIELM(Lbuild: Int, seed: Int = 42, size: Int = 1, callf: Boolean = fa
       l += 1
       val te = Tempo.stop
       Tempo.start
-      f(ELMGenericModel(newRnd, Alfat, biases, null, null, Beta, null, null, null, null), te)
+      f(ELMGenericModel(newRnd, Alfat, biases, null, null, Beta, null, null, null), te)
     }
     //    Alfat.resizeRows(l)
     //    Beta.resizeRows(l)
-    val model = ELMGenericModel(rnd, Alfat, biases, null, null, Beta, null, null, null, null)
+    val model = ELMGenericModel(rnd, Alfat, biases, null, null, Beta, null, null, null)
     model
   }//rnd ok
 

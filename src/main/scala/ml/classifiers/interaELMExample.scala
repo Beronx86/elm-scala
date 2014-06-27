@@ -1,6 +1,7 @@
 package ml.classifiers
 
 import ml.Pattern
+import util.Datasets
 
 /*
 elm-scala: an implementation of ELM in Scala using MTJ
@@ -20,13 +21,19 @@ Copyright (C) 2014 Davi Pereira dos Santos
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 object interaELMExample extends App with ExampleTemplate {
-  val dataset =    "banana"
+  val dataset = "banana"
   // "iris"
   val k = 2
-  val l = 5
+  val l = 15
+
   def kfoldIteration[T](tr: Seq[Pattern], ts: Seq[Pattern], fold: Int, bla: Int) {
     val i = interaELM(l)
     val mi = i.build(tr)
+    val LOO = Datasets.LOO(tr) { (trloo, p) =>
+      if (OSELM(l) build trloo hit p) 0 else 1
+    }.sum / data.length.toDouble
+
+    println("LOOPRESS: " + i.LOOError(mi) + "  LOO: " + LOO)
 
     val c = C45()
     val mc = c.build(tr)

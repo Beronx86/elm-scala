@@ -18,15 +18,14 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.classifiers
 
 import ml.Pattern
-import scala.util.Random
 import ml.models.{ELMGenericModel, Model}
-import no.uib.cipr.matrix.{DenseVector, DenseMatrix}
+import ml.mtj.ResizableDenseMatrix
+import ml.neural.elm.ConvexIELMTrait
 import ml.neural.elm.Data._
-import ml.mtj.{DenseMatrix2, ResizableDenseMatrix}
-import ml.neural.elm.{ConvexIELMTrait, ELM}
-import util.{XSRandom, Tempo}
+import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
+import util.{Tempo, XSRandom}
 
-case class ECIELM(Lbuild: Int, seed: Int = 42, size: Int = 1, callf:Boolean=false, f: (Model, Double) => Unit = (_, _) => ()) extends ConvexIELMTrait{
+case class ECIELM(Lbuild: Int, seed: Int = 42, size: Int = 1, callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ()) extends ConvexIELMTrait {
   override val toString = "ECIELM"
   val CANDIDATES = 100
 
@@ -36,13 +35,13 @@ case class ECIELM(Lbuild: Int, seed: Int = 42, size: Int = 1, callf:Boolean=fals
     val ninsts = checkEmptyness(trSet)
     val nclasses = trSet.head.nclasses
     val natts = trSet.head.nattributes
-    val X = patterns2matrix(trSet,ninsts)
+    val X = patterns2matrix(trSet, ninsts)
     val biases = Array.fill(Lbuild)(0d)
     val Alfat = new ResizableDenseMatrix(Lbuild, natts)
     val Beta = new ResizableDenseMatrix(Lbuild, nclasses)
     val H = new ResizableDenseMatrix(ninsts, Lbuild)
     H.resizeCols(0)
-    val (t, e) = patterns2te(trSet,ninsts)
+    val (t, e) = patterns2te(trSet, ninsts)
     var l = 0
     val tmp = new DenseVector(H.numRows())
     val tmp2 = new DenseVector(H.numRows())
@@ -58,62 +57,64 @@ case class ECIELM(Lbuild: Int, seed: Int = 42, size: Int = 1, callf:Boolean=fals
       l += 1
       val te = Tempo.stop
       Tempo.start
-      f(ELMGenericModel(rnd.clone(), Alfat, biases, null, null, Beta, null, null, null, null), te)
+      f(ELMGenericModel(rnd.clone(), Alfat, biases, null, null, Beta, null, null, null), te)
     }
     //    Alfat.resizeRows(l)
     //    Beta.resizeRows(l)
     //    ELMModel(Alfat, biases.take(Beta.numRows()), new DenseMatrix(1, 1), Beta)
-    val model = ELMGenericModel(rnd, Alfat, biases, null, null, Beta, null, null, null, null)
+    val model = ELMGenericModel(rnd, Alfat, biases, null, null, Beta, null, null, null)
     model
   }
 
-    /**
-     * Mutate e and rnd
-     * @return
-     */
-    def createNodeForConvexUpdateAmongCandidates(rnd: XSRandom, X: DenseMatrix, t: Array[DenseVector], e: Array[DenseVector], tmp: DenseVector, tmp2: DenseVector) = {
-      val nclasses = t.size
-      val natts = X.numColumns()
-      val ninsts = X.numRows()
-      val candidates = 0 until CANDIDATES map { idx =>
-        val newe = Array.fill(nclasses)(new DenseVector(ninsts))
-        val (weights, bias, newRnd) = newNode(natts, rnd)
-        rnd.setSeed(newRnd.getSeed)
-        val alfa = new DenseVector(weights, false)
-        val beta = new Array[Double](nclasses)
-        val h = feedHidden(X, alfa, bias)
-        val hneg = h.copy()
-        hneg.scale(-1)
-        var o = 0
-        while (o < nclasses) {
-          val neweo = newe(o)
-          neweo.set(e(o))
+  /**
+   * Mutate e and rnd
+   * @return
+   */
+  def createNodeForConvexUpdateAmongCandidates(rnd: XSRandom, X: DenseMatrix, t: Array[DenseVector], e: Array[DenseVector], tmp: DenseVector, tmp2: DenseVector) = {
+    val nclasses = t.size
+    val natts = X.numColumns()
+    val ninsts = X.numRows()
+    val candidates = 0 until CANDIDATES map { idx =>
+      val newe = Array.fill(nclasses)(new DenseVector(ninsts))
+      val (weights, bias, newRnd) = newNode(natts, rnd)
+      rnd.setSeed(newRnd.getSeed)
+      val alfa = new DenseVector(weights, false)
+      val beta = new Array[Double](nclasses)
+      val h = feedHidden(X, alfa, bias)
+      val hneg = h.copy()
+      hneg.scale(-1)
+      var o = 0
+      while (o < nclasses) {
+        val neweo = newe(o)
+        neweo.set(e(o))
 
-          //Calculate new weight.
-          tmp.set(t(o))
-          tmp.add(hneg)
-          tmp2.set(tmp)
-          tmp2.scale(-1)
-          tmp2.add(neweo)
-          val nume = neweo.dot(tmp2)
-          val deno = tmp2.dot(tmp2)
-          val b = nume / deno
-          beta(o) = b
+        //Calculate new weight.
+        tmp.set(t(o))
+        tmp.add(hneg)
+        tmp2.set(tmp)
+        tmp2.scale(-1)
+        tmp2.add(neweo)
+        val nume = neweo.dot(tmp2)
+        val deno = tmp2.dot(tmp2)
+        val b = nume / deno
+        beta(o) = b
 
-          //Recalculate residual error.
-          neweo.scale(1 - b)
-          tmp.scale(b)
-          neweo.add(tmp)
+        //Recalculate residual error.
+        neweo.scale(1 - b)
+        tmp.scale(b)
+        neweo.add(tmp)
 
-          o += 1
-        }
-        val err = newe.map(x => math.sqrt(x.dot(x))).sum
-        (err, weights, bias, h, beta, newe)
+        o += 1
       }
-      val (_, weights, bias, h, beta, newe) = candidates.minBy(_._1)
-      //    println("-------xxxxx--------" + candidates.map(_._1))
-      e.zip(newe).foreach { case (a, b) => a.set(b)}
-      (weights, bias, h, beta)
+      val err = newe.map(x => math.sqrt(x.dot(x))).sum
+      (err, weights, bias, h, beta, newe)
     }
-}//rnd ok
+    val (_, weights, bias, h, beta, newe) = candidates.minBy(_._1)
+    //    println("-------xxxxx--------" + candidates.map(_._1))
+    e.zip(newe).foreach { case (a, b) => a.set(b)}
+    (weights, bias, h, beta)
+  }
+}
+
+//rnd ok
 

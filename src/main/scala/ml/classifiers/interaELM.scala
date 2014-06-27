@@ -19,8 +19,6 @@ package ml.classifiers
 
 import ml.Pattern
 import ml.models.{ELMGenericModel, Model}
-import ml.neural.elm.ELMUtils
-import no.uib.cipr.matrix.DenseMatrix
 
 /**
  * Grows network from 1 to Lmax according to arriving instances.
@@ -60,15 +58,6 @@ case class interaELM(Lmax: Int, seed: Int = 42) extends ConvergentIncremental wi
     //     println(" L: " + best.H.numColumns())
     best
   }
-
-  protected def errorMatrix(H: DenseMatrix, Beta: DenseMatrix, Y: DenseMatrix) = {
-    val Prediction = new DenseMatrix(H.numRows(), Beta.numColumns())
-    val E = Y.copy()
-    ELMUtils.feedOutput(H, Beta, Prediction)
-    E.add(-1, Prediction)
-    E
-  }
-
 }
 
 

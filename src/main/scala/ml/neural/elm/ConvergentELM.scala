@@ -17,15 +17,12 @@ Copyright (C) 2014 Davi Pereira dos Santos
 */
 package ml.neural.elm
 
-import ml.classifiers.Learner
-import ml.models.{ELMGenericModel, Model}
-import no.uib.cipr.matrix.{Matrices, DenseVector, DenseMatrix}
 import ml.Pattern
-import ml.neural.elm.Math._
-import util.XSRandom
-import scala.util.Random
-import ml.mtj.{ResizableDenseMatrix, DenseMatrix2}
+import ml.models.{ELMGenericModel, Model}
 import ml.neural.elm.Data._
+import ml.neural.elm.Math._
+import no.uib.cipr.matrix.DenseMatrix
+import util.XSRandom
 
 /**
  * Created by davi on 21/05/14.
@@ -69,7 +66,7 @@ trait ConvergentELM extends ELM {
       r
     }
 
-    ELMGenericModel(rnd, Alfat, biasesArray, H, P, Beta, X, Y, pinvH, HHinv)
+    ELMGenericModel(rnd, Alfat, biasesArray, H, P, Beta, X, Y, pinvH)
   }
 
   /**
@@ -84,6 +81,11 @@ trait ConvergentELM extends ELM {
       println("ERROR: Training set size (" + ninsts + ") is lesser than L (" + Lbuild + ")!")
       sys.exit(0)
     }
+  }
+
+  def LOOError(model: Model): Double = {
+    val m = cast(model)
+    LOOError(m.Y)(errorMatrix(m.H, m.Beta, m.Y))(m.HHinv)
   }
 
   /**
@@ -134,6 +136,11 @@ trait ConvergentELM extends ELM {
     val PredictionMatrix = Y.copy()
     PredictionMatrix.add(-1, PRESSMatrix(E)(HHinv))
     PredictionMatrix
+  }
+
+  def PRESS(model: Model): Double = {
+    val m = cast(model)
+    PRESS(errorMatrix(m.H, m.Beta, m.Y))(m.HHinv)
   }
 
   /**
@@ -193,6 +200,15 @@ trait ConvergentELM extends ELM {
     case _ => println("Convergent ELMs require ELMGenericModel.")
       sys.exit(0)
   }
+
+  protected def errorMatrix(H: DenseMatrix, Beta: DenseMatrix, Y: DenseMatrix) = {
+    val Prediction = new DenseMatrix(H.numRows(), Beta.numColumns())
+    val E = Y.copy()
+    ELMUtils.feedOutput(H, Beta, Prediction)
+    E.add(-1, Prediction)
+    E
+  }
+
 }
 
 //rnd ok

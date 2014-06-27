@@ -36,11 +36,10 @@ trait ConvergentGrowing extends ConvergentELM {
     val hminv = m.Hinv
     val H = m.H
     val I = m.I
+    val hhinv = m.HHinv
 
-    val HHinv = new DenseMatrix(H.numRows(), hminv.numColumns())
-    H.mult(hminv, HHinv)
-    val (newAlfat, newBiases, newH, newHinv, newBeta, newRnd) = grow(I, rnd, H, xm, ym, hminv, Alfat, biases, HHinv)
-    ELMGenericModel(newRnd, newAlfat, newBiases.getData, newH, null, newBeta, xm, ym, newHinv, HHinv)
+    val (newAlfat, newBiases, newH, newHinv, newBeta, newRnd) = grow(I, rnd, H, xm, ym, hminv, Alfat, biases, hhinv)
+    ELMGenericModel(newRnd, newAlfat, newBiases.getData, newH, null, newBeta, xm, ym, newHinv)
   }
 
   def growTo(desiredL: Int, model: Model, fast_mutable: Boolean = false) = {

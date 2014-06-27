@@ -30,7 +30,7 @@ import util.XSRandom
  * @param Lmax
  * @param seed
  */
-case class EMELM(Lmax: Int, seed: Int = 1) extends ConvergentGrowing {
+case class EMELM(Lmax: Int, seed: Int = 42) extends ConvergentGrowing {
   override val toString = "EMELM"
   val Lbuild = 1
 

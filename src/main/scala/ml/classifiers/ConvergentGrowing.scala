@@ -28,6 +28,7 @@ trait ConvergentGrowing extends ConvergentELM {
 
   def growByOne(model: Model, fast_mutable: Boolean=false) = {
     if (fast_mutable) {
+      println("fastmut")
       val bla = ???
     } else Unit
     val m = cast(model)

@@ -31,7 +31,7 @@ import util.{XSRandom, Tempo}
  * CI-ELM
  * Created by davi on 19/05/14.
  */
-case class CIELM(Lbuild: Int, seed: Int = 0, size: Int = 1, callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ()) extends ConvexIELMTrait {
+case class CIELM(Lbuild: Int, seed: Int = 42, size: Int = 1, callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ()) extends ConvexIELMTrait {
   override val toString = "CIELM"
 
   def build(trSet: Seq[Pattern]) = {

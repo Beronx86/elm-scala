@@ -34,7 +34,7 @@ import ml.neural.elm.{ConvergentELM, ELMUtils, ELM}
  * @param L
  * @param seed
  */
-case class OSELM(L: Int, seed: Int = 1) extends ConvergentIncremental {
+case class OSELM(L: Int, seed: Int = 42) extends ConvergentIncremental {
   override val toString = "OSELM"
   val Lbuild = L
 }

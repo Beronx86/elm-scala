@@ -27,7 +27,7 @@ import no.uib.cipr.matrix.DenseMatrix
  * @param Lmax
  * @param seed
  */
-case class interaELM(Lmax: Int, override val seed: Int = 1) extends ConvergentIncremental with ConvergentGrowing {
+case class interaELM(Lmax: Int, seed: Int = 42) extends ConvergentIncremental with ConvergentGrowing {
   override val toString = "interaELM"
   val Lbuild = 1
 

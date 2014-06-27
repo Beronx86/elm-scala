@@ -26,7 +26,7 @@ import ml.mtj.{DenseMatrix2, ResizableDenseMatrix}
 import ml.neural.elm.{ConvexIELMTrait, ELM}
 import util.{XSRandom, Tempo}
 
-case class ECIELM(Lbuild: Int, seed: Int = 0, size: Int = 1, callf:Boolean=false, f: (Model, Double) => Unit = (_, _) => ()) extends ConvexIELMTrait{
+case class ECIELM(Lbuild: Int, seed: Int = 42, size: Int = 1, callf:Boolean=false, f: (Model, Double) => Unit = (_, _) => ()) extends ConvexIELMTrait{
   override val toString = "ECIELM"
   val CANDIDATES = 100
 

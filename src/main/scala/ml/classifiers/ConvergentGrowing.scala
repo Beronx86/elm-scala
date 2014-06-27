@@ -39,6 +39,9 @@ trait ConvergentGrowing extends ConvergentELM {
     val hhinv = m.HHinv.copy()
 
     val (newAlfat, newBiases, newH, newHinv, newBeta, newRnd) = grow(I, rnd, H, xm, ym, hminv, Alfat, biases, hhinv)
+
+    println(getClass.getName.split('.').last + ": " + newHinv.get(0, 0))
+
     ELMGenericModel(newRnd, newAlfat, newBiases.getData, newH, null, newBeta, xm, ym, newHinv)
   }
 

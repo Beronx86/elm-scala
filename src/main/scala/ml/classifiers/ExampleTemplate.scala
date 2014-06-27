@@ -25,6 +25,7 @@ Copyright (C) 2014 Davi Pereira dos Santos
 trait ExampleTemplate {
   val dataset: String
   val k: Int
+  val parallel: Boolean
   lazy val data = (Datasets.arff(bina = true)(dataset + ".arff") match {
     case Right(x) => x
     case Left(str) => println("Could not load banana dataset from the program path: " + str); sys.exit(0)
@@ -53,6 +54,6 @@ trait ExampleTemplate {
     val currentSeed = (System.currentTimeMillis() % 1000000).toInt
     IELM(Lbuild = 15, seed = currentSeed).build(warmingdata)
 
-    util.Datasets.kfoldCV(data, k, parallel = true)(kfoldIteration)
+    util.Datasets.kfoldCV(data, k, parallel)(kfoldIteration)
   }
 }

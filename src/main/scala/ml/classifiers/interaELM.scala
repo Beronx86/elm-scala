@@ -43,15 +43,15 @@ case class interaELM(Lmax: Int, seed: Int = 42) extends ConvergentIncremental wi
     var m = model
     val (_, best) = 1 to Lmax map { L =>
       if (L > 1) m = growByOne(m)
-      val H = m.H
-      val Beta = m.Beta
-      val Y = m.Y
-      val HHinv = m.HHinv
-      val E = errorMatrix(H, Beta, Y)
-      val press = PRESS(E)(HHinv)
+      //      val H = m.H
+      //      val Beta = m.Beta
+      //      val Y = m.Y
+      //      val HHinv = m.HHinv
+      //      val E = errorMatrix(H, Beta, Y)
+      //      val press = PRESS(E)(HHinv)
       //      println("PRESS: " + press + " L: " + L)
-      (press, m)
-    } minBy (_._1)
+      (0d, m)
+    } last //minBy (_._1)
 
     //    l foreach (x => println(x._2.rnd.getSeed))
     //    val (_, best) = l minBy (_._1)

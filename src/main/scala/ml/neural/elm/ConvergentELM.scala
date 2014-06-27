@@ -56,15 +56,10 @@ trait ConvergentELM extends ELM {
     val Beta = new DenseMatrix(Lbuild, nclasses)
     pinvH.mult(Y, Beta)
 
-    //todo:X and HHinv are transposed/calculated even when it is useless (e.g. for OS-ELM)! lazy is ineffective in call-by-value
-    lazy val X = new DenseMatrix(Xt.numColumns(), Xt.numRows())
+    //todo:X is transposed/calculated even when it is useless (e.g. for OS-ELM)! lazy is ineffective in call-by-value
+    val X = new DenseMatrix(Xt.numColumns(), Xt.numRows())
     Xt.transpose(X)
-
-    lazy val HHinv = {
-      val r = new DenseMatrix(H.numRows(), H.numRows())
-      H.mult(pinvH, r)
-      r
-    }
+    //    println(getClass.getName.split('.').last + ": "+ Xt.get(0,0) + " tr: "+trSet)
 
     ELMGenericModel(rnd, Alfat, biasesArray, H, P, Beta, X, Y, pinvH)
   }

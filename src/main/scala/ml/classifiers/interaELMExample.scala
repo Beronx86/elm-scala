@@ -21,19 +21,18 @@ Copyright (C) 2014 Davi Pereira dos Santos
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 object interaELMExample extends App with ExampleTemplate {
+  val parallel = false
   val dataset = "banana"
   // "iris"
   val k = 2
-  val l = 15
+  val l = 4
 
-  def kfoldIteration[T](tr: Seq[Pattern], ts: Seq[Pattern], fold: Int, bla: Int) {
+  def kfoldIteration[T](tr0: Seq[Pattern], ts: Seq[Pattern], fold: Int, bla: Int) {
+    val tr = tr0.take(500)
     val i = interaELM(l)
     val mi = i.build(tr)
-    val LOO = Datasets.LOO(tr) { (trloo, p) =>
-      if (OSELM(l) build trloo hit p) 0 else 1
-    }.sum / data.length.toDouble
 
-    println("LOOPRESS: " + i.LOOError(mi) + "  LOO: " + LOO)
+
 
     val c = C45()
     val mc = c.build(tr)
@@ -45,7 +44,19 @@ object interaELMExample extends App with ExampleTemplate {
     var me = e.build(tr)
     me = e.growTo(l, me)
 
-    println("i: " + mi.accuracy(ts) + "\tc: " + mc.accuracy(ts) + "\to: " + mo.accuracy(ts) + "\te: " + me.accuracy(ts))
+    lazy val LOOi = Datasets.LOO(tr) { (trloo, p) =>
+      if (interaELM(l) build trloo hit p) 0 else 1
+    }.sum / data.length.toDouble
+
+    lazy val LOOos = Datasets.LOO(tr) { (trloo, p) =>
+      if (OSELM(l) build trloo hit p) 0 else 1
+    }.sum / data.length.toDouble
+    //    println("LOOPRESSos: " + o.LOOError(mo) + "  LOOPRESSi: " + i.LOOError(mi) + "  LOOos: " + LOOos + "  LOOi: " + LOOi)
+
+    //    println("i: " + mi.accuracy(ts) + "\tc: " + mc.accuracy(ts) + "\to: " + mo.accuracy(ts) + "\te: " + me.accuracy(ts))
+    println("i: " + mi.accuracy(ts) + "\to: " + mo.accuracy(ts) + "\te: " + me.accuracy(ts))
+
+    sys.exit(0)
   }
 
   run

@@ -38,10 +38,10 @@ trait IELMTrait extends IteratedBuildELM {
     val natts = trSet.head.nattributes
     val nclasses = trSet.head.nclasses
     val X = patterns2matrix(trSet,ninsts)
-    val biases = Array.fill(initialL)(0d)
-    val Alfat = new ResizableDenseMatrix(initialL, natts)
-    val Beta = new ResizableDenseMatrix(initialL, nclasses)
-    val H = new ResizableDenseMatrix(ninsts, initialL)
+    val biases = Array.fill(Lbuild)(0d)
+    val Alfat = new ResizableDenseMatrix(Lbuild, natts)
+    val Beta = new ResizableDenseMatrix(Lbuild, nclasses)
+    val H = new ResizableDenseMatrix(ninsts, Lbuild)
     H.resizeCols(0)
     val e = patterns2t(trSet,ninsts)
     var l = 0
@@ -49,7 +49,7 @@ trait IELMTrait extends IteratedBuildELM {
     if (callf) {
       Alfat.resizeRows(0)
       Beta.resizeRows(0)
-      while (l < initialL) {
+      while (l < Lbuild) {
         val (weights, bias, h, beta) = buildCore(rnd, X, e, tmp)
         biases(l) = bias
         l += 1
@@ -60,7 +60,7 @@ trait IELMTrait extends IteratedBuildELM {
         f(ELMGenericModel(rnd.clone(), Alfat, biases, null, null, Beta, null, null, null, null), te)
       }
     } else {
-      while (l < initialL) {
+      while (l < Lbuild) {
         val (weights, bias, h, beta) = buildCore(rnd, X, e, tmp)
         H.addCol(h) //vantagem do I-ELM: H vem pronto e não muda
         biases(l) = bias

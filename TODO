@@ -1,4 +1,6 @@
 adopt some test suite
+correct parallel modes that are stil expecting y|n to reflect help-text
+change ELM-scala and ML-scala to have version file also or another thing
 X and HHinv are calculated even when it is useless in ConvergenteELM! lazy is ineffective in call-by-value
 implement update and updateall for intera, EM and OS
 implement fast_mutable in all ELMs

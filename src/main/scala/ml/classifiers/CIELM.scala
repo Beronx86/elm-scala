@@ -31,7 +31,7 @@ import util.{XSRandom, Tempo}
  * CI-ELM
  * Created by davi on 19/05/14.
  */
-case class CIELM(initialL: Int, seed: Int = 0, size: Int = 1, callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ()) extends ConvexIELMTrait {
+case class CIELM(Lbuild: Int, seed: Int = 0, size: Int = 1, callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ()) extends ConvexIELMTrait {
   override val toString = "CIELM"
 
   def build(trSet: Seq[Pattern]) = {
@@ -41,12 +41,12 @@ case class CIELM(initialL: Int, seed: Int = 0, size: Int = 1, callf: Boolean = f
     val natts = trSet.head.nattributes
     val nclasses = trSet.head.nclasses
     val X = patterns2matrix(trSet, ninsts)
-    val biases = Array.fill(initialL)(0d)
-    val Alfat = new ResizableDenseMatrix(initialL, natts)
-    val Beta = new ResizableDenseMatrix(initialL, nclasses)
+    val biases = Array.fill(Lbuild)(0d)
+    val Alfat = new ResizableDenseMatrix(Lbuild, natts)
+    val Beta = new ResizableDenseMatrix(Lbuild, nclasses)
     val (t, e) = patterns2te(trSet, ninsts)
     var l = 0
-    while (l < initialL) {
+    while (l < Lbuild) {
       Alfat.resizeRows(l + 1) //needed to call f()
       Beta.resizeRows(l + 1)
       val (weights, b, newRnd) = newNode(natts, rnd)

@@ -29,10 +29,10 @@ import scala.util.Random
 /**
  * Created by davi on 24/05/14.
  */
-case class EIELM(initialL: Int, seed: Int = 0, size: Int = 1, callf: Boolean = false, f: (ELMGenericModel, Double) => Unit = (tmp: Model, tmpt: Double) => ())
+case class EIELM(Lbuild: Int, seed: Int = 0, size: Int = 1, callf: Boolean = false, f: (ELMGenericModel, Double) => Unit = (tmp: Model, tmpt: Double) => ())
   extends IELMTrait {
   override val toString = "EIELM"
-  val CANDIDATES = 100
+  val CANDIDATES = 10
 
   protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Array[DenseVector], tmp: DenseVector) = createNodeAmongCandidates(rnd, X, e, tmp)
 

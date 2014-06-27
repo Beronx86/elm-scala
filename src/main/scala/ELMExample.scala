@@ -37,17 +37,17 @@ object ELMExample extends App {
   val currentSeed = (System.currentTimeMillis() % 1000000).toInt
 
   val elms = Seq(
-    IELM(initialL = 80, seed = currentSeed),
-    EIELM(initialL = 80, seed = currentSeed),
-    CIELM(initialL = 80, seed = currentSeed),
-    ECIELM(initialL = 80, seed = currentSeed),
+    IELM(Lbuild = 80, seed = currentSeed),
+    EIELM(Lbuild = 80, seed = currentSeed),
+    CIELM(Lbuild = 80, seed = currentSeed),
+    ECIELM(Lbuild = 80, seed = currentSeed),
     OSELM(L = 16, seed = currentSeed)
   )
   val appPath = new File(".").getCanonicalPath + "/"
   println(appPath)
 
   println("Warming up JVM-BLAS interface...")
-  IELM(initialL = 15, seed = currentSeed).build(warmingdata)
+  IELM(Lbuild = 15, seed = currentSeed).build(warmingdata)
 
   Seq("banana.arff", "iris.arff") foreach { dataset =>
     println("Comparing all ELMs in " + dataset + " dataset...")

@@ -29,7 +29,7 @@ import scala.util.Random
 /**
  * Created by davi on 24/05/14.
  */
-case class IELM(initialL: Int, seed: Int = 0, callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ())
+case class IELM(Lbuild: Int, seed: Int = 0, callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ())
   extends IELMTrait {
   override val toString = "IELM"
 

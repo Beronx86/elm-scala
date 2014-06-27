@@ -33,7 +33,7 @@ import ml.neural.elm.Data._
 trait IteratedBuildELM extends BatchELM {
 //todo: correct this, extending BatchELM is very inefficient for update() on incremental-friendly classifiers (I-ELM?)!
   val f: (ELMGenericModel, Double) => Unit
-  val initialL: Int
+  val Lbuild: Int
   val callf: Boolean
 
   /**

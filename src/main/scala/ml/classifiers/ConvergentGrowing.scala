@@ -99,14 +99,12 @@ trait ConvergentGrowing extends ConvergentELM {
    */
   protected def grow(rnd: XSRandom, H: DenseMatrix, Xt: DenseMatrix, Y: DenseMatrix, Hinv: DenseMatrix, Alfat: DenseMatrix, biases: Array[Double], HHinv: DenseMatrix) = {
     val (newAlfat, newNeuron, newBiases, newRnd) = addNeuron(rnd, Alfat, biases)
-    val (newH, newh) = resizeH(H, Xt, newNeuron, newBiases)
+    val (newH, newh, newhm1XN) = resizeH(H, Xt, newNeuron, newBiases)
 
     //    val I = Matrices.identity(HHinv.numRows())
     val I_HHinv = HHinv //.add(-1, I)
     mMinusIdentity(I_HHinv)
-    val tmp = new DenseMatrix(newh, false)
-    val tmpt = new DenseMatrix(1, tmp.numRows())
-    tmp.transpose(tmpt)
+    val tmpt = newhm1XN
 
     val num = new DenseMatrix(1, H.numRows())
     tmpt.mult(I_HHinv, num)
@@ -192,7 +190,7 @@ trait ConvergentGrowing extends ConvergentELM {
       h.set(i, v)
       i += 1
     }
-    (newH, h)
+    (newH, h, hm)
   }
 
   private def stackUD(U: DenseMatrix, D: DenseMatrix) = {

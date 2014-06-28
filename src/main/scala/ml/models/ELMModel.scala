@@ -25,6 +25,7 @@ import util.XSRandom
 
 trait ELMModel extends Model {
   val rnd: XSRandom
+
   //needed by test()
   val biases: Array[Double]
   val Alfat: DenseMatrix

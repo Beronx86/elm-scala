@@ -60,9 +60,10 @@ trait ConvergentGrowing extends ConvergentELM {
    */
   def mPlusIdentity(m: DenseMatrix) {
     val d = m.getData
+    val l = d.size
     var c = 0
     var gap = m.numRows() + 1
-    while (c < m.numRows()) {
+    while (c < l) {
       d(c) += 1
       c += gap
     }
@@ -74,9 +75,10 @@ trait ConvergentGrowing extends ConvergentELM {
    */
   def mMinusIdentity(m: DenseMatrix) {
     val d = m.getData
+    val l = d.size
     var c = 0
     var gap = m.numRows() + 1
-    while (c < m.numRows()) {
+    while (c < l) {
       d(c) -= 1
       c += gap
     }
@@ -98,15 +100,17 @@ trait ConvergentGrowing extends ConvergentELM {
     val (newAlfat, newNeuron, newBiases, newRnd) = addNeuron(rnd, Alfat, biases)
     val (newH, newh) = resizeH(H, X, newNeuron, newBiases)
 
-    mMinusIdentity(HHinv)
-    val I_HHinv = HHinv
+    //    val I = Matrices.identity(HHinv.numRows())
+    val I_HHinv = HHinv //.add(-1, I)
+    mMinusIdentity(I_HHinv)
     val tmp = new DenseMatrix(newh, false)
     val tmpt = new DenseMatrix(1, tmp.numRows())
     tmp.transpose(tmpt)
 
     val num = new DenseMatrix(1, H.numRows())
     tmpt.mult(I_HHinv, num)
-    mPlusIdentity(HHinv) //recovers original value
+    mPlusIdentity(I_HHinv) //recovers original value
+
     val tmp2 = new DenseVector(1)
     num.mult(newh, tmp2)
     val factor = 1 / tmp2.get(0)

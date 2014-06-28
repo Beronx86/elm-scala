@@ -25,7 +25,7 @@ import util.XSRandom
 /**
  * Created by davi on 24/05/14.
  */
-case class EIELM(Lbuild: Int, seed: Int = 42, size: Int = 1, callf: Boolean = false, f: (ELMGenericModel0, Double) => Unit = (tmp: Model, tmpt: Double) => ())
+case class EIELM(Lbuild: Int, seed: Int = 42, size: Int = 1, callf: Boolean = false, f: (ELMGenericModel, Double) => Unit = (tmp: Model, tmpt: Double) => ())
   extends IELMTrait {
   override val toString = "EIELM"
   val CANDIDATES = 10
@@ -76,6 +76,4 @@ case class EIELM(Lbuild: Int, seed: Int = 42, size: Int = 1, callf: Boolean = fa
     e.zip(newe).foreach { case (a, b) => a.set(b)}
     (weights, bias, h, beta)
   }
-}
-
-//rnd ok
+}//rnd ok

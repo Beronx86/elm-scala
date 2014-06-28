@@ -59,5 +59,5 @@ object interaELMExample extends App with ExampleTemplate {
   }
 
   run
-  println("o menor LOO (p. ex. no model selection do interaELM) não leva necessariamente a menor acuracia")
+  println("o menor LOO (p. ex. no model selection do interaELM) não leva necessariamente a menor acuracia no 5-fold CV")
 }

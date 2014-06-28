@@ -50,6 +50,46 @@ trait ConvergentGrowing extends ConvergentELM {
     (2 to desiredL).foldLeft(cast(model))((m, p) => growByOne(m, fast_mutable))
   }
 
+  /**
+   * Fast and cheap.
+   * @param m
+   */
+  def mPlusIdentity(m: DenseMatrix) {
+    val d = m.getData
+    var c = 0
+    var gap = m.numRows() + 1
+    while (c < m.numRows()) {
+      d(c) += 1
+      c += gap
+    }
+  }
+
+  /**
+   * Fast and cheap.
+   * @param m
+   */
+  def mMinusIdentity(m: DenseMatrix) {
+    val d = m.getData
+    var c = 0
+    var gap = m.numRows() + 1
+    while (c < m.numRows()) {
+      d(c) -= 1
+      c += gap
+    }
+  }
+
+  /**
+   * This is not thread-safe since HHinv is changed for a few milisseconds. todo
+   * @param rnd
+   * @param H
+   * @param X
+   * @param Y
+   * @param Hinv
+   * @param Alfat
+   * @param biases
+   * @param HHinv
+   * @return
+   */
   protected def grow(I: DenseMatrix, rnd: XSRandom, H: DenseMatrix, X: DenseMatrix, Y: DenseMatrix, Hinv: DenseMatrix, Alfat: DenseMatrix, biases: Array[Double], HHinv: DenseMatrix) = {
     val (newAlfat, newNeuron, newBiases, newRnd) = addNeuron(rnd, Alfat, biases)
     val (newH, newh) = resizeH(H, X, newNeuron, newBiases)

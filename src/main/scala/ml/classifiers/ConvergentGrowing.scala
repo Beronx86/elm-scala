@@ -17,13 +17,18 @@ Copyright (C) 2014 Davi Pereira dos Santos
 */
 package ml.classifiers
 
-import ml.models.{ELMGenericModel, Model}
+import ml.models.{ELMGroModel, Model}
 import ml.neural.elm.ConvergentELM
 import ml.neural.elm.Math._
 import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
 import util.XSRandom
 
 trait ConvergentGrowing extends ConvergentELM {
+  protected def cast(model: Model) = model match {
+    case m: ELMGroModel => m
+    case _ => println("ConvergentGrowing ELMs require ELMGroModel.")
+      sys.exit(0)
+  }
 
   def growByOne(model: Model, fast_mutable: Boolean = false) = {
     //    if (fast_mutable) {      println("fastmut"); val bla = ???    } else Unit
@@ -35,14 +40,13 @@ trait ConvergentGrowing extends ConvergentELM {
     val biases = m.biases
     val hminv = m.Hinv
     val H = m.H
-    val I = m.I
-    val hhinv = m.HHinv.copy()
+    val hhinv = m.HHinv
 
-    val (newAlfat, newBiases, newH, newHinv, newBeta, newRnd) = grow(I, rnd, H, xm, ym, hminv, Alfat, biases, hhinv)
+    val (newAlfat, newBiases, newH, newHinv, newBeta, newRnd) = grow(rnd, H, xm, ym, hminv, Alfat, biases, hhinv)
 
     //    println(getClass.getName.split('.').last + ": " + newHinv.get(0, 0))
 
-    ELMGenericModel(newRnd, newAlfat, newBiases.getData, newH, null, newBeta, xm, ym, newHinv)
+    ELMGroModel(newRnd, newAlfat, newBiases.getData, newBeta, newH, xm, ym, newHinv)
   }
 
   def growTo(desiredL: Int, model: Model, fast_mutable: Boolean = false) = {
@@ -50,18 +54,59 @@ trait ConvergentGrowing extends ConvergentELM {
     (2 to desiredL).foldLeft(cast(model))((m, p) => growByOne(m, fast_mutable))
   }
 
-  protected def grow(I: DenseMatrix, rnd: XSRandom, H: DenseMatrix, X: DenseMatrix, Y: DenseMatrix, Hinv: DenseMatrix, Alfat: DenseMatrix, biases: Array[Double], HHinv: DenseMatrix) = {
+  /**
+   * Fast and cheap.
+   * @param m
+   */
+  def mPlusIdentity(m: DenseMatrix) {
+    val d = m.getData
+    var c = 0
+    var gap = m.numRows() + 1
+    while (c < m.numRows()) {
+      d(c) += 1
+      c += gap
+    }
+  }
+
+  /**
+   * Fast and cheap.
+   * @param m
+   */
+  def mMinusIdentity(m: DenseMatrix) {
+    val d = m.getData
+    var c = 0
+    var gap = m.numRows() + 1
+    while (c < m.numRows()) {
+      d(c) -= 1
+      c += gap
+    }
+  }
+
+  /**
+   * This is not thread-safe since HHinv is changed for a few milisseconds. todo
+   * @param rnd
+   * @param H
+   * @param X
+   * @param Y
+   * @param Hinv
+   * @param Alfat
+   * @param biases
+   * @param HHinv
+   * @return
+   */
+  protected def grow(rnd: XSRandom, H: DenseMatrix, X: DenseMatrix, Y: DenseMatrix, Hinv: DenseMatrix, Alfat: DenseMatrix, biases: Array[Double], HHinv: DenseMatrix) = {
     val (newAlfat, newNeuron, newBiases, newRnd) = addNeuron(rnd, Alfat, biases)
     val (newH, newh) = resizeH(H, X, newNeuron, newBiases)
 
-    //    val I = Matrices.identity(HHinv.numRows())
-    val I_HHinv = HHinv.add(-1, I)
+    mMinusIdentity(HHinv)
+    val I_HHinv = HHinv
     val tmp = new DenseMatrix(newh, false)
     val tmpt = new DenseMatrix(1, tmp.numRows())
     tmp.transpose(tmpt)
 
     val num = new DenseMatrix(1, H.numRows())
     tmpt.mult(I_HHinv, num)
+    mPlusIdentity(HHinv) //recovers original value
     val tmp2 = new DenseVector(1)
     num.mult(newh, tmp2)
     val factor = 1 / tmp2.get(0)

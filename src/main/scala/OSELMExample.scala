@@ -65,9 +65,10 @@ object OSELMExample extends App {
     "When there are no numerical instability, they should behave exactly the same in terms of accuracy.")
 
   //Testing equality of PRESS and LOO.
-  //  val LOO = Datasets.LOO(data) { (tr, p) =>
-  //    if (OSELM(20) build tr hit p) 1 else 0
-  //  }.sum / data.length.toDouble
-  //  println("LOO error: " + (1 - LOO))
+  val LOO = Datasets.LOO(data.take(200)) { (tr, p) =>
+    if (OSELM(10) build tr hit p) 1 else 0
+  }.sum / data.length.toDouble
+  println("LOO error: " + (1 - LOO) + " PRESSLOO: " )
+  interaELM(10).build(data.take(200))
 
 }

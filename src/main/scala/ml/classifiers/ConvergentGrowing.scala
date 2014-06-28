@@ -18,6 +18,7 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.classifiers
 
 import ml.models.{ELMGroModel, Model}
+import ml.mtj.DenseMatrix2
 import ml.neural.elm.ConvergentELM
 import ml.neural.elm.Math._
 import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
@@ -96,9 +97,9 @@ trait ConvergentGrowing extends ConvergentELM {
    * @param HHinv
    * @return
    */
-  protected def grow(rnd: XSRandom, H: DenseMatrix, X: DenseMatrix, Y: DenseMatrix, Hinv: DenseMatrix, Alfat: DenseMatrix, biases: Array[Double], HHinv: DenseMatrix) = {
+  protected def grow(rnd: XSRandom, H: DenseMatrix, Xt: DenseMatrix, Y: DenseMatrix, Hinv: DenseMatrix, Alfat: DenseMatrix, biases: Array[Double], HHinv: DenseMatrix) = {
     val (newAlfat, newNeuron, newBiases, newRnd) = addNeuron(rnd, Alfat, biases)
-    val (newH, newh) = resizeH(H, X, newNeuron, newBiases)
+    val (newH, newh) = resizeH(H, Xt, newNeuron, newBiases)
 
     //    val I = Matrices.identity(HHinv.numRows())
     val I_HHinv = HHinv //.add(-1, I)
@@ -159,12 +160,13 @@ trait ConvergentGrowing extends ConvergentELM {
     (newAlfat, newNeuron, newBiases, newRnd)
   }
 
-  protected def resizeH(H: DenseMatrix, X: DenseMatrix, lastNeuron: DenseVector, biases: DenseVector) = {
+  protected def resizeH(H: DenseMatrix, Xt: DenseMatrix, lastNeuron: DenseVector, biases: DenseVector) = {
     val newH = new DenseMatrix(H.numRows(), H.numColumns + 1)
     //    val newHt = new DenseMatrix(H.numColumns + 1, H.numRows())
     val h = new DenseVector(H.numRows())
     var i = 0
     var j = 0
+    //todo: arraycopy
     while (i < H.numRows()) {
       j = 0
       while (j < H.numColumns()) {
@@ -175,7 +177,13 @@ trait ConvergentGrowing extends ConvergentELM {
       }
       i += 1
     }
-    X.mult(lastNeuron, h)
+
+    val lastNeuronm = new DenseMatrix2(lastNeuron.getData)
+    lastNeuronm.setAsRowVector()
+    val hm = new DenseMatrix2(h.getData)
+    hm.setAsRowVector()
+    lastNeuronm.mult(Xt, hm)
+
     i = 0
     while (i < H.numRows()) {
       val v = sigm2(h.get(i) + biases.get(j))

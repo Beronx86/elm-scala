@@ -25,10 +25,10 @@ object interaELMExample extends App with ExampleTemplate {
   val dataset = "banana"
   // "iris"
   val k = 2
-  val l = 4
+  val l = 18
 
   def kfoldIteration[T](tr0: Seq[Pattern], ts: Seq[Pattern], fold: Int, bla: Int) {
-    val tr = tr0.take(500)
+    val tr = tr0.take(800)
     val i = interaELM(l)
     val mi = i.build(tr)
 
@@ -53,11 +53,11 @@ object interaELMExample extends App with ExampleTemplate {
     }.sum / data.length.toDouble
     //    println("LOOPRESSos: " + o.LOOError(mo) + "  LOOPRESSi: " + i.LOOError(mi) + "  LOOos: " + LOOos + "  LOOi: " + LOOi)
 
-    //    println("i: " + mi.accuracy(ts) + "\tc: " + mc.accuracy(ts) + "\to: " + mo.accuracy(ts) + "\te: " + me.accuracy(ts))
-    println("i: " + mi.accuracy(ts) + "\to: " + mo.accuracy(ts) + "\te: " + me.accuracy(ts))
+    println(s"i(${mi.L}): " + mi.accuracy(ts) + "\tc: " + mc.accuracy(ts) + "\to: " + mo.accuracy(ts) + "\te: " + me.accuracy(ts))
+    //    println("i: " + mi.accuracy(ts) + "\to: " + mo.accuracy(ts) + "\te: " + me.accuracy(ts))
 
-    sys.exit(0)
   }
 
   run
+  println("o menor LOO (p. ex. no model selection do interaELM) não leva necessariamente a menor acuracia")
 }

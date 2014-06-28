@@ -1,7 +1,7 @@
 import java.io.File
 
 import ml.classifiers._
-import util.{Tempo, Datasets}
+import util.{Datasets, Tempo}
 
 /*
 elm-scala: an implementation of ELM in Scala using MTJ
@@ -64,11 +64,18 @@ object OSELMExample extends App {
   println("Note that OS-ELM can be faster than ELM due to cache scarcity in the processor." +
     "When there are no numerical instability, they should behave exactly the same in terms of accuracy.")
 
-  //Testing equality of PRESS and LOO.
-  val LOO = Datasets.LOO(data.take(200)) { (tr, p) =>
-    if (OSELM(10) build tr hit p) 1 else 0
-  }.sum / data.length.toDouble
-  println("LOO error: " + (1 - LOO) + " PRESSLOO: " )
-  interaELM(10).build(data.take(200))
+  println("Testing equality of PRESS and LOO...")
+  val d = data.take(500)
+  val LOOerror = Datasets.LOO(d) { (tr, p) =>
+    if (OSELM(10) build tr hit p) 0 else 1
+  }.sum / d.length.toDouble
+  println("LOO error: " + LOOerror + " \nPRESSLOO: ")
+  interaELM(10).build(d)
+  val em = EMELM(10)
+  val me = em.growTo(10, em.build(d))
+  val os = OSELM(10)
+  val mo = os.build(d)
+  println("EMPRESSLOO: " + em.LOOError(me))
+  println("OSPRESSLOO: " + os.LOOError(mo))
 
 }

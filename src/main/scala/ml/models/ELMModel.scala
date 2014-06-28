@@ -30,6 +30,7 @@ trait ELMModel extends Model {
   val PReady: DenseMatrix
   val Beta: DenseMatrix
   lazy val P = if (PReady == null) ELMUtils.calculateP(H) else PReady
+  lazy val L = H.numColumns()
 
   def distribution(pattern: Pattern) = ELMUtils.distribution(ELMUtils.test(pattern, Alfat, biases, Beta))
 }

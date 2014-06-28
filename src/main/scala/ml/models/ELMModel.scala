@@ -54,6 +54,7 @@ trait ELMModel extends Model {
 //todo: ELMSimpleModel does not need rnd nor N; I and CI-ELM need updatable versions and the creation of proper specific ELMXXXXModels
 case class ELMSimpleModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], Beta: DenseMatrix, N: Int) extends ELMModel {
   val H = null
+  val Ht = null
   val Hinv = null
   val P = null
   val Y = null
@@ -65,20 +66,25 @@ case class ELMSimpleModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Doubl
 case class ELMIncModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], Beta: DenseMatrix,
                        P: DenseMatrix, N: Int, Xt: DenseMatrix, Y: DenseMatrix) extends ELMModel {
   lazy val H = ELMUtils.feedHiddent(Xt, Alfat, biases)
+  lazy val Hinv = {
+    val r = new DenseMatrix(L, N)
+    P.mult(Ht, pinvH)
+  }
 }
 
 case class ELMGroModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], Beta: DenseMatrix,
-                       Xt: DenseMatrix, Y: DenseMatrix, H: DenseMatrix, Hinv: DenseMatrix) extends ELMModel {
+                       Xt: DenseMatrix, Y: DenseMatrix, H: DenseMatrix, Ht: DenseMatrix, Hinv: DenseMatrix) extends ELMModel {
   val N = H.numRows()
   lazy val HHinv = {
     val r = new DenseMatrix(H.numRows(), H.numRows())
     H.mult(Hinv, r)
     r
   }
+  lazy val P = ELMUtils.calculateP(H, Ht)
 }
 
-case class ELMConvModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], Beta: DenseMatrix,
-                        H: DenseMatrix, Hinv: DenseMatrix, P: DenseMatrix, N: Int, Xt: DenseMatrix, Y: DenseMatrix) extends ELMModel {
+case class ELMConvergentModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], Beta: DenseMatrix,
+                              H: DenseMatrix, Ht: DenseMatrix, Hinv: DenseMatrix, P: DenseMatrix, N: Int, Xt: DenseMatrix, Y: DenseMatrix) extends ELMModel {
   lazy val HHinv = {
     val r = new DenseMatrix(H.numRows(), H.numRows())
     H.mult(Hinv, r)

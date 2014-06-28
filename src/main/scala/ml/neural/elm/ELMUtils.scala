@@ -51,10 +51,7 @@ object ELMUtils {
     H.mult(Beta, Y)
   }
 
-  def calculateP(H: DenseMatrix) = {
-    println("Recalculating P; perhaps part of this can be avoided...")
-    val Ht = new DenseMatrix(H.numColumns(), H.numRows())
-    H.transpose(Ht)
+  def calculateP(H: DenseMatrix, Ht: DenseMatrix) = {
     val HtH = new DenseMatrix(Ht.numRows(), H.numColumns())
     Ht.mult(H, HtH) //15.5%
     inv(HtH) //9.1%
@@ -82,32 +79,6 @@ object ELMUtils {
     Alfat.mult(Xt, Ht)
     Ht.transpose(H)
     addToEachLineOnMatrixAndApplyf(H, biases, sigm2)
-    H
+    (H, Ht)
   }
-
-
-  //  protected def feedHiddent(Xt: DenseMatrix, Alfat: DenseMatrix, biases: Array[Double]) = {
-  //    val Ht = new DenseMatrix(Alfat.numRows(), Xt.numColumns())
-  //    val H = new DenseMatrix(Ht.numColumns(), Ht.numRows())
-  //    Alfat.mult(Xt, Ht)
-  //    Ht.transpose(H)
-  //    addToEachLineOnMatrixAndApplyf(H, biases, sigm2)
-  //    H
-  //  }
-  //
-  //  protected def feedHidden(X: DenseMatrix, alfa: DenseVector, bias: Double) = {
-  //    val h = new DenseVector(X.numRows())
-  //    X.mult(alfa, h)
-  //    addAndApplyOnVector(h, bias, sigm2)
-  //    h
-  //  }
-
-
-  //  protected def cast(model: Model) = model match {
-  //    case m: ELMModel => m
-  //    case _ => println("ELM requires ELMModel.")
-  //      sys.exit(0)
-  //  }
-  //
-  //
 }

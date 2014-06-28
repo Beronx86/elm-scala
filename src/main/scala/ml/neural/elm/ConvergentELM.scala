@@ -18,9 +18,8 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.neural.elm
 
 import ml.Pattern
-import ml.models.{ELMConvModel, ELMModel, Model}
+import ml.models.{ELMConvergentModel, ELMModel, Model}
 import ml.neural.elm.Data._
-import ml.neural.elm.Math._
 import no.uib.cipr.matrix.DenseMatrix
 import util.XSRandom
 
@@ -51,18 +50,17 @@ trait ConvergentELM extends ELM {
     val Alfat = new DenseMatrix(Lbuild, natts)
     initializeWeights(Alfat, biasesArray, rnd)
 
-    val H = ELMUtils.feedHiddent(Xt, Alfat, biasesArray)
-    val Ht = new DenseMatrix(Lbuild, ninsts)
-    H.transpose(Ht)
-    val HtH = new DenseMatrix(Lbuild, Lbuild)
-    Ht.mult(H, HtH)
-    val P = inv(HtH)
-    val pinvH = new DenseMatrix(Lbuild, ninsts)
-    P.mult(Ht, pinvH)
-    val Beta = new DenseMatrix(Lbuild, nclasses)
-    pinvH.mult(Y, Beta)
+    val tupleHHt = ELMUtils.feedHiddent(Xt, Alfat, biasesArray)
+    val H = tupleHHt._1
+    val Ht = tupleHHt._2
+    val P = ELMUtils.calculateP(H, Ht)
 
-    ELMConvModel(rnd, Alfat, biasesArray, Beta, H, pinvH, P, ninsts, Xt, Y)
+    val Hinv = new DenseMatrix(Lbuild, ninsts)
+    P.mult(Ht, Hinv)
+    val Beta = new DenseMatrix(Lbuild, nclasses)
+    Hinv.mult(Y, Beta)
+
+    ELMConvergentModel(rnd, Alfat, biasesArray, Beta, H, Ht, Hinv, P, ninsts, Xt, Y)
   }
 
   /**

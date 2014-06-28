@@ -18,6 +18,7 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.neural.elm
 
 import ml.Pattern
+import ml.models.ELMSimpleModel
 import ml.mtj.ResizableDenseMatrix
 import ml.neural.elm.Data._
 import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
@@ -54,7 +55,7 @@ trait IELMTrait extends IteratedBuildELM {
         Beta.addRow(beta)
         val te = Tempo.stop
         Tempo.start
-        f(ELMGenericModel0(rnd.clone(), Alfat, biases, null, Beta, null, null, null, null), te)
+        f(ELMSimpleModel(rnd.clone(), Alfat, biases, Beta, ninsts), te)
       }
     } else {
       while (l < Lbuild) {
@@ -68,7 +69,7 @@ trait IELMTrait extends IteratedBuildELM {
       Alfat.resizeRows(l)
       Beta.resizeRows(l)
     }
-    ELMGenericModel0(rnd, Alfat, biases, H, Beta, null, null, null, null) //todo: se nao crescer, manter P e H anteriores?
+    ELMSimpleModel(rnd, Alfat, biases, Beta, ninsts) //todo: se nao crescer, manter P e H anteriores?
   }
 
   protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Array[DenseVector], tmp: DenseVector): (Array[Double], Double, DenseVector, Array[Double])

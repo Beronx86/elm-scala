@@ -18,7 +18,7 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.neural.elm
 
 import ml.Pattern
-import ml.models.Model
+import ml.models.{ELMGroModel, Model}
 import ml.neural.elm.Data._
 import ml.neural.elm.Math._
 import no.uib.cipr.matrix.DenseMatrix
@@ -61,7 +61,7 @@ trait ConvergentELM extends ELM {
     Xt.transpose(X)
     //    println(getClass.getName.split('.').last + ": "+ Xt.get(0,0) + " tr: "+trSet)
 
-    ELMGenericModel0(rnd, Alfat, biasesArray, H, Beta, P, X, Y, pinvH)
+    ELMGroModel(rnd, Alfat, biasesArray, Beta, H, X, Y, pinvH)
   }
 
   /**

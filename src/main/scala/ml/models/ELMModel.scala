@@ -28,6 +28,8 @@ trait ELMModel extends Model {
   val Alfat: DenseMatrix
   val biases: Array[Double]
   val Beta: DenseMatrix
+  val H: DenseMatrix
+  val X: DenseMatrix
   val N: Int
   lazy val L = Alfat.numRows()
   lazy val I = Math.identity(N)
@@ -38,7 +40,14 @@ trait ELMModel extends Model {
 case class ELMSimpleModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], Beta: DenseMatrix, N: Int) extends ELMModel
 
 case class ELMIncModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], Beta: DenseMatrix,
-                       P: DenseMatrix, N: Int) extends ELMModel
+                       P: DenseMatrix, N: Int) extends ELMModel {
+  lazy val H = {
+    val m = new DenseMatrix(N, Alfat.numRows())
+    X.
+
+  }
+
+}
 
 case class ELMGroModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], Beta: DenseMatrix,
                        H: DenseMatrix, X: DenseMatrix, Y: DenseMatrix, Hinv: DenseMatrix) extends ELMModel {

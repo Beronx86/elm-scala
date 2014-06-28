@@ -18,7 +18,7 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.classifiers
 
 import ml.Pattern
-import ml.models.Model
+import ml.models.{ELMSimpleModel, Model}
 import ml.mtj.ResizableDenseMatrix
 import ml.neural.elm.ConvexIELMTrait
 import ml.neural.elm.Data._
@@ -57,12 +57,12 @@ case class ECIELM(Lbuild: Int, seed: Int = 42, callf: Boolean = false, f: (Model
       l += 1
       val te = Tempo.stop
       Tempo.start
-      f(ELMGenericModel0(rnd.clone(), Alfat, biases, null, Beta, null, null, null, null), te)
+      f(ELMSimpleModel(rnd.clone(), Alfat, biases, Beta, ninsts), te)
     }
     //    Alfat.resizeRows(l)
     //    Beta.resizeRows(l)
     //    ELMModel(Alfat, biases.take(Beta.numRows()), new DenseMatrix(1, 1), Beta)
-    val model = ELMGenericModel0(rnd, Alfat, biases, null, Beta, null, null, null, null)
+    val model = ELMSimpleModel(rnd, Alfat, biases, Beta, ninsts)
     model
   }
 

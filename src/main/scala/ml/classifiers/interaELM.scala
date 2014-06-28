@@ -18,7 +18,7 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.classifiers
 
 import ml.Pattern
-import ml.models.{ELMGenericModel, Model}
+import ml.models.{ELMModel, Model}
 
 /**
  * Grows network from 1 to Lmax according to arriving instances.
@@ -37,10 +37,10 @@ case class interaELM(Lmax: Int, seed: Int = 42) extends ConvergentIncremental wi
   override def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
     val m = super.update(model)(pattern)
     ???
-    if (math.sqrt(m.N + 1).toInt > math.sqrt(m.N).toInt) modelSelection(m) else m
+    if (math.sqrt(m.N + 1).toInt > math.sqrt(m.N).toInt) ??? /*modelSelection(m)*/ else m
   }
 
-  protected def modelSelection(model: ELMGenericModel) = {
+  protected def modelSelection(model: ELMModel) = {
     var m = model
     val (_, best) = 1 to Lmax map { L =>
       if (L > 1) m = growByOne(m)

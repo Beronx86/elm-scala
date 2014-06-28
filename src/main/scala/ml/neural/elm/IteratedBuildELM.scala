@@ -17,22 +17,14 @@ Copyright (C) 2014 Davi Pereira dos Santos
 */
 package ml.neural.elm
 
-import ml.classifiers.Learner
-import ml.models.{ELMGenericModel, Model}
-import no.uib.cipr.matrix.{Matrices, DenseVector, DenseMatrix}
-import ml.Pattern
-import ml.neural.elm.Math._
 import util.XSRandom
-import scala.util.Random
-import ml.mtj.{ResizableDenseMatrix, DenseMatrix2}
-import ml.neural.elm.Data._
 
 /**
  * Created by davi on 21/05/14.
  */
 trait IteratedBuildELM extends BatchELM {
 //todo: correct this, extending BatchELM is very inefficient for update() on incremental-friendly classifiers (I-ELM?)!
-  val f: (ELMGenericModel, Double) => Unit
+val f: (ELMGenericModel0, Double) => Unit
   val Lbuild: Int
   val callf: Boolean
 

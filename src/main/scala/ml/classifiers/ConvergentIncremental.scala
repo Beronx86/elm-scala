@@ -19,18 +19,22 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.classifiers
 
 import ml.Pattern
-import ml.models.{ELMGenericModel, Model}
+import ml.models.{ELMIncModel, Model}
 import ml.mtj.DenseMatrix2
 import ml.neural.elm.{ConvergentELM, ELMUtils}
 import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
 
-trait ConvergentIncremental  extends ConvergentELM {
+trait ConvergentIncremental extends ConvergentELM {
+  protected def cast(model: Model) = model match {
+    case m: ELMIncModel => m
+    case _ => println("ConvergentIncremental ELMs require ELMIncModel.")
+      sys.exit(0)
+  }
   def update(model: Model, fastAndCheap: Boolean = false)(pattern: Pattern) = {
     val m = cast(model)
     val Alfat = m.Alfat
     val biases = m.biases
     val P0 = m.P
-    val H = m.H
     val rnd = m.rnd
     val Beta0 = m.Beta //LxO
     val (h, hm) = ELMUtils.feedHiddenv(pattern.arraymtj, Alfat, biases) //h: Lx1; H: NxL
@@ -77,7 +81,7 @@ trait ConvergentIncremental  extends ConvergentELM {
     }
 
     //todo: atualizar H? H fica mais comprido a cada update!
-    ELMGenericModel(rnd, Alfat, biases, null, P1, Beta1, null, null, null)
+    ELMIncModel(rnd, Alfat, biases, Beta1, P1, m.N + 1)
   }
 
   def updateAll(model: Model, fastAndCheap: Boolean = false)(patterns: Seq[Pattern]) =

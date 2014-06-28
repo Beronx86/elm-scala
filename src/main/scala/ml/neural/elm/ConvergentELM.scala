@@ -18,7 +18,7 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.neural.elm
 
 import ml.Pattern
-import ml.models.{ELMGenericModel, Model}
+import ml.models.Model
 import ml.neural.elm.Data._
 import ml.neural.elm.Math._
 import no.uib.cipr.matrix.DenseMatrix
@@ -61,7 +61,7 @@ trait ConvergentELM extends ELM {
     Xt.transpose(X)
     //    println(getClass.getName.split('.').last + ": "+ Xt.get(0,0) + " tr: "+trSet)
 
-    ELMGenericModel(rnd, Alfat, biasesArray, H, P, Beta, X, Y, pinvH)
+    ELMGenericModel0(rnd, Alfat, biasesArray, H, Beta, P, X, Y, pinvH)
   }
 
   /**
@@ -190,11 +190,11 @@ trait ConvergentELM extends ELM {
    */
   protected def fPRESS(HATvalue: Double)(error: Double) = error / (1 - HATvalue)
 
-  protected def cast(model: Model) = model match {
-    case m: ELMGenericModel => m
-    case _ => println("Convergent ELMs require ELMGenericModel.")
-      sys.exit(0)
-  }
+  //  protected def cast(model: Model) = model match {
+  //    case m: ELMGenericModel => m
+  //    case _ => println("Convergent ELMs require ELMGenericModel.")
+  //      sys.exit(0)
+  //  }
 
   protected def errorMatrix(H: DenseMatrix, Beta: DenseMatrix, Y: DenseMatrix) = {
     val Prediction = new DenseMatrix(H.numRows(), Beta.numColumns())

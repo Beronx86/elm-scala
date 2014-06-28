@@ -17,19 +17,15 @@ Copyright (C) 2014 Davi Pereira dos Santos
 */
 package ml.classifiers
 
-import ml.neural.elm.{IELMTrait, ELM}
-import ml.Pattern
-import ml.models.{ELMGenericModel, Model}
-import ml.neural.elm.Data._
-import ml.mtj.ResizableDenseMatrix
-import no.uib.cipr.matrix.{DenseVector, DenseMatrix}
+import ml.models.Model
+import ml.neural.elm.IELMTrait
+import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
 import util.XSRandom
-import scala.util.Random
 
 /**
  * Created by davi on 24/05/14.
  */
-case class EIELM(Lbuild: Int, seed: Int = 42, size: Int = 1, callf: Boolean = false, f: (ELMGenericModel, Double) => Unit = (tmp: Model, tmpt: Double) => ())
+case class EIELM(Lbuild: Int, seed: Int = 42, size: Int = 1, callf: Boolean = false, f: (ELMGenericModel0, Double) => Unit = (tmp: Model, tmpt: Double) => ())
   extends IELMTrait {
   override val toString = "EIELM"
   val CANDIDATES = 10
@@ -80,4 +76,6 @@ case class EIELM(Lbuild: Int, seed: Int = 42, size: Int = 1, callf: Boolean = fa
     e.zip(newe).foreach { case (a, b) => a.set(b)}
     (weights, bias, h, beta)
   }
-}//rnd ok
+}
+
+//rnd ok

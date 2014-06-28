@@ -31,7 +31,9 @@ trait ELMModel extends Model {
   val Alfat: DenseMatrix
   val Beta: DenseMatrix
 
+  //needed by P and Hinv
   val H: DenseMatrix
+  val Ht: DenseMatrix
 
   //needed by grow()
   val Xt: DenseMatrix
@@ -40,7 +42,11 @@ trait ELMModel extends Model {
 
   //needed by modelSelection() and grow()
   val Y: DenseMatrix
-  val HHinv: DenseMatrix
+  lazy val HHinv = {
+    val r = new DenseMatrix(H.numRows(), H.numRows())
+    H.mult(Hinv, r)
+    r
+  }
 
   //needed by update()
   val P: DenseMatrix
@@ -59,35 +65,31 @@ case class ELMSimpleModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Doubl
   val P = null
   val Y = null
   val Xt = null
-  val HHinv = null
 }
 
 //todo: Xt,Y -> queue[Pattern ou (array,array)] (pra evitar copias na memoria; Xt e Y só vão ser needed ao final dos incrementos, podem ser criados inteiro)
 case class ELMIncModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], Beta: DenseMatrix,
                        P: DenseMatrix, N: Int, Xt: DenseMatrix, Y: DenseMatrix) extends ELMModel {
-  lazy val H = ELMUtils.feedHiddent(Xt, Alfat, biases)
+  private lazy val tupleHHt = ELMUtils.feedHiddent(Xt, Alfat, biases)
+  lazy val H = tupleHHt._1
+  lazy val Ht = tupleHHt._2
   lazy val Hinv = {
-    val r = new DenseMatrix(L, N)
-    P.mult(Ht, pinvH)
+    val m = new DenseMatrix(L, N)
+    P.mult(Ht, m)
+    m
   }
 }
 
 case class ELMGroModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], Beta: DenseMatrix,
-                       Xt: DenseMatrix, Y: DenseMatrix, H: DenseMatrix, Ht: DenseMatrix, Hinv: DenseMatrix) extends ELMModel {
+                       Xt: DenseMatrix, Y: DenseMatrix, H: DenseMatrix, Hinv: DenseMatrix) extends ELMModel {
   val N = H.numRows()
-  lazy val HHinv = {
-    val r = new DenseMatrix(H.numRows(), H.numRows())
-    H.mult(Hinv, r)
-    r
-  }
   lazy val P = ELMUtils.calculateP(H, Ht)
+  lazy val Ht = {
+    val m = new DenseMatrix(H.numColumns(), H.numRows())
+    H.transpose(m)
+    m
+  }
 }
 
 case class ELMConvergentModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], Beta: DenseMatrix,
-                              H: DenseMatrix, Ht: DenseMatrix, Hinv: DenseMatrix, P: DenseMatrix, N: Int, Xt: DenseMatrix, Y: DenseMatrix) extends ELMModel {
-  lazy val HHinv = {
-    val r = new DenseMatrix(H.numRows(), H.numRows())
-    H.mult(Hinv, r)
-    r
-  }
-}
+                              H: DenseMatrix, Ht: DenseMatrix, Hinv: DenseMatrix, P: DenseMatrix, N: Int, Xt: DenseMatrix, Y: DenseMatrix) extends ELMModel

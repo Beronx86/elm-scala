@@ -18,16 +18,6 @@ Copyright (C) 2014 Davi Pereira dos Santos
 
 package ml.classifiers
 
-import ml.Pattern
-import ml.mtj.DenseMatrix2
-import ml.neural.elm.Data._
-import ml.neural.elm.Math._
-import no.uib.cipr.matrix.{DenseVector, DenseMatrix}
-
-import scala.util.Random
-import ml.models.{ELMGenericModel, Model}
-import ml.neural.elm.{ConvergentELM, ELMUtils, ELM}
-
 /**
  * Updates weights at each instance arrival.
  * The topology is fixed.
@@ -35,6 +25,6 @@ import ml.neural.elm.{ConvergentELM, ELMUtils, ELM}
  * @param seed
  */
 case class OSELM(L: Int, seed: Int = 42) extends ConvergentIncremental {
-  override val toString = "OSELM"
+  override val toString = "OSELM L" + L
   val Lbuild = L
 }

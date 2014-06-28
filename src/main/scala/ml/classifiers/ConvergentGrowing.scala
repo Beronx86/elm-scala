@@ -35,14 +35,13 @@ trait ConvergentGrowing extends ConvergentELM {
     val biases = m.biases
     val hminv = m.Hinv
     val H = m.H
-    val I = m.I
-    val hhinv = m.HHinv.copy()
+    val hhinv = m.HHinv
 
-    val (newAlfat, newBiases, newH, newHinv, newBeta, newRnd) = grow(I, rnd, H, xm, ym, hminv, Alfat, biases, hhinv)
+    val (newAlfat, newBiases, newH, newHinv, newBeta, newRnd) = grow(rnd, H, xm, ym, hminv, Alfat, biases, hhinv)
 
     //    println(getClass.getName.split('.').last + ": " + newHinv.get(0, 0))
 
-    ELMGenericModel(newRnd, newAlfat, newBiases.getData, newH, null, newBeta, xm, ym, newHinv)
+    ELMGroModel(newRnd, newAlfat, newBiases.getData, newBeta, newH, xm, ym, newHinv)
   }
 
   def growTo(desiredL: Int, model: Model, fast_mutable: Boolean = false) = {
@@ -70,10 +69,9 @@ trait ConvergentGrowing extends ConvergentELM {
    */
   def mMinusIdentity(m: DenseMatrix) {
     val d = m.getData
-    val l = d.size
     var c = 0
     var gap = m.numRows() + 1
-    while (c < l) {
+    while (c < m.numRows()) {
       d(c) -= 1
       c += gap
     }
@@ -91,7 +89,7 @@ trait ConvergentGrowing extends ConvergentELM {
    * @param HHinv
    * @return
    */
-  protected def grow(I: DenseMatrix, rnd: XSRandom, H: DenseMatrix, X: DenseMatrix, Y: DenseMatrix, Hinv: DenseMatrix, Alfat: DenseMatrix, biases: Array[Double], HHinv: DenseMatrix) = {
+  protected def grow(rnd: XSRandom, H: DenseMatrix, X: DenseMatrix, Y: DenseMatrix, Hinv: DenseMatrix, Alfat: DenseMatrix, biases: Array[Double], HHinv: DenseMatrix) = {
     val (newAlfat, newNeuron, newBiases, newRnd) = addNeuron(rnd, Alfat, biases)
     val (newH, newh) = resizeH(H, X, newNeuron, newBiases)
 

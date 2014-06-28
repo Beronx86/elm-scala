@@ -15,7 +15,6 @@ Copyright (C) 2014 Davi Pereira dos Santos
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 package ml.models
 
 import ml.Pattern
@@ -27,23 +26,31 @@ trait ELMModel extends Model {
   val rnd: XSRandom
   val Alfat: DenseMatrix
   val biases: Array[Double]
+  val H: DenseMatrix
+  val Hinv: DenseMatrix
+  val PReady: DenseMatrix
   val Beta: DenseMatrix
-  val N: Int
-  lazy val L = Alfat.numRows()
-  lazy val I = Math.identity(N)
+  lazy val P = if (PReady == null) ELMUtils.calculateP(H) else PReady
+  lazy val N = H.numRows()
+  lazy val L = H.numColumns()
+  lazy val I = Math.identity(H.numRows())
+  lazy val HHinv = {
+    val r = new DenseMatrix(H.numRows(), H.numRows())
+    H.mult(Hinv, r)
+    r
+  }
+
 
   def distribution(pattern: Pattern) = ELMUtils.distribution(ELMUtils.test(pattern, Alfat, biases, Beta))
 }
 
-case class ELMGenericModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], H: DenseMatrix, PReady: DenseMatrix,
-                           Beta: DenseMatrix, X: DenseMatrix, Y: DenseMatrix, Hinv: DenseMatrix) extends ELMModel {
-  val N = H.numRows()
-}
-
-case class ELMIncModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], P: DenseMatrix, Beta: DenseMatrix) extends ELMModel
-
-case class ELMGroModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], H: DenseMatrix, Beta: DenseMatrix, X: DenseMatrix, Y: DenseMatrix, Hinv: DenseMatrix) extends ELMModel {
-  lazy val HHinv = {
-    val r = new DenseMatrix(H.numRows(), H.numRows()) H.mult(Hinv, r) r
-  }
-}
+//case class ELMGenericModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double],
+//                           H: DenseMatrix,
+//                           PReady: DenseMatrix, Beta: DenseMatrix,
+//                           X: DenseMatrix, Y: DenseMatrix,
+//                           Hinv: DenseMatrix) extends ELMModel
+case class ELMGenericModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double],
+                           H: DenseMatrix,
+                           PReady: DenseMatrix, Beta: DenseMatrix,
+                           X: DenseMatrix, Y: DenseMatrix,
+                           Hinv: DenseMatrix) extends ELMModel 

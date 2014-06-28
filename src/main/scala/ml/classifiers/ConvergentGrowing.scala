@@ -41,7 +41,7 @@ trait ConvergentGrowing extends ConvergentELM {
 
     //    println(getClass.getName.split('.').last + ": " + newHinv.get(0, 0))
 
-    ELMGroModel(newRnd, newAlfat, newBiases.getData, newBeta, newH, xm, ym, newHinv)
+    ELMGenericModel(newRnd, newAlfat, newBiases.getData, newH, null, newBeta, xm, ym, newHinv)
   }
 
   def growTo(desiredL: Int, model: Model, fast_mutable: Boolean = false) = {
@@ -55,9 +55,10 @@ trait ConvergentGrowing extends ConvergentELM {
    */
   def mPlusIdentity(m: DenseMatrix) {
     val d = m.getData
+    val l = d.size
     var c = 0
     var gap = m.numRows() + 1
-    while (c < m.numRows()) {
+    while (c < l) {
       d(c) += 1
       c += gap
     }
@@ -69,9 +70,10 @@ trait ConvergentGrowing extends ConvergentELM {
    */
   def mMinusIdentity(m: DenseMatrix) {
     val d = m.getData
+    val l = d.size
     var c = 0
     var gap = m.numRows() + 1
-    while (c < m.numRows()) {
+    while (c < l) {
       d(c) -= 1
       c += gap
     }
@@ -102,7 +104,7 @@ trait ConvergentGrowing extends ConvergentELM {
 
     val num = new DenseMatrix(1, H.numRows())
     tmpt.mult(I_HHinv, num)
-    mPlusIdentity(HHinv) //recovers original value
+    mPlusIdentity(I_HHinv) //recovers original value
 
     val tmp2 = new DenseVector(1)
     num.mult(newh, tmp2)

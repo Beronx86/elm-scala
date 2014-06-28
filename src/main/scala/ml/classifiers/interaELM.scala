@@ -35,8 +35,9 @@ case class interaELM(Lmax: Int, seed: Int = 42) extends ConvergentIncremental wi
   }
 
   override def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
-    val m = cast(model)
-    if (math.sqrt(m.H.numRows() + 1).toInt > math.sqrt(m.H.numRows()).toInt) modelSelection(m) else m
+    val m = super.update(model)(pattern)
+    ???
+    if (math.sqrt(m.N + 1).toInt > math.sqrt(m.N).toInt) modelSelection(m) else m
   }
 
   protected def modelSelection(model: ELMGenericModel) = {

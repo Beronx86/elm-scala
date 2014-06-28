@@ -25,7 +25,7 @@ import ml.neural.elm.{ConvergentELM, ELMUtils}
 import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
 
 trait ConvergentIncremental  extends ConvergentELM {
-  def update(model: Model, fast_mutable: Boolean = false)(pattern: Pattern) = {
+  def update(model: Model, fastAndCheap: Boolean = false)(pattern: Pattern) = {
     val m = cast(model)
     val Alfat = m.Alfat
     val biases = m.biases
@@ -52,7 +52,7 @@ trait ConvergentIncremental  extends ConvergentELM {
     val deltaP = new DenseMatrix(L, L)
     P0hht.mult(P0, deltaP) //LxL
     deltaP.scale(factor)
-    val P1 = if (fast_mutable) {
+    val P1 = if (fastAndCheap) {
       P0.add(deltaP)
       P0
     } else {
@@ -68,7 +68,7 @@ trait ConvergentIncremental  extends ConvergentELM {
     deltaP.mult(h, tmpLx1)
     val tmpLxO = new DenseMatrix(L, O)
     tmpLx1m.mult(parens, tmpLxO)
-    val Beta1 = if (fast_mutable) {
+    val Beta1 = if (fastAndCheap) {
       Beta0.add(tmpLxO)
       Beta0
     } else {
@@ -80,11 +80,6 @@ trait ConvergentIncremental  extends ConvergentELM {
     ELMGenericModel(rnd, Alfat, biases, null, P1, Beta1, null, null, null)
   }
 
-  def updateAll(model: Model, fast_mutable: Boolean = false)(patterns: Seq[Pattern]) = {
-    val m = cast(model)
-    patterns.foldLeft(model)((m, p) => update(m)(p))
-  }
-
+  def updateAll(model: Model, fastAndCheap: Boolean = false)(patterns: Seq[Pattern]) =
+    patterns.foldLeft(model)((m, p) => update(m, fastAndCheap = true)(p))
 }
-
-//rnd ok

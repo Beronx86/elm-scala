@@ -46,15 +46,6 @@ trait ELM extends Learner {
     h
   }
 
-  protected def feedHiddent(Xt: DenseMatrix, Alfat: DenseMatrix, biases: Array[Double]) = {
-    val Ht = new DenseMatrix(Alfat.numRows(), Xt.numColumns())
-    val H = new DenseMatrix(Ht.numColumns(), Ht.numRows())
-    Alfat.mult(Xt, Ht)
-    Ht.transpose(H)
-    addToEachLineOnMatrixAndApplyf(H, biases, sigm2)
-    H
-  }
-
   protected def checkEmptyness(trSet: Seq[Pattern]) = {
     val ninsts = trSet.length
     if (ninsts == 0) {
@@ -77,7 +68,7 @@ trait ELM extends Learner {
       j = 0
       while (j < Alfat.numColumns()) {
         val v = rnd.nextDouble() * 2 - 1
-//        Alfa.set(j, i, v)
+        //        Alfa.set(j, i, v)
         Alfat.set(i, j, v)
         j += 1
       }

@@ -18,23 +18,22 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.classifiers
 
 import ml.Pattern
-import ml.models.{ELMGenericModel, Model}
-import ml.neural.elm.ConvergentELM
-import ml.neural.elm.Math._
-import no.uib.cipr.matrix.{DenseMatrix, DenseVector, Matrices}
-import util.XSRandom
+import ml.models.Model
 
 /**
  * Grows network from 1 to Lmax.
- * It performs batch learning, i.e. retrains from scratch to accomodate new instances.
  * @param Lmax
  * @param seed
  */
+// todo: It performs batch learning, i.e. retrains from scratch to accomodate new instances.
 case class EMELM(Lmax: Int, seed: Int = 42) extends ConvergentGrowing {
   override val toString = "EMELM"
   val Lbuild = 1
 
-  def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = ???
+  def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
+    println("EM-ELM does not accept update() for now. It could perform an entire rebuild.")
+    sys.exit(0)
+  }
 
-  def updateAll(model: Model, fast_mutable: Boolean)(patterns: Seq[Pattern]) = ???
+  def updateAll(model: Model, fast_mutable: Boolean)(patterns: Seq[Pattern]) = update(null)(null)
 }

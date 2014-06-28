@@ -18,7 +18,7 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.neural.elm
 
 import ml.Pattern
-import ml.models.{ELMGroModel, Model}
+import ml.models.{ELMConvModel, ELMModel, Model}
 import ml.neural.elm.Data._
 import ml.neural.elm.Math._
 import no.uib.cipr.matrix.DenseMatrix
@@ -30,7 +30,13 @@ import util.XSRandom
 trait ConvergentELM extends ELM {
   val Lbuild: Int
 
-  def build(trSet: Seq[Pattern]) = {
+  protected def cast(model: Model) = model match {
+    case m: ELMModel => m
+    case _ => println("Convergent ELMs require ELMModels.")
+      sys.exit(0)
+  }
+
+  def build(trSet: Seq[Pattern]): ELMModel = {
     val rnd = new XSRandom(seed)
 
     val ninsts = checkEmptyness(trSet)
@@ -45,7 +51,7 @@ trait ConvergentELM extends ELM {
     val Alfat = new DenseMatrix(Lbuild, natts)
     initializeWeights(Alfat, biasesArray, rnd)
 
-    val H = feedHiddent(Xt, Alfat, biasesArray)
+    val H = ELMUtils.feedHiddent(Xt, Alfat, biasesArray)
     val Ht = new DenseMatrix(Lbuild, ninsts)
     H.transpose(Ht)
     val HtH = new DenseMatrix(Lbuild, Lbuild)
@@ -56,12 +62,7 @@ trait ConvergentELM extends ELM {
     val Beta = new DenseMatrix(Lbuild, nclasses)
     pinvH.mult(Y, Beta)
 
-    //todo:X is transposed/calculated even when it is useless (e.g. for OS-ELM)! lazy is ineffective in call-by-value
-    val X = new DenseMatrix(Xt.numColumns(), Xt.numRows())
-    Xt.transpose(X)
-    //    println(getClass.getName.split('.').last + ": "+ Xt.get(0,0) + " tr: "+trSet)
-
-    ELMGroModel(rnd, Alfat, biasesArray, Beta, H, X, Y, pinvH)
+    ELMConvModel(rnd, Alfat, biasesArray, Beta, H, pinvH, P, ninsts, Xt, Y)
   }
 
   /**

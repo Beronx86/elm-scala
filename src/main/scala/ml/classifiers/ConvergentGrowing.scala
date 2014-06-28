@@ -25,16 +25,9 @@ import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
 import util.XSRandom
 
 trait ConvergentGrowing extends ConvergentELM {
-  protected def cast(model: Model) = model match {
-    case m: ELMGroModel => m
-    case _ => println("ConvergentGrowing ELMs require ELMGroModel.")
-      sys.exit(0)
-  }
-
   def growByOne(model: Model, fast_mutable: Boolean = false) = {
     //    if (fast_mutable) {      println("fastmut"); val bla = ???    } else Unit
     val m = cast(model)
-    val xm = m.X
     val ym = m.Y
     val rnd = m.rnd
     val Alfat = m.Alfat
@@ -43,11 +36,11 @@ trait ConvergentGrowing extends ConvergentELM {
     val H = m.H
     val hhinv = m.HHinv
 
-    val (newAlfat, newBiases, newH, newHinv, newBeta, newRnd) = grow(rnd, H, xm, ym, hminv, Alfat, biases, hhinv)
+    val (newAlfat, newBiases, newH, newHinv, newBeta, newRnd) = grow(rnd, H, m.Xt, ym, hminv, Alfat, biases, hhinv)
 
     //    println(getClass.getName.split('.').last + ": " + newHinv.get(0, 0))
 
-    ELMGroModel(newRnd, newAlfat, newBiases.getData, newBeta, newH, xm, ym, newHinv)
+    ELMGroModel(newRnd, newAlfat, newBiases.getData, newBeta, m.Xt, ym, newH, newHinv)
   }
 
   def growTo(desiredL: Int, model: Model, fast_mutable: Boolean = false) = {
@@ -89,7 +82,7 @@ trait ConvergentGrowing extends ConvergentELM {
    * This is not thread-safe since HHinv is changed for a few milisseconds. todo
    * @param rnd
    * @param H
-   * @param X
+   * @param Xt
    * @param Y
    * @param Hinv
    * @param Alfat

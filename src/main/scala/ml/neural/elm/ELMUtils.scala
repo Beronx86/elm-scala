@@ -76,6 +76,16 @@ object ELMUtils {
     (h, H)
   }
 
+  def feedHiddent(Xt: DenseMatrix, Alfat: DenseMatrix, biases: Array[Double]) = {
+    val Ht = new DenseMatrix(Alfat.numRows(), Xt.numColumns())
+    val H = new DenseMatrix(Ht.numColumns(), Ht.numRows())
+    Alfat.mult(Xt, Ht)
+    Ht.transpose(H)
+    addToEachLineOnMatrixAndApplyf(H, biases, sigm2)
+    H
+  }
+
+
   //  protected def feedHiddent(Xt: DenseMatrix, Alfat: DenseMatrix, biases: Array[Double]) = {
   //    val Ht = new DenseMatrix(Alfat.numRows(), Xt.numColumns())
   //    val H = new DenseMatrix(Ht.numColumns(), Ht.numRows())

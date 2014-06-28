@@ -25,11 +25,6 @@ import ml.neural.elm.{ConvergentELM, ELMUtils}
 import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
 
 trait ConvergentIncremental extends ConvergentELM {
-  protected def cast(model: Model) = model match {
-    case m: ELMIncModel => m
-    case _ => println("ConvergentIncremental ELMs require ELMIncModel.")
-      sys.exit(0)
-  }
   def update(model: Model, fastAndCheap: Boolean = false)(pattern: Pattern) = {
     val m = cast(model)
     val Alfat = m.Alfat
@@ -37,7 +32,8 @@ trait ConvergentIncremental extends ConvergentELM {
     val P0 = m.P
     val rnd = m.rnd
     val Beta0 = m.Beta //LxO
-    val (h, hm) = ELMUtils.feedHiddenv(pattern.arraymtj, Alfat, biases) //h: Lx1; H: NxL
+    val x = pattern.arraymtj
+    val (h, hm) = ELMUtils.feedHiddenv(x, Alfat, biases) //h: Lx1; H: NxL
 
     val L = h.size()
     val O = Beta0.numColumns()
@@ -80,8 +76,26 @@ trait ConvergentIncremental extends ConvergentELM {
       tmpLxO
     }
 
-    //todo: atualizar H? H fica mais comprido a cada update!
-    ELMIncModel(rnd, Alfat, biases, Beta1, P1, m.N + 1)
+    //All of this is useless for OS-only ELM
+    val newXt = new DenseMatrix(m.Xt.numRows(), m.Xt.numColumns() + 1)
+    System.arraycopy(m.Xt.getData, 0, newXt.getData, 0, m.Xt.getData.size)
+    System.arraycopy(x.getData, 0, newXt.getData, m.Xt.getData.size, x.getData.size)
+    val newY = new DenseMatrix(m.Y.numRows() + 1, m.Y.numColumns())
+    var i = 0
+    while (i < m.Y.numRows()) {
+      var j = 0
+      while (j < m.Y.numColumns()) {
+        newY.set(i, j, m.Y.get(i, j))
+        j += 1
+      }
+      i += 1
+    }
+    var j = 0
+    while (j < m.Y.numColumns()) {
+      newY.set(i, j, y(j))
+      j += 1
+    }
+    ELMIncModel(rnd, Alfat, biases, Beta1, P1, m.N + 1, newXt, newY)
   }
 
   def updateAll(model: Model, fastAndCheap: Boolean = false)(patterns: Seq[Pattern]) =

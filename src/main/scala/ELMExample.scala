@@ -58,7 +58,7 @@ object ELMExample extends App {
     elms foreach { elm =>
       println(elm)
 
-      util.Datasets.kfoldCV(data, k = 10, parallel = true) { (trainingSet, testingSet, fold, _) =>
+      util.Datasets.kfoldCV(data, k = 3, parallel = true) { (trainingSet, testingSet, fold, _) =>
         val (model, t) = Tempo.timev(elm.build(trainingSet))
         val acc = model.accuracy(testingSet).formatted("%2.2f")
         println("Fold " + fold + ": " + acc + " in " + t + "ms.")
@@ -67,4 +67,6 @@ object ELMExample extends App {
       println("")
     }
   }
-}//rnd ok
+}
+
+//rnd ok

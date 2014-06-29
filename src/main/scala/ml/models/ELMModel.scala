@@ -67,7 +67,7 @@ case class ELMSimpleModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Doubl
   val Xt = null
 }
 
-//todo: Xt,Y -> queue[Pattern ou (array,array)] (pra evitar copias na memoria; Xt e Y só vão ser needed ao final dos incrementos, podem ser criados inteiro)
+//todo: Xt,Y -> queue[Pattern ou (array,array)] (pra evitar copias de Xt e Y inteiros na memoria; Xt e Y só vão ser needed ao final dos incrementos, podem ser criados inteiros de uma vez from queue)
 case class ELMIncModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], Beta: DenseMatrix,
                        P: DenseMatrix, N: Int, Xt: DenseMatrix, Y: DenseMatrix) extends ELMModel {
   private lazy val tupleHHt = ELMUtils.feedHiddent(Xt, Alfat, biases)

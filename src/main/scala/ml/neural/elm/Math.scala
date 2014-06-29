@@ -17,7 +17,7 @@ Copyright (C) 2014 Davi Pereira dos Santos
 */
 package ml.neural.elm
 
-import no.uib.cipr.matrix.{DenseVector, Matrices, DenseMatrix}
+import no.uib.cipr.matrix.{DenseMatrix, DenseVector, Matrices}
 
 import scala.collection.mutable
 
@@ -75,7 +75,7 @@ object Math {
     }
   }
 
-  def addToEachLineOnMatrixAndApplyf(M: DenseMatrix, a: Array[Double], f: Double => Double) {
+  def addToEachRowOnMatrixAndApplyf(M: DenseMatrix, a: Array[Double], f: Double => Double) {
     var i = 0
     var j = 0
     while (j < M.numColumns()) {
@@ -86,6 +86,30 @@ object Math {
         i += 1
       }
       j += 1
+    }
+  }
+
+  def addToEachColumnOnMatrixAndApplyf(M: DenseMatrix, a: Array[Double], f: Double => Double) {
+    var i = 0
+    while (i < M.numRows()) {
+      var j = 0
+      val v = a(i)
+      while (j < M.numColumns()) {
+        M.set(i, j, f(M.get(i, j) + v))
+        j += 1
+      }
+      i += 1
+    }
+  }
+
+  def copyToEachColumnOnMatrixAndApplyf(M: DenseMatrix, a: Array[Double], f: Double => Double) {
+    var c = 0
+    val al = a.size
+    val d = M.getData
+    val ml = d.size
+    while (c < ml) {
+      System.arraycopy(a, 0, d, c, al)
+      c += al
     }
   }
 

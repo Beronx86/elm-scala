@@ -27,7 +27,7 @@ import util.{Tempo, XSRandom}
 
 case class ECIELM(Lbuild: Int, seed: Int = 42, callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ()) extends ConvexIELMTrait {
   override val toString = "ECIELM"
-  val CANDIDATES = 100
+  val CANDIDATES = 10
 
   override def build(trSet: Seq[Pattern]) = {
     Tempo.start

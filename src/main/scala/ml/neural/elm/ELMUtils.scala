@@ -77,8 +77,8 @@ object ELMUtils {
     val Ht = new DenseMatrix(Alfat.numRows(), Xt.numColumns())
     val H = new DenseMatrix(Ht.numColumns(), Ht.numRows())
     Alfat.mult(Xt, Ht)
+    addToEachLineOnMatrixAndApplyf(Ht, biases, sigm2)
     Ht.transpose(H)
-    addToEachLineOnMatrixAndApplyf(H, biases, sigm2)
     (H, Ht)
   }
 }

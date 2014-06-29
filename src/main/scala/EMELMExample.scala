@@ -1,5 +1,4 @@
 import ml.classifiers._
-import ml.classifiers.interaELMExample._
 import util.{Datasets, Tempo}
 
 /*
@@ -44,7 +43,7 @@ object EMELMExample extends App {
     case Left(str) => println("Could not load " + dataset + " dataset from the program path: " + str); sys.exit(0)
   }).take(1000)
 
-  util.Datasets.kfoldCV(data, k = 10, parallel = true) { (trainingSet, testingSet, fold, _) =>
+  util.Datasets.kfoldCV(data, k = 10, parallel = false) { (trainingSet, testingSet, fold, _) =>
     val elm = OSELM(L = 16, seed = currentSeed)
     val emelm = EMELM(Lmax = 1, seed = currentSeed)
 

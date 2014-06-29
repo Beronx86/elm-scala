@@ -30,7 +30,7 @@ import util.{Tempo, XSRandom}
  * Created by davi on 19/05/14.
  */
 case class CIELM(Lbuild: Int, seed: Int = 42, callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ()) extends ConvexIELMTrait {
-  override val toString = "CIELM "
+  override val toString = "CIELM"
 
   def build(trSet: Seq[Pattern]) = {
     Tempo.start

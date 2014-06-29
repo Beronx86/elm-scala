@@ -18,9 +18,8 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.neural.elm
 
 import ml.Pattern
-import ml.models.{ELMGenericModel, Model}
+import ml.models.{ELMConvergentModel, ELMModel, Model}
 import ml.neural.elm.Data._
-import ml.neural.elm.Math._
 import no.uib.cipr.matrix.DenseMatrix
 import util.XSRandom
 
@@ -30,7 +29,13 @@ import util.XSRandom
 trait ConvergentELM extends ELM {
   val Lbuild: Int
 
-  def build(trSet: Seq[Pattern]) = {
+  protected def cast(model: Model) = model match {
+    case m: ELMModel => m
+    case _ => println("Convergent ELMs require ELMModels.")
+      sys.exit(0)
+  }
+
+  def build(trSet: Seq[Pattern]): ELMModel = {
     val rnd = new XSRandom(seed)
 
     val ninsts = checkEmptyness(trSet)
@@ -45,23 +50,17 @@ trait ConvergentELM extends ELM {
     val Alfat = new DenseMatrix(Lbuild, natts)
     initializeWeights(Alfat, biasesArray, rnd)
 
-    val H = feedHiddent(Xt, Alfat, biasesArray)
-    val Ht = new DenseMatrix(Lbuild, ninsts)
-    H.transpose(Ht)
-    val HtH = new DenseMatrix(Lbuild, Lbuild)
-    Ht.mult(H, HtH)
-    val P = inv(HtH)
-    val pinvH = new DenseMatrix(Lbuild, ninsts)
-    P.mult(Ht, pinvH)
+    val tupleHHt = ELMUtils.feedHiddent(Xt, Alfat, biasesArray)
+    val H = tupleHHt._1
+    val Ht = tupleHHt._2
+    val P = ELMUtils.calculateP(H, Ht)
+
+    val Hinv = new DenseMatrix(Lbuild, ninsts)
+    P.mult(Ht, Hinv)
     val Beta = new DenseMatrix(Lbuild, nclasses)
-    pinvH.mult(Y, Beta)
+    Hinv.mult(Y, Beta)
 
-    //todo:X is transposed/calculated even when it is useless (e.g. for OS-ELM)! lazy is ineffective in call-by-value
-    val X = new DenseMatrix(Xt.numColumns(), Xt.numRows())
-    Xt.transpose(X)
-    //    println(getClass.getName.split('.').last + ": "+ Xt.get(0,0) + " tr: "+trSet)
-
-    ELMGenericModel(rnd, Alfat, biasesArray, H, P, Beta, X, Y, pinvH)
+    ELMConvergentModel(rnd, Alfat, biasesArray, Beta, H, Ht, Hinv, P, ninsts, Xt, Y)
   }
 
   /**
@@ -190,11 +189,11 @@ trait ConvergentELM extends ELM {
    */
   protected def fPRESS(HATvalue: Double)(error: Double) = error / (1 - HATvalue)
 
-  protected def cast(model: Model) = model match {
-    case m: ELMGenericModel => m
-    case _ => println("Convergent ELMs require ELMGenericModel.")
-      sys.exit(0)
-  }
+  //  protected def cast(model: Model) = model match {
+  //    case m: ELMGenericModel => m
+  //    case _ => println("Convergent ELMs require ELMGenericModel.")
+  //      sys.exit(0)
+  //  }
 
   protected def errorMatrix(H: DenseMatrix, Beta: DenseMatrix, Y: DenseMatrix) = {
     val Prediction = new DenseMatrix(H.numRows(), Beta.numColumns())

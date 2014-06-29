@@ -17,9 +17,14 @@ Copyright (C) 2014 Davi Pereira dos Santos
 */
 package ml.mtj
 
-import no.uib.cipr.matrix.{DenseVector, DenseMatrix}
+import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
 
 class DenseMatrix2(data: Array[Double]) extends DenseMatrix(new DenseVector(data, false), false) {
+  def setAsRowVector() = {
+    numRows = 1
+    numColumns = data.size
+  }
+
   //  def setData(data:Array[Double]) {
   //    this.data
   //  }
@@ -46,7 +51,7 @@ class DenseMatrix2(data: Array[Double]) extends DenseMatrix(new DenseVector(data
     numColumns = columns
   }
 
-//  override def forEach(action: Consumer[_ >: MatrixEntry]): Unit = ???
-//
-//  override def spliterator(): Spliterator[MatrixEntry] = ???
+  //  override def forEach(action: Consumer[_ >: MatrixEntry]): Unit = ???
+  //
+  //  override def spliterator(): Spliterator[MatrixEntry] = ???
 }

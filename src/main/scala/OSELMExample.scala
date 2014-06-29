@@ -55,7 +55,7 @@ object OSELMExample extends App {
 
     val (osmodel, ost) = Tempo.timev {
       val firstModel = oselm.build(trainingSet.take(20))
-      trainingSet.drop(20).foldLeft(firstModel)((m, p) => oselm.update(m)(p))
+      trainingSet.drop(20).foldLeft(firstModel)((m, p) => ???) //oselm.update(m)(p))
     }
     val osacc = osmodel.accuracy(testingSet).formatted("%2.2f")
     println("Fold " + fold + ".  OSELM: " + osacc + " in " + ost + "ms.    " + "ELM: " + acc + " in " + t + "ms.")

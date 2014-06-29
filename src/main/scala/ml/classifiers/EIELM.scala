@@ -17,7 +17,7 @@ Copyright (C) 2014 Davi Pereira dos Santos
 */
 package ml.classifiers
 
-import ml.models.{ELMGenericModel, Model}
+import ml.models.{ELMSimpleModel, Model}
 import ml.neural.elm.IELMTrait
 import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
 import util.XSRandom
@@ -25,7 +25,7 @@ import util.XSRandom
 /**
  * Created by davi on 24/05/14.
  */
-case class EIELM(Lbuild: Int, seed: Int = 42, callf: Boolean = false, f: (ELMGenericModel, Double) => Unit = (tmp: Model, tmpt: Double) => ())
+case class EIELM(Lbuild: Int, seed: Int = 42, callf: Boolean = false, f: (ELMSimpleModel, Double) => Unit = (tmp: Model, tmpt: Double) => ())
   extends IELMTrait {
   override val toString = "EIELM"
   val CANDIDATES = 10
@@ -76,4 +76,6 @@ case class EIELM(Lbuild: Int, seed: Int = 42, callf: Boolean = false, f: (ELMGen
     e.zip(newe).foreach { case (a, b) => a.set(b)}
     (weights, bias, h, beta)
   }
-}//rnd ok
+}
+
+//rnd ok

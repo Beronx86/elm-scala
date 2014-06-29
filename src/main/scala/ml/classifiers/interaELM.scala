@@ -18,7 +18,7 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.classifiers
 
 import ml.Pattern
-import ml.models.{ELMGenericModel, Model}
+import ml.models.{ELMModel, Model}
 
 /**
  * Grows network from 1 to Lmax according to arriving instances.
@@ -37,10 +37,11 @@ case class interaELM(Lmax: Int, seed: Int = 42) extends ConvergentIncremental wi
   override def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
     val m = super.update(model)(pattern)
     ???
-    if (math.sqrt(m.N + 1).toInt > math.sqrt(m.N).toInt) modelSelection(m) else m
+    if (math.sqrt(m.N + 1).toInt > math.sqrt(m.N).toInt) ??? /*modelSelection(m)*/ else m
   }
 
-  protected def modelSelection(model: ELMGenericModel) = {
+  protected def modelSelection(model: ELMModel) = {
+    //todo: analyse which matrices can be reused along all growing (i.e. they don't change size and need not be kept intact as candidate for the final model)
     var m = model
     val (_, best) = 1 to Lmax map { L =>
       if (L > 1) m = growByOne(m)
@@ -59,221 +60,9 @@ case class interaELM(Lmax: Int, seed: Int = 42) extends ConvergentIncremental wi
 
 
 /*
-========================================================
-
-package ml.neural.old
-
-import ml.Pattern
-import no.uib.cipr.matrix.Matrix.Norm
-import no.uib.cipr.matrix._
-
-/**
- * Essas demoram mais pra dar matriz singular (ao incrementar L):
- * /usr/lib/lapack/liblapack.so.3
- * /usr/lib/libblas/libblas.so.3
- * @param hiddenLayerSize
- * @param patterns
- * @param seed
- */
-case class OSELMold(hiddenLayerSize: Int, patterns: Seq[Pattern], seed: Int, testRank: Boolean = false, QR: Boolean = false)
-  extends ELMtrait {
-  var denPRESS = 0d
-  patterns2matrices(patterns)
-  initializeWeights()
-  if (QR) buildQR() else build()
-
-  /**
-   * Moore-Penrose generalized inverse matrix.
-   * Evita ill-conditioned matrices, i.e. singular ones (det = 0).
-   * Based on the Java code, which was based on Huang Matlab code.
-   * Theory:Ridge regression
-   * MP(A) = inv((H'*H+lumda*I))*H'
-   * @return (M0, pseudo-inverse) M0 is used for incremental learning (OS-ELM)
-   */
-  val lumda = 0.0
-
-  /**
-   * nothing in this class is thread safe
-   * not even the resulting array
-   * use .toList to avoid problems
-   * @param pattern
-   * @return
-   */
-  def distribution(pattern: Pattern) = {
-    val data = squashedOutput(pattern)
-    val Tinc = new DenseVector(data, false)
-    val divBySum = 1 / data.sum
-    Tinc.scale(divBySum)
-    //    println(data.toList)
-    data
-  }
-
-  /**
-   * Good to put outputs inside [0,1] interval for probability estimation.
-   * @param pattern
-   * @return
-   */
-  def squashedOutput(pattern: Pattern) = {
-    calculateHinc(pattern.arraymtj, testHincm, testHinc)
-    outputLayert.mult(testHinc, Tinc)
-    val Ox1 = new DenseVector(nclasses)
-    outputLayert.mult(testHinc, Ox1)
-
-    //Aplica sigmoide na camada de saida.
-    i = 0
-    var v = 0d
-    while (i < Ox1.size) {
-      v = sigm(Ox1.get(i) * 2 - 1)
-      Ox1.set(i, v)
-      i += 1
-    }
-    Ox1.getData
-  }
-
-  def checkAvgStability(p: Pattern) = {
-    val a = predict(p)
-    save()
-    increment(p)
-    decrement(p)
-    val b = predict(p)
-    restore()
-    a == b
-  }
-
-  def checkStability(p: Pattern) = {
-    val a = p.label_array.zip(output(p)).map {
-      case (a, b) => a - b
-    }.toList
-    save()
-    increment(p)
-    val b = PRESSarray(p).toList
-    restore()
-    Datasets.dist(a, b)
-  }
-
-  def denPRESSaccuracy(testSet: Seq[Pattern]) = {
-    denPRESS = 0
-    val n = testSet.length.toDouble
-    (testSet count PRESShit) / n
-    denPRESS / n
-  }
-
-  def PRESSsqrt(p: Pattern) = {
-    calculateHinc(p.arraymtj, Hincm, Hinc)
-    outputLayert.mult(Hinc, Tinc)
-    val output = Tinc.getData
-
-    val h = Hinc
-    val Pkt = Pk.transpose()
-    val hP = new DenseVector(hiddenLayerSize)
-    Pkt.mult(h, hP)
-    val hPh = hP.dot(h) //.round
-    val den = 1 - hPh
-    var totalpress = 0d
-    var o = 0
-    //    var idx = -1
-    while (o < p.nclasses) {
-      //      val tmp = (output(o)) / den
-      val tmp = (p.label_array(o) - output(o)) / den
-      val press = tmp.abs //* tmp
-      //      if (press > maxpress) {
-      totalpress += press
-      //        idx = o
-      //      }
-      o += 1
-    }
-    //    if (maxpress < 0.5) 1d else 0d
-    totalpress / p.nclasses
-  }
-
-  def denPRESS0(p: Pattern) = {
-    calculateHinc(p.arraymtj, Hincm, Hinc)
-    outputLayert.mult(Hinc, Tinc)
-    val h = Hinc
-    val Pkt = Pk.transpose()
-    val hP = new DenseVector(hiddenLayerSize)
-    Pkt.mult(h, hP)
-    val hPh = hP.dot(h) //.round
-    val den = 1 - hPh
-    den.abs
-  }
-
-  def PRESSaccuracy(testSet: Seq[Pattern]) = {
-    denPRESS = 0
-    (testSet count PRESShit) / testSet.length.toDouble
-  }
-
-  def PRESScru(testSet: Seq[Pattern]) = {
-    (testSet map PRESShitcru).toList
-  }
-
-
-  def PRESShit(p: Pattern) = {
-    calculateHinc(p.arraymtj, Hincm, Hinc)
-    outputLayert.mult(Hinc, Tinc)
-    val output = Tinc.getData
-    val h = Hinc
-    val Pkt = Pk.copy()
-    Pk.transpose(Pkt)
-    val hP = new DenseVector(hiddenLayerSize)
-    Pkt.mult(h, hP)
-    val hPh = hP.dot(h)
-    val den = 1 - hPh
-    denPRESS += den.abs
-    var o = 0
-    val a = new Array[Double](nclasses)
-    while (o < p.nclasses) {
-      a(o) = (p.label_array(o) - output(o)) / den
-      o += 1
-    }
-    p.label_array.zip(a).map {
-      case (u, v) => u - v
-    }.toList.zipWithIndex.max._2 == p.label
-  }
-
-  def PRESSarray(p: Pattern) = {
-    calculateHinc(p.arraymtj, Hincm, Hinc)
-    outputLayert.mult(Hinc, Tinc)
-    val output = Tinc.getData
-    val h = Hinc
-    val Pkt = Pk.transpose()
-    val hP = new DenseVector(hiddenLayerSize)
-    Pkt.mult(h, hP)
-    val hPh = hP.dot(h)
-    val den = 1 - hPh
-    var o = 0
-    val a = new Array[Double](nclasses)
-    while (o < p.nclasses) {
-      a(o) = (p.label_array(o) - output(o)) / den
-      o += 1
-    }
-    a
-  }
-
-  def PRESShitcru(p: Pattern) = {
-    calculateHinc(p.arraymtj, Hincm, Hinc)
-    outputLayert.mult(Hinc, Tinc)
-    val output = Tinc.getData
-    val h = Hinc
-    val Pkt = Pk.copy()
-    Pk.transpose(Pkt)
-    val hP = new DenseVector(hiddenLayerSize)
-    Pkt.mult(h, hP)
-    val hPh = hP.dot(h)
-    val den = 1 - hPh
-    denPRESS += den.abs
-    var o = 0
-    val a = new Array[Double](nclasses)
-    while (o < p.nclasses) {
-      a(o) = (p.label_array(o) - output(o)) / den
-      o += 1
-    }
-    a.toList.zip(p.label_array).map{case(a,b)=>b-a}
-    //    (p.label, a.toList.map(_ / a.sum))
-  }
-
+====
   def rank = {
-    ??? //how to define zero?
+    ??? //how to define which value is "zero enough"?
     val svd = new SVD(H.numRows(), H.numColumns())
     val s = svd.factor(H)
     //    val U = s.getU()
@@ -289,76 +78,6 @@ case class OSELMold(hiddenLayerSize: Int, patterns: Seq[Pattern], seed: Int, tes
       i += 1
     }
     r
-  }
-
-  private def pinvpre(H0: DenseMatrix, H0T: DenseMatrix, H0TH0_1: DenseMatrix) = {
-    //H0TH0.add(lumda, I) //this modifies H0TH0!
-    val tmp_LxL = new DenseMatrix(hiddenLayerSize, hiddenLayerSize)
-    try {
-      //      H0TH0.solve(ILxL, tmp_LxL)
-      val pseudo_inverse = new DenseMatrix(hiddenLayerSize, H0.numRows)
-      //      tmp_LxL.mult(H0T, pseudo_inverse)
-      H0TH0_1.mult(H0T, pseudo_inverse)
-      pseudo_inverse
-    } catch {
-      case e: MatrixSingularException => println("L=" + hiddenLayerSize + "N=" + ninsts + ". Singular matrix:\n" + H0TH0_1)
-        sys.exit(0)
-    }
-  }
-
-  private def build() {
-    transP.transpose(P)
-    T.transpose(Tt)
-    hiddenLayer.mult(P, tempH)
-    tempH.add(BiasMatrix)
-
-    //Calculate H and Ht.
-    i = 0
-    while (i < hiddenLayerSize) {
-      j = 0
-      while (j < ninsts) {
-        Ht.set(i, j, sigm2(tempH.get(i, j)))
-        j += 1
-      }
-      i += 1
-    }
-    Ht.transpose(H)
-    Ht.mult(H, H0tH0_LxL)
-    val P0 = invLxL(H0tH0_LxL)
-    pinvH = if (testRank) pinvSVD(H.copy()) else pinvpre(H, Ht, P0.copy()) //precisa ser pinv pois a matriz raramente vai ser quadrada
-    pinvH.mult(T, outputLayer)
-    outputLayer.transpose(outputLayert)
-    Pk = P0
-
-    //create BiasMatrixinc for tests and for increments
-    i = 0
-    while (i < hiddenLayerSize) {
-      BiasMatrixinc.set(i, BiasMatrix.get(i, 0))
-      i += 1
-    }
-  }
-
-  def invLxL(A: Matrix) = {
-    val tmp_LxL = new DenseMatrix(hiddenLayerSize, hiddenLayerSize)
-    try {
-      A.solve(ILxL, tmp_LxL)
-      tmp_LxL
-    } catch {
-      case e: MatrixSingularException => println("L=" + hiddenLayerSize + "N=" + ninsts + ". Singular matrix:\n" + A)
-        sys.exit(0)
-    }
-  }
-
-  def invNxN(A: Matrix) = {
-    A.solve(INxN, tmp_NxN)
-    tmp_NxN
-  }
-
-  def inv(A: Matrix) = {
-    val I = Matrices.identity(A.numRows())
-    val tmp = A.copy()
-    A.solve(I, tmp)
-    tmp
   }
 
   def incChunk(patternschunk: Seq[Pattern]) {
@@ -480,73 +199,6 @@ case class OSELMold(hiddenLayerSize: Int, patterns: Seq[Pattern], seed: Int, tes
     }
     incChunk(patternschunk)
   }
-
-  protected def calculateHinc(p: DenseVector, Hmat: DenseMatrix, Hvec: DenseVector) {
-    hiddenLayer.mult(p, tempHinc) //LxE Ex1 = Lx1
-    tempHinc.add(BiasMatrixinc) //Lx1
-    //Aplica sigmoide na camada oculta.
-    i = 0
-    var v = 0d
-    while (i < hiddenLayerSize) {
-      v = sigm2(tempHinc.get(i))
-      Hmat.set(0, i, v)
-      Hvec.set(i, v)
-      i += 1
-    }
-  }
-
-  /**
-   * OS-ELM one-by-one incremental steps.
-   * inputs: hiddenLayer BiasMatrixinc Pk outputLayert outputLayer
-   * changes: Hincm Hinc tempHinc Ainc tmp_LxLinc newPinc Pk tmp_1xOinc tmp_1xOincm newOutputLayerinc outputLayer outputLayert
-   */
-  def inc(p: DenseVector, tt: DenseVector) {
-    calculateHinc(p, Hincm, Hinc) //cpu 7%
-    System.arraycopy(tt.getData, 0, tincm.getData, 0, nclasses)
-
-    //P update
-    Pk.mult(Hinc, Ainc) //cpu 39%  LxL Lx1 = Lx1
-
-    val tmp = Hinc.dot(Ainc)
-    val factor = -1 / (1 + tmp)
-
-    Aincm.mult(Hincm, tmp_LxL2)
-    tmp_LxL2.mult(Pk, newPinc)
-    newPinc.scale(factor)
-    newPinc.add(Pk) //cpu 11%
-    Pk.set(newPinc)
-
-    //cpu 40%
-    Hincm.mult(outputLayer, tmp_1xOincm)
-    tmp_1xOincm.scale(-1)
-    tmp_1xOincm.add(tincm)
-    newPinc.mult(Hinc, Ainc) //reuses A's memory space
-    Aincm.mult(tmp_1xOincm, newOutputLayerinc) //Am is updated when A changes
-    newOutputLayerinc.add(outputLayer)
-    outputLayer.set(newOutputLayerinc)
-    outputLayer.transpose(outputLayert)
-  }
-
-  def decrement(pattern: Pattern) {
-    val transP = pattern.arraymtj
-    val t = pattern.reversed_weighted_label_array_mtj
-    inc(transP, t)
-  }
-
-  def increment(pattern: Pattern) {
-    //cpu 97%
-    val p = pattern.arraymtj
-    val tt = pattern.weighted_label_array_mtj
-    inc(p, tt)
-  }
-
-  //    //Converts OutputWeight to Layer format.
-  //    for ((neuron, ne) <- layers(1).neurons.zipWithIndex) {
-  //      val tmp = neuron.weights.length - 1
-  //      0 until tmp foreach {
-  //        we => neuron.weights(we) = Beta0.get(we, ne)
-  //      }
-  //    }
 
   private def pinvSVD(H0: DenseMatrix) = {
     val rows = H0.numRows()

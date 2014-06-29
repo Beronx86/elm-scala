@@ -18,7 +18,7 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.classifiers
 
 import ml.Pattern
-import ml.models.{ELMGenericModel, Model}
+import ml.models.{ELMSimpleModel, Model}
 import ml.mtj.ResizableDenseMatrix
 import ml.neural.elm.ConvexIELMTrait
 import ml.neural.elm.Data._
@@ -55,11 +55,11 @@ case class CIELM(Lbuild: Int, seed: Int = 42, callf: Boolean = false, f: (Model,
       l += 1
       val te = Tempo.stop
       Tempo.start
-      f(ELMGenericModel(newRnd, Alfat, biases, null, null, Beta, null, null, null), te)
+      f(ELMSimpleModel(newRnd, Alfat, biases, Beta, ninsts), te)
     }
     //    Alfat.resizeRows(l)
     //    Beta.resizeRows(l)
-    val model = ELMGenericModel(rnd, Alfat, biases, null, null, Beta, null, null, null)
+    val model = ELMSimpleModel(rnd, Alfat, biases, Beta, ninsts)
     model
   } //rnd ok
 

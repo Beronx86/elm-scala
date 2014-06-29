@@ -43,7 +43,7 @@ case class interaELM(Lmax: Int, seed: Int = 42) extends ConvergentIncremental wi
   protected def modelSelection(model: ELMModel) = {
     //todo: analyse which matrices can be reused along all growing (i.e. they don't change size and need not be kept intact as candidate for the final model)
     var m = model
-    val (_, best) = 1 to Lmax map { L =>
+    val (_, best) = 1 to math.min(m.N / 2, Lmax) map { L =>
       if (L > 1) m = growByOne(m)
       val H = m.H
       val Beta = m.Beta

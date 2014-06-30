@@ -18,22 +18,26 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.neural.elm
 
 import no.uib.cipr.matrix.{DenseMatrix, DenseVector, Matrices}
+import util.Lock
 
 import scala.collection.mutable
 
 /**
  * Created by davi on 23/05/14.
  */
-object Math {
+object Math extends Lock {
   val IMap = mutable.LinkedHashMap[Int, DenseMatrix]()
 
   /**
    * The identity matrix is immutable by definition.
+   * This function is thread-safe (with global lock).
    * @param n
    */
   def identity(n: Int) = {
+    acquire()
     val r = IMap.getOrElse(n, Matrices.identity(n))
     if (IMap.size > 20) IMap.drop(5)
+    release()
     r
   }
 

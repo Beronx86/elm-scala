@@ -17,10 +17,9 @@ Copyright (C) 2014 Davi Pereira dos Santos
 */
 package ml.neural.elm
 
-import no.uib.cipr.matrix._
 import ml.Pattern
-import util.{Datasets, XSRandom, Tempo}
-import scala.util.Random
+import no.uib.cipr.matrix._
+import util.{Datasets, Tempo, XSRandom}
 
 /**
  * Stateful EMELM
@@ -340,8 +339,6 @@ case class EMELM(patterns: Seq[Pattern], seed: Int, SVD: Boolean = false) {
     Sinv
   }
 }
-
-//rnd ok mutable
 
 object EMTest extends App {
   val dataset = "iris.arff"

@@ -25,8 +25,8 @@ import ml.neural.elm.Data._
 import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
 import util.{Tempo, XSRandom}
 
-case class ECIELM(Lbuild: Int, seed: Int = 42, callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ()) extends ConvexIELMTrait {
-  override val toString = "ECIELM"
+case class ECIELM(Lbuild: Int, seed: Int = 42, notes: String = "", callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ()) extends ConvexIELMTrait {
+  override val toString = "ECIELM_" + notes
   val CANDIDATES = 10
 
   override def build(trSet: Seq[Pattern]) = {

@@ -17,21 +17,17 @@ Copyright (C) 2014 Davi Pereira dos Santos
 */
 package ml.classifiers
 
-import ml.neural.elm.{IteratedBuildELM, IELMTrait, ELM}
-import ml.Pattern
 import ml.models.Model
-import ml.neural.elm.Data._
-import ml.mtj.ResizableDenseMatrix
-import no.uib.cipr.matrix.{DenseVector, DenseMatrix}
+import ml.neural.elm.IELMTrait
+import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
 import util.XSRandom
-import scala.util.Random
 
 /**
  * Created by davi on 24/05/14.
  */
-case class IELM(Lbuild: Int, seed: Int = 42, callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ())
+case class IELM(Lbuild: Int, seed: Int = 42, notes: String = "", callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ())
   extends IELMTrait {
-  override val toString = "IELM"
+  override val toString = "IELM_" + notes
 
   protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Array[DenseVector], tmp: DenseVector) = {
     val (weights, bias, newRnd) = newNode(X.numColumns(), rnd)
@@ -63,4 +59,6 @@ case class IELM(Lbuild: Int, seed: Int = 42, callf: Boolean = false, f: (Model, 
     }
     (h, beta)
   }
-}//rnd ok
+}
+
+//rnd ok

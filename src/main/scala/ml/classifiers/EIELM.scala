@@ -25,9 +25,9 @@ import util.XSRandom
 /**
  * Created by davi on 24/05/14.
  */
-case class EIELM(Lbuild: Int, seed: Int = 42, callf: Boolean = false, f: (ELMSimpleModel, Double) => Unit = (tmp: Model, tmpt: Double) => ())
+case class EIELM(Lbuild: Int, seed: Int = 42, notes: String = "", callf: Boolean = false, f: (ELMSimpleModel, Double) => Unit = (tmp: Model, tmpt: Double) => ())
   extends IELMTrait {
-  override val toString = "EIELM"
+  override val toString = "EIELM_" + notes
   val CANDIDATES = 10
 
   protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Array[DenseVector], tmp: DenseVector) = createNodeAmongCandidates(rnd, X, e, tmp)

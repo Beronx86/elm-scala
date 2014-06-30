@@ -29,8 +29,8 @@ import util.{Tempo, XSRandom}
  * CI-ELM
  * Created by davi on 19/05/14.
  */
-case class CIELM(Lbuild: Int, seed: Int = 42, callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ()) extends ConvexIELMTrait {
-  override val toString = "CIELM"
+case class CIELM(Lbuild: Int, seed: Int = 42, notes: String = "", callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ()) extends ConvexIELMTrait {
+  override val toString = "CIELM_" + notes
 
   def build(trSet: Seq[Pattern]) = {
     Tempo.start

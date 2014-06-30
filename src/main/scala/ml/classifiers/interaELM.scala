@@ -25,8 +25,8 @@ import ml.models.{ELMModel, Model}
  * @param Lmax
  * @param seed
  */
-case class interaELM(Lmax: Int, seed: Int = 42) extends ConvergentIncremental with ConvergentGrowing {
-  override val toString = "interaELM"
+case class interaELM(Lmax: Int, seed: Int = 42, notes: String = "") extends ConvergentIncremental with ConvergentGrowing {
+  override val toString = "interaELM_" + notes
   val Lbuild = 1
 
   override def build(trSet: Seq[Pattern]) = {

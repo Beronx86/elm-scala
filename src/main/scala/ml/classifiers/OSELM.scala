@@ -24,7 +24,7 @@ package ml.classifiers
  * @param L
  * @param seed
  */
-case class OSELM(L: Int, seed: Int = 42) extends ConvergentIncremental {
-  override val toString = "OSELM"
+case class OSELM(L: Int, seed: Int = 42, notes: String = "") extends ConvergentIncremental {
+  override val toString = "OSELM_" + notes
   val Lbuild = L
 }

@@ -28,19 +28,8 @@ trait ConvergentGrowing extends ConvergentELM {
   def growByOne(model: Model, fast_mutable: Boolean = false) = {
     //    if (fast_mutable) {      println("fastmut"); val bla = ???    } else Unit
     val m = cast(model)
-    val ym = m.Y
-    val rnd = m.rnd
-    val Alfat = m.Alfat
-    val biases = m.biases
-    val hminv = m.Hinv
-    val H = m.H
-    val hhinv = m.HHinv
-
-    val (newAlfat, newBiases, newH, newHinv, newBeta, newRnd) = grow(rnd, H, m.Xt, ym, hminv, Alfat, biases, hhinv)
-
-    //    println(getClass.getName.split('.').last + ": " + newHinv.get(0, 0))
-
-    ELMGroModel(newRnd, newAlfat, newBiases.getData, newBeta, m.Xt, ym, newH, newHinv)
+    val (newAlfat, newBiases, newH, newHinv, newBeta, newRnd) = grow(m.rnd, m.H, m.Xt, m.Y, m.Hinv, m.Alfat, m.biases, m.HHinv)
+    ELMGroModel(newRnd, newAlfat, newBiases.getData, newBeta, m.Xt, m.Y, newH, newHinv)
   }
 
   def growTo(desiredL: Int, model: Model, fast_mutable: Boolean = false) = {
@@ -52,30 +41,24 @@ trait ConvergentGrowing extends ConvergentELM {
    * Fast and cheap.
    * @param m
    */
-  def mPlusIdentity(m: DenseMatrix) {
+  def identMinusM(m: DenseMatrix) {
     val d = m.getData
-    val l = d.size
-    var c = 0
+    //    m.zero()
     var gap = m.numRows() + 1
+    val l = d.size - 1
+    var c = 0
+    var cc = 0
     while (c < l) {
-      d(c) += 1
+      d(c) = 1 - d(c)
+      cc = 1
+      while (cc < gap - 1) {
+        d(c + cc) = 0 - d(c + cc)
+        cc += 1
+      }
       c += gap
     }
-  }
-
-  /**
-   * Fast and cheap.
-   * @param m
-   */
-  def mMinusIdentity(m: DenseMatrix) {
-    val d = m.getData
-    val l = d.size
-    var c = 0
-    var gap = m.numRows() + 1
-    while (c < l) {
-      d(c) -= 1
-      c += gap
-    }
+    d(l) = 1 - d(l)
+    //    println(m)
   }
 
   /**
@@ -96,16 +79,15 @@ trait ConvergentGrowing extends ConvergentELM {
 
     //    val I = Matrices.identity(HHinv.numRows())
     val I_HHinv = HHinv //.add(-1, I)
-    mMinusIdentity(I_HHinv)
-    val tmpt = newhm1XN
+    identMinusM(I_HHinv)
 
     val num = new DenseMatrix(1, H.numRows())
-    tmpt.mult(I_HHinv, num)
-    mPlusIdentity(I_HHinv) //recovers original value
+    newhm1XN.mult(I_HHinv, num)
+    //    identMinusM(I_HHinv) //recovers original value
 
-    val tmp2 = new DenseVector(1)
-    num.mult(newh, tmp2)
-    val factor = 1 / tmp2.get(0)
+    val deno = new DenseVector(1)
+    num.mult(newh, deno)
+    val factor = 1 / deno.get(0)
     num.scale(factor)
     val D = num //1xN
 

@@ -37,17 +37,21 @@ trait ConvergentELM extends ELM {
 
   def build(trSet: Seq[Pattern]): ELMModel = {
     val rnd = new XSRandom(seed)
-
     val ninsts = checkEmptyness(trSet)
-    checkFullRankness(trSet, ninsts)
-    val natts = trSet.head.nattributes
-    val nclasses = trSet.head.nclasses
+    checkFullRankness(ninsts)
     val t = patterns2matrices(trSet, ninsts)
     val Xt = t._1
     val Y = t._2
-    val biasesArray = new Array[Double](Lbuild)
-    //    val Alfa = new DenseMatrix(Lbuild, natts)
-    val Alfat = new DenseMatrix(Lbuild, natts)
+    buildCore(Lbuild, Xt, Y, rnd)
+  }
+
+  protected def buildCore(L: Int, Xt: DenseMatrix, Y: DenseMatrix, rnd: XSRandom) = {
+    val ninsts = Xt.numColumns()
+    val natts = Xt.numRows()
+    val nclasses = Y.numColumns()
+    val biasesArray = new Array[Double](L)
+    //    val Alfa = new DenseMatrix(L, natts)
+    val Alfat = new DenseMatrix(L, natts)
     initializeWeights(Alfat, biasesArray, rnd)
 
     val tupleHHt = ELMUtils.feedHiddent(Xt, Alfat, biasesArray)
@@ -55,9 +59,9 @@ trait ConvergentELM extends ELM {
     val Ht = tupleHHt._2
     val P = ELMUtils.calculateP(H, Ht)
 
-    val Hinv = new DenseMatrix(Lbuild, ninsts)
+    val Hinv = new DenseMatrix(L, ninsts)
     P.mult(Ht, Hinv)
-    val Beta = new DenseMatrix(Lbuild, nclasses)
+    val Beta = new DenseMatrix(L, nclasses)
     Hinv.mult(Y, Beta)
 
     ELMConvergentModel(rnd, Alfat, biasesArray, Beta, H, Ht, Hinv, P, ninsts, Xt, Y)
@@ -66,11 +70,10 @@ trait ConvergentELM extends ELM {
   /**
    * This is not a problem for I-ELM and variants, but is needed for OS-ELM (and EM-ELM?).
    * At the moment the test is fast, i.e. it doesn't really check the rank.
-   * @param trSet
    * @param ninsts
    * @return
    */
-  protected def checkFullRankness(trSet: Seq[Pattern], ninsts: Int) {
+  protected def checkFullRankness(ninsts: Int) {
     if (ninsts < Lbuild) {
       println("ERROR: Training set size (" + ninsts + ") is lesser than L (" + Lbuild + ")!")
       sys.exit(0)

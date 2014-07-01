@@ -22,13 +22,11 @@ import ml.models.Model
 
 /**
  * Grows network from 1 to Lmax.
- * @param Lmax
  * @param seed
  */
 // todo: It performs batch learning, i.e. retrains from scratch to accomodate new instances.
-case class EMELM(Lmax: Int, seed: Int = 42, notes: String = "") extends ConvergentGrowing {
+case class EMELM(Lbuild: Int, seed: Int = 42, notes: String = "") extends ConvergentGrowing {
   override val toString = "EMELM_" + notes
-  val Lbuild = 1
 
   def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
     println("EM-ELM does not accept update() for now. It could perform an entire rebuild.")

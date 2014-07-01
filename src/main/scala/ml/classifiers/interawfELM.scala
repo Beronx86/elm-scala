@@ -20,22 +20,25 @@ package ml.classifiers
 import ml.models.ELMModel
 
 /**
- * Grows network from 1 to Lmax according to arriving instances.
- * @param Lmax
+ * Grows network from 1.
+ * L changes monotonically.
+ * @param deltaL
  * @param seed
  */
-case class interaELM(Lmax: Int, seed: Int = 42, notes: String = "") extends interaTrait {
-  override val toString = "interaELM_" + notes
+case class interawfELM(deltaL: Int, seed: Int = 42, notes: String = "") extends interaTrait {
+  override val toString = "interawfELM_" + notes
 
   protected def modelSelection(model: ELMModel) = {
     //todo: analyse which matrices can be reused along all growing (i.e. they don't change size and need not be kept intact as candidate for the final model)
     var m = model
-    val (_, best) = (1 to math.min(m.N / 2, Lmax) map { L =>
-      if (L > 1) m = growByOne(m)
+    val min = m.L
+    val max = math.min(m.L + deltaL, m.N)
+    val (_, best) = (min to max) map { L =>
+      if (L > min) m = growByOne(m)
       val E = errorMatrix(m.H, m.Beta, m.Y)
       val press = LOOError(m.Y)(E)(m.HHinv) //PRESS(E)(HHinv)
       (press, m)
-    }) minBy (_._1)
+    } minBy (_._1)
     best
   }
 }

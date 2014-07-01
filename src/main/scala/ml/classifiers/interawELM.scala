@@ -18,24 +18,30 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.classifiers
 
 import ml.models.ELMModel
+import util.XSRandom
 
 /**
- * Grows network from 1 to Lmax according to arriving instances.
- * @param Lmax
+ * Grows network from 1.
+ * L1 changes dynamically in [L0 - deltaL; L0 + deltaL].
+ * @param deltaL
  * @param seed
  */
-case class interaELM(Lmax: Int, seed: Int = 42, notes: String = "") extends interaTrait {
-  override val toString = "interaELM_" + notes
+case class interawELM(deltaL: Int, seed: Int = 42, notes: String = "") extends interaTrait {
+  override val toString = "interawELM_" + notes
 
   protected def modelSelection(model: ELMModel) = {
     //todo: analyse which matrices can be reused along all growing (i.e. they don't change size and need not be kept intact as candidate for the final model)
     var m = model
-    val (_, best) = (1 to math.min(m.N / 2, Lmax) map { L =>
-      if (L > 1) m = growByOne(m)
-      val E = errorMatrix(m.H, m.Beta, m.Y)
-      val press = LOOError(m.Y)(E)(m.HHinv) //PRESS(E)(HHinv)
-      (press, m)
-    }) minBy (_._1)
+    val previousL = m.L
+    val min = math.max(1, m.L - deltaL)
+    val max = math.min(m.L + deltaL, m.N)
+    if (m.L != min) m = buildCore(min, m.Xt, m.Y, new XSRandom(seed)) //m entra na dança na vez de L=min no loop
+    val (_, best) = (min to max) map { L =>
+        if (L > min && previousL != L) m = growByOne(m)
+        val E = errorMatrix(m.H, m.Beta, m.Y)
+        val press = LOOError(m.Y)(E)(m.HHinv) //PRESS(E)(HHinv)
+        (press, m)
+      } minBy (_._1)
     best
   }
 }

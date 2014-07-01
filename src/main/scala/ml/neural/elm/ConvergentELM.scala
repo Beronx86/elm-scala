@@ -130,7 +130,7 @@ trait ConvergentELM extends ELM {
    */
   protected def PREdictions(Y: DenseMatrix)(E: DenseMatrix)(HHinv: DenseMatrix) = {
     val PredictionMatrix = Y.copy()
-    PredictionMatrix.add(-1, PRESSMatrix(E)(HHinv))
+    PredictionMatrix.add(-1, PREMatrix(E)(HHinv))
     PredictionMatrix
   }
 
@@ -142,31 +142,56 @@ trait ConvergentELM extends ELM {
   /**
    * Calculates the PRESS statistic (Prediction REsidual Sum of Squares) for all outputs/classes.
    * (usually for regressors)
-   * @param E matrix of errors (difference between expected and predicted)
+   * @param E matrix of errors (squared difference between expected and predicted)
    * @param HHinv
    * @return
    */
   protected def PRESS(E: DenseMatrix)(HHinv: DenseMatrix) = {
-    //todo: this can be more efficient, because the loop is also inside PRESSMatrix()
+    //todo: this can be a little more efficient, because the loop is also inside PRESSMatrix()
     val n = HHinv.numRows()
     val nclasses = E.numColumns()
-    val M = PRESSMatrix(E)(HHinv)
+    val M = PREMatrix(E)(HHinv)
     var sum = 0d
     var i = 0
+    val d = M.getData
     while (i < n * nclasses) {
-      sum += M.getData()(i)
+      val v = d(i)
+      sum += v
       i += 1
     }
     sum
   }
 
   /**
-   * Calculates individual PRESS for each instance for each output/class.
+   * Calculates the PRE (Prediction REsidual) for all outputs/classes.
+   * (usually for regressors)
+   * @param E matrix of errors (difference between expected and predicted)
+   * @param HHinv
+   * @return
+   */
+  protected def PRE(E: DenseMatrix)(HHinv: DenseMatrix) = {
+    //todo: this can be a little more efficient, because the loop is also inside PRESSMatrix()
+    val n = HHinv.numRows()
+    val nclasses = E.numColumns()
+    val M = PREMatrix(E)(HHinv)
+    var sum = 0d
+    var i = 0
+    val d = M.getData
+    while (i < n * nclasses) {
+      val v = d(i)
+      sum += v * v
+      i += 1
+    }
+    sum
+  }
+
+  /**
+   * Calculates individual PRE for each instance for each output/class.
    * @param E matrix of errors (difference between expected and predicted)
    * @param HHinv HAT matrix
    * @return N x O matrix of individual PRESS values for each output
    */
-  protected def PRESSMatrix(E: DenseMatrix)(HHinv: DenseMatrix) = {
+  protected def PREMatrix(E: DenseMatrix)(HHinv: DenseMatrix) = {
     val nclasses = E.numColumns()
     val M = new DenseMatrix(E.numRows(), E.numColumns())
     val n = HHinv.numRows()
@@ -175,7 +200,7 @@ trait ConvergentELM extends ELM {
     while (c < nclasses) {
       i = 0
       while (i < n) {
-        M.set(i, c, fPRESS(HHinv.get(i, i))(E.get(i, c)))
+        M.set(i, c, fPRE(HHinv.get(i, i))(E.get(i, c)))
         i += 1
       }
       c += 1
@@ -184,18 +209,12 @@ trait ConvergentELM extends ELM {
   }
 
   /**
-   * Calculates an instance contribution to the PRESS statistic.
+   * Calculates an instance contribution to the PRE (for PRESS statistic).
    * @param HATvalue value in the respective position at the diagonal of HHinv
    * @param error difference between expected and predicted for the respective output
    * @return
    */
-  protected def fPRESS(HATvalue: Double)(error: Double) = error / (1 - HATvalue)
-
-  //  protected def cast(model: Model) = model match {
-  //    case m: ELMGenericModel => m
-  //    case _ => println("Convergent ELMs require ELMGenericModel.")
-  //      sys.exit(0)
-  //  }
+  protected def fPRE(HATvalue: Double)(error: Double) = error / (1 - HATvalue)
 
   protected def errorMatrix(H: DenseMatrix, Beta: DenseMatrix, Y: DenseMatrix) = {
     val Prediction = new DenseMatrix(H.numRows(), Beta.numColumns())

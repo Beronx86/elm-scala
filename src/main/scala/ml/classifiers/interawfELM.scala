@@ -26,7 +26,7 @@ import ml.models.ELMModel
  * @param seed
  */
 case class interawfELM(deltaL: Int, seed: Int = 42, notes: String = "") extends interaTrait {
-  override val toString = "interawfELM_" + notes
+  override val toString = s"interawfELM d${deltaL}_" + notes
 
   protected def modelSelection(model: ELMModel) = {
     //todo: analyse which matrices can be reused along all growing (i.e. they don't change size and need not be kept intact as candidate for the final model)

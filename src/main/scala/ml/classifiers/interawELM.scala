@@ -27,7 +27,7 @@ import util.XSRandom
  * @param seed
  */
 case class interawELM(deltaL: Int, seed: Int = 42, notes: String = "") extends interaTrait {
-  override val toString = "interawELM_" + notes
+  override val toString = s"interawELM d${deltaL}_" + notes
 
   protected def modelSelection(model: ELMModel) = {
     //todo: analyse which matrices can be reused along all growing (i.e. they don't change size and need not be kept intact as candidate for the final model)

@@ -28,7 +28,7 @@ object interaELMExample extends App with ExampleTemplate {
   val l = 20
 
   def kfoldIteration[T](tr0: Seq[Pattern], ts: Seq[Pattern], fold: Int, bla: Int) {
-    val tr = tr0.take(333)
+    val tr = tr0.take(31533)
 
     Tempo.start
     val i = interaELM(l)
@@ -45,12 +45,10 @@ object interaELMExample extends App with ExampleTemplate {
 
     val o = OSELM(l)
     val mo = o.build(tr)
-    println(mo.Beta)
 
     val e = EMELM(1)
     var me = e.build(tr)
     me = e.growTo(l, me)
-    println(me.Beta)
 
     lazy val LOOi = Datasets.LOO(tr) { (trloo, p) =>
       if (interaELM(l) build trloo hit p) 0 else 1

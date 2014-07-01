@@ -47,10 +47,6 @@ case class interaELM(Lmax: Int, seed: Int = 42, notes: String = "") extends Conv
       if (L > 1) m = growByOne(m)
       val E = errorMatrix(m.H, m.Beta, m.Y)
       val press = LOOError(m.Y)(E)(m.HHinv) //PRESS(E)(HHinv)
-      if (L == 2) {
-        println(m.Beta)
-        println("LOOPRESS: " + press + " L: " + L)
-      }
       (press, m)
     }) minBy (_._1)
     best

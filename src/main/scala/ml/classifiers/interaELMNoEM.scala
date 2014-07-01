@@ -48,11 +48,6 @@ case class interaELMNoEM(Lmax: Int, seed: Int = 42, notes: String = "") extends 
       if (L > 1) m = buildCore(L, m.Xt, m.Y, new XSRandom(seed))
       val E = errorMatrix(m.H, m.Beta, m.Y)
       val press = LOOError(m.Y)(E)(m.HHinv) //PRESS(E)(HHinv)
-      if (L == 2) {
-        println(m.Beta)
-        println("LOOPRESS2: " + press + " L: " + L)
-      }
-      //      if (L == 2) sys.exit(0)
       (press, m)
     }) minBy (_._1)
     best

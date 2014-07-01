@@ -58,7 +58,7 @@ trait ConvergentGrowing extends ConvergentELM {
       c += gap
     }
     d(l) = 1 - d(l)
-    //    println(m)
+    //    etln(m)
   }
 
 
@@ -133,7 +133,6 @@ trait ConvergentGrowing extends ConvergentELM {
 
     val newHinv = stackUD(U, D)
     val newBeta = updateBeta(Y, newHinv)
-    println(s"${getClass.getName} rnd:${newRnd.getSeed}")
 
     (newAlfat, newBiases, newH, newHinv, newBeta, newRnd)
   }

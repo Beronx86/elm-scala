@@ -70,8 +70,5 @@ object EMELMExample extends App {
 //  println("os "+ LOOos)
 //  println("em "+ LOOem)
 
-  println("Note that OS-ELM can be faster than ELM due to cache scarcity in the processor." +
-    "When there are no numerical instability, they should behave exactly the same in terms of accuracy.")
+  println("When there are no numerical instability, they should behave exactly the same in terms of accuracy.")
 }
-
-//rnd ok

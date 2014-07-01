@@ -1,7 +1,7 @@
 package ml.classifiers
 
 import ml.Pattern
-import util.Datasets
+import util.{Datasets, Tempo}
 
 /*
 elm-scala: an implementation of ELM in Scala using MTJ
@@ -25,14 +25,20 @@ object interaELMExample extends App with ExampleTemplate {
   val dataset = "banana"
   // "iris"
   val k = 2
-  val l = 18
+  val l = 30
 
   def kfoldIteration[T](tr0: Seq[Pattern], ts: Seq[Pattern], fold: Int, bla: Int) {
-    val tr = tr0.take(800)
+    val tr = tr0.take(333)
+
+    Tempo.start
     val i = interaELM(l)
     val mi = i.build(tr)
+    Tempo.print_stop
 
-
+    Tempo.start
+    val i2 = interaELMNoEM(l)
+    val mi2 = i2.build(tr)
+    Tempo.print_stop
 
     val c = C45()
     val mc = c.build(tr)
@@ -40,22 +46,21 @@ object interaELMExample extends App with ExampleTemplate {
     val o = OSELM(l)
     val mo = o.build(tr)
 
-    val e = EMELM(166)
+    val e = EMELM(1)
     var me = e.build(tr)
     me = e.growTo(l, me)
 
     lazy val LOOi = Datasets.LOO(tr) { (trloo, p) =>
       if (interaELM(l) build trloo hit p) 0 else 1
-    }.sum / data.length.toDouble
+    }.sum / tr.length.toDouble
 
     lazy val LOOos = Datasets.LOO(tr) { (trloo, p) =>
       if (OSELM(l) build trloo hit p) 0 else 1
-    }.sum / data.length.toDouble
-    //    println("LOOPRESSos: " + o.LOOError(mo) + "  LOOPRESSi: " + i.LOOError(mi) + "  LOOos: " + LOOos + "  LOOi: " + LOOi)
+    }.sum / tr.length.toDouble
+    //        println("LOOPRESSos: " + o.LOOError(mo) + "  LOOPRESSi: " + i.LOOError(mi) + "  LOOos: " + LOOos + "  LOOi: " + LOOi)
 
-    println(s"i(${mi.L}): " + mi.accuracy(ts) + "\tc: " + mc.accuracy(ts) + "\to: " + mo.accuracy(ts) + "\te: " + me.accuracy(ts))
-    //    println("i: " + mi.accuracy(ts) + "\to: " + mo.accuracy(ts) + "\te: " + me.accuracy(ts))
-
+    println(s"i(${mi.L}): ${mi.accuracy(ts)} \ti2(${mi2.L}): ${mi2.accuracy(ts)} \tc(-}): ${mc.accuracy(ts)}\to(${o.L}): ${mo.accuracy(ts)}\te(${me.L}): " + me.accuracy(ts))
+    println(s"LOOPRESSi: ${i.LOOError(mi)} LOOPRESSi2: ${i2.LOOError(mi2)}")
   }
 
   run

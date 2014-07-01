@@ -57,7 +57,7 @@ trait ELMModel extends Model {
   def distribution(pattern: Pattern) = ELMUtils.distribution(ELMUtils.test(pattern, Alfat, biases, Beta))
 }
 
-//todo: ELMSimpleModel does not need rnd nor N; I and CI-ELM need updatable versions and the creation of proper specific ELMXXXXModels
+//todo: ELMSimpleModel does not need rnd nor N; I and CI-ELM need updateable versions and the creation of proper specific ELMXXXXModels
 case class ELMSimpleModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], Beta: DenseMatrix, N: Int) extends ELMModel {
   val H = null
   val Ht = null

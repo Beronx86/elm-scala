@@ -45,7 +45,7 @@ object EMELMExample extends App {
 
   util.Datasets.kfoldCV(data, k = 10, parallel = false) { (trainingSet, testingSet, fold, _) =>
     val elm = OSELM(L = 16, seed = currentSeed)
-    val emelm = EMELM(Lmax = 1, seed = currentSeed)
+    val emelm = EMELM(1, seed = currentSeed)
 
     val (model, t) = Tempo.timev(elm.build(trainingSet))
     val acc = model.accuracy(testingSet).formatted("%2.2f")
@@ -55,7 +55,8 @@ object EMELMExample extends App {
       emelm.growTo(16, m)
     }
     val emacc = emmodel.accuracy(testingSet).formatted("%2.2f")
-    println("Fold " + fold + ".  EMELM: " + emacc + " in " + ost + "ms.    " + "ELM: " + acc + " in " + t + "ms.")
+    println(s"Fold $fold.  EMELM: $emacc in $ost ms.    ELM: $acc in $t ms.")
+    println(s"PRESS EM:${emelm.PRESS(emmodel)} OS:${elm.PRESS(model)}")
   }
 
 

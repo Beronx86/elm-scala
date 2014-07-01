@@ -45,13 +45,12 @@ case class interaELM(Lmax: Int, seed: Int = 42, notes: String = "") extends Conv
     var m = model
     val (_, best) = 1 to math.min(m.N / 2, Lmax) map { L =>
       if (L > 1) m = growByOne(m)
-      val H = m.H
-      val Beta = m.Beta
-      val Y = m.Y
-      val HHinv = m.HHinv
-      val E = errorMatrix(H, Beta, Y)
-      val press = LOOError(Y)(E)(HHinv) //PRESS(E)(HHinv)
-      //            println("PRESS: " + press + " L: " + 0)
+      val E = errorMatrix(m.H, m.Beta, m.Y)
+      val press = LOOError(m.Y)(E)(m.HHinv) //PRESS(E)(HHinv)
+      if (L == 2) {
+        println(m.Beta)
+        println("LOOPRESS: " + press + " L: " + L)
+      }
       (press, m)
     } minBy (_._1)
     best

@@ -17,29 +17,17 @@ Copyright (C) 2014 Davi Pereira dos Santos
 */
 package ml.classifiers
 
-import ml.Pattern
-import ml.models.{ELMModel, Model}
+import ml.models.ELMModel
 import util.XSRandom
 
 /**
  * Grows network from 1 to Lmax according to arriving instances.
+ * Rebuilds from scratch. Should be equal interaELM in accuracy.
  * @param Lmax
  * @param seed
  */
-case class interaELMNoEM(Lmax: Int, seed: Int = 42, notes: String = "") extends ConvergentIncremental with ConvergentGrowing {
+case class interaELMNoEM(Lmax: Int, seed: Int = 42, notes: String = "") extends interaTrait {
   override val toString = "interaELMNoEM_" + notes
-  val Lbuild = 1
-
-  override def build(trSet: Seq[Pattern]) = {
-    val model = cast(super.build(trSet))
-    modelSelection(model)
-  }
-
-  override def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
-    val m = super.update(model)(pattern)
-    ???
-    if (math.sqrt(m.N + 1).toInt > math.sqrt(m.N).toInt) ??? /*modelSelection(m)*/ else m
-  }
 
   protected def modelSelection(model: ELMModel) = {
     //todo: analyse which matrices can be reused along all growing (i.e. they don't change size and need not be kept intact as candidates for the final model)

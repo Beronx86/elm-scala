@@ -85,7 +85,7 @@ trait ConvergentELM extends ELM {
   }
 
   /**
-   * Calculates fast LOO accuracy over all instances using PRESS.
+   * Calculates fast LOO accuracy over all instances using PRE.
    * (for classifiers)
    * (assumes the correct output is the only one 1-valued)
    * @param Y matrix of expected values NxO

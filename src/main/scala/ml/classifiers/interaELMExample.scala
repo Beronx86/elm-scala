@@ -25,7 +25,7 @@ object interaELMExample extends App with ExampleTemplate {
   val dataset = "banana"
   // "iris"
   val k = 2
-  val l = 30
+  val l = 2
 
   def kfoldIteration[T](tr0: Seq[Pattern], ts: Seq[Pattern], fold: Int, bla: Int) {
     val tr = tr0.take(333)
@@ -45,10 +45,12 @@ object interaELMExample extends App with ExampleTemplate {
 
     val o = OSELM(l)
     val mo = o.build(tr)
+    println(mo.Beta)
 
     val e = EMELM(1)
     var me = e.build(tr)
     me = e.growTo(l, me)
+    println(me.Beta)
 
     lazy val LOOi = Datasets.LOO(tr) { (trloo, p) =>
       if (interaELM(l) build trloo hit p) 0 else 1
@@ -60,7 +62,7 @@ object interaELMExample extends App with ExampleTemplate {
     //        println("LOOPRESSos: " + o.LOOError(mo) + "  LOOPRESSi: " + i.LOOError(mi) + "  LOOos: " + LOOos + "  LOOi: " + LOOi)
 
     println(s"i(${mi.L}): ${mi.accuracy(ts)} \ti2(${mi2.L}): ${mi2.accuracy(ts)} \tc(-}): ${mc.accuracy(ts)}\to(${o.L}): ${mo.accuracy(ts)}\te(${me.L}): " + me.accuracy(ts))
-    println(s"LOOPRESSi: ${i.LOOError(mi)} LOOPRESSi2: ${i2.LOOError(mi2)}")
+    println(s"PRESSi: ${i.PRESS(mi)} PRESSi2: ${i2.PRESS(mi2)} PRESSos: ${o.PRESS(mo)} PRESSem: ${e.PRESS(me)}")
   }
 
   run

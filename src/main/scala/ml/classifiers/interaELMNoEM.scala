@@ -43,7 +43,7 @@ case class interaELMNoEM(Lmax: Int, seed: Int = 42, notes: String = "") extends 
   protected def modelSelection(model: ELMModel) = {
     //todo: analyse which matrices can be reused along all growing (i.e. they don't change size and need not be kept intact as candidates for the final model)
     var m = model
-    val (_, best) = 1 to math.min(m.N / 2, Lmax) map { L =>
+    val (_, best) = (1 to math.min(m.N / 2, Lmax) map { L =>
       if (L > 1) m = buildCore(L, m.Xt, m.Y, m.rnd.clone())
       val E = errorMatrix(m.H, m.Beta, m.Y)
       val press = LOOError(m.Y)(E)(m.HHinv) //PRESS(E)(HHinv)
@@ -53,7 +53,7 @@ case class interaELMNoEM(Lmax: Int, seed: Int = 42, notes: String = "") extends 
       }
       //      if (L == 2) sys.exit(0)
       (press, m)
-    } minBy (_._1)
+    }).last //minBy (_._1)
     best
   }
 }

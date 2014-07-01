@@ -61,6 +61,37 @@ trait ConvergentGrowing extends ConvergentELM {
     //    println(m)
   }
 
+
+  /**
+   * Fast and cheap.
+   * @param m
+   */
+  def mPlusIdentity(m: DenseMatrix) {
+    val d = m.getData
+    val l = d.size
+    var c = 0
+    var gap = m.numRows() + 1
+    while (c < l) {
+      d(c) += 1
+      c += gap
+    }
+  }
+
+  /**
+   * Fast and cheap.
+   * @param m
+   */
+  def mMinusIdentity(m: DenseMatrix) {
+    val d = m.getData
+    val l = d.size
+    var c = 0
+    var gap = m.numRows() + 1
+    while (c < l) {
+      d(c) -= 1
+      c += gap
+    }
+  }
+
   /**
    * This is not thread-safe since HHinv is changed for a few milisseconds. todo
    * @param rnd
@@ -79,11 +110,11 @@ trait ConvergentGrowing extends ConvergentELM {
 
     //    val I = Matrices.identity(HHinv.numRows())
     val I_HHinv = HHinv //.add(-1, I)
-    identMinusM(I_HHinv)
+    mMinusIdentity(I_HHinv)
 
     val num = new DenseMatrix(1, H.numRows())
     newhm1XN.mult(I_HHinv, num)
-    //    identMinusM(I_HHinv) //recovers original value
+    mPlusIdentity(I_HHinv) //recovers original value
 
     val deno = new DenseVector(1)
     num.mult(newh, deno)

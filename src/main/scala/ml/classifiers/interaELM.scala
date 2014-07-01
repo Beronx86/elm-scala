@@ -52,7 +52,7 @@ case class interaELM(Lmax: Int, seed: Int = 42, notes: String = "") extends Conv
         println("LOOPRESS: " + press + " L: " + L)
       }
       (press, m)
-    }).last //minBy (_._1)
+    }) minBy (_._1)
     best
   }
 }

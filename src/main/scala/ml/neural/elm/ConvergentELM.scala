@@ -63,7 +63,7 @@ trait ConvergentELM extends ELM {
     P.mult(Ht, Hinv)
     val Beta = new DenseMatrix(L, nclasses)
     Hinv.mult(Y, Beta)
-
+    println(s"${getClass.getName} rnd:${rnd.getSeed}")
     ELMConvergentModel(rnd, Alfat, biasesArray, Beta, H, Ht, Hinv, P, ninsts, Xt, Y)
   }
 

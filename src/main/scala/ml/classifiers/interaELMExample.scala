@@ -25,7 +25,7 @@ object interaELMExample extends App with ExampleTemplate {
   val dataset = "banana"
   // "iris"
   val k = 2
-  val l = 2
+  val l = 20
 
   def kfoldIteration[T](tr0: Seq[Pattern], ts: Seq[Pattern], fold: Int, bla: Int) {
     val tr = tr0.take(333)

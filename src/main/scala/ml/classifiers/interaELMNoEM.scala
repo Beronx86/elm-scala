@@ -19,6 +19,7 @@ package ml.classifiers
 
 import ml.Pattern
 import ml.models.{ELMModel, Model}
+import util.XSRandom
 
 /**
  * Grows network from 1 to Lmax according to arriving instances.
@@ -44,7 +45,7 @@ case class interaELMNoEM(Lmax: Int, seed: Int = 42, notes: String = "") extends 
     //todo: analyse which matrices can be reused along all growing (i.e. they don't change size and need not be kept intact as candidates for the final model)
     var m = model
     val (_, best) = (1 to math.min(m.N / 2, Lmax) map { L =>
-      if (L > 1) m = buildCore(L, m.Xt, m.Y, m.rnd.clone())
+      if (L > 1) m = buildCore(L, m.Xt, m.Y, new XSRandom(seed))
       val E = errorMatrix(m.H, m.Beta, m.Y)
       val press = LOOError(m.Y)(E)(m.HHinv) //PRESS(E)(HHinv)
       if (L == 2) {
@@ -53,7 +54,7 @@ case class interaELMNoEM(Lmax: Int, seed: Int = 42, notes: String = "") extends 
       }
       //      if (L == 2) sys.exit(0)
       (press, m)
-    }).last //minBy (_._1)
+    }) minBy (_._1)
     best
   }
 }

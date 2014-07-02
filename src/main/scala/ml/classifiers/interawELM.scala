@@ -40,6 +40,7 @@ case class interawELM(deltaL: Int, seed: Int = 42, notes: String = "") extends i
         if (L > min && previousL != L) m = growByOne(m)
         val E = errorMatrix(m.H, m.Beta, m.Y)
         val press = LOOError(m.Y)(E)(m.HHinv) //PRESS(E)(HHinv)
+        println("Lbest:" + L) //testando se w is working
         (press, m)
       } minBy (_._1)
     best

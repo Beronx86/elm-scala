@@ -26,7 +26,7 @@ import ml.models.{ELMIncModel, ELMModel, Model}
 trait interaTrait extends ConvergentIncremental with ConvergentGrowing {
   val Lbuild = 1
 
-  override def build(trSet: Seq[Pattern]) = {
+  override def build(trSet: Seq[Pattern]): Model = {
     val model = cast(super.build(trSet))
     modelSelection(model)
   }

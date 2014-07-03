@@ -35,7 +35,7 @@ trait ConvergentELM extends ELM {
       sys.exit(0)
   }
 
-  def build(trSet: Seq[Pattern]): ELMModel = {
+  def build(trSet: Seq[Pattern]): Model = {
     val rnd = new XSRandom(seed)
     val ninsts = checkEmptyness(trSet)
     checkFullRankness(ninsts)
@@ -160,7 +160,7 @@ trait ConvergentELM extends ELM {
     val d = M.getData
     while (i < n * nclasses) {
       val v = d(i)
-      sum += v
+      sum += v * v
       i += 1
     }
     sum
@@ -183,7 +183,7 @@ trait ConvergentELM extends ELM {
     val d = M.getData
     while (i < n * nclasses) {
       val v = d(i)
-      sum += v * v
+      sum += v
       i += 1
     }
     sum

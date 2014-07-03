@@ -1,6 +1,7 @@
 package ml.classifiers
 
 import ml.Pattern
+import ml.models.ELMModel
 import util.{Datasets, Tempo}
 
 /*
@@ -29,6 +30,16 @@ object interaELMExample extends App with ExampleTemplate {
 
   def kfoldIteration[T](tr0: Seq[Pattern], ts: Seq[Pattern], fold: Int, bla: Int) {
     val tr = tr0.take(31533)
+
+    //warming up
+    val wii = interaELM(l)
+    tr.drop(2).foldLeft(wii.build(tr.take(2)))((m, p) => wii.update(m)(p))
+
+    Tempo.start
+    //todo: pq mii ta ficando com L=37 e 73? O press está gigante 10^60
+    val ii = interaELM(l)
+    val mii = tr.drop(50).foldLeft(ii.build(tr.take(50)))((m, p) => ii.update(m)(p))
+    Tempo.print_stop
 
     Tempo.start
     val i = interaELM(l)
@@ -59,10 +70,10 @@ object interaELMExample extends App with ExampleTemplate {
     }.sum / tr.length.toDouble
     //        println("LOOPRESSos: " + o.LOOError(mo) + "  LOOPRESSi: " + i.LOOError(mi) + "  LOOos: " + LOOos + "  LOOi: " + LOOi)
 
-    println(s"i(${mi.L}): ${mi.accuracy(ts)} \ti2(${mi2.L}): ${mi2.accuracy(ts)} \tc(-}): ${mc.accuracy(ts)}\to(${o.L}): ${mo.accuracy(ts)}\te(${me.L}): " + me.accuracy(ts))
-    println(s"PRESSi: ${i.PRESS(mi)} PRESSi2: ${i2.PRESS(mi2)} PRESSos: ${o.PRESS(mo)} PRESSem: ${e.PRESS(me)}")
+    println(s"ii(${mii.asInstanceOf[ELMModel].L}): ${mii.accuracy(ts)} \ti(${mi.asInstanceOf[ELMModel].L}): ${mi.accuracy(ts)} \ti2(${mi2.asInstanceOf[ELMModel].L}): ${mi2.accuracy(ts)} \tc(-}): ${mc.accuracy(ts)}\to(${mo.asInstanceOf[ELMModel].L}): ${mo.accuracy(ts)}\te(${me.asInstanceOf[ELMModel].L}): " + me.accuracy(ts))
+    println(s"PRESSii: ${ii.PRESS(mii)} PRESSi: ${i.PRESS(mi)} PRESSi2: ${i2.PRESS(mi2)} PRESSos: ${o.PRESS(mo)} PRESSem: ${e.PRESS(me)}")
   }
 
   run
-  println("o menor LOO (p. ex. no model selection do interaELM) não leva necessariamente a menor acuracia no 5-fold CV")
+  println("o menor LOO (p. ex. no model selection do interaELM) não leva necessariamente a menor acuracia no 5-fold CV (o conjunto usado no PRESS pode ser muito inferior ao cjt disponivel)")
 }

@@ -61,7 +61,7 @@ case class CIELM(Lbuild: Int, seed: Int = 42, notes: String = "", callf: Boolean
     //    Beta.resizeRows(l)
     val model = ELMSimpleModel(rnd, Alfat, biases, Beta, ninsts)
     model
-  } //rnd ok
+  }
 
   /**
    * Mutate e

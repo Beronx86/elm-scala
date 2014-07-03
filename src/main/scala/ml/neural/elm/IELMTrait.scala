@@ -18,7 +18,7 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.neural.elm
 
 import ml.Pattern
-import ml.models.ELMSimpleModel
+import ml.models.{ELMSimpleModel, Model}
 import ml.mtj.ResizableDenseMatrix
 import ml.neural.elm.Data._
 import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
@@ -28,6 +28,10 @@ import util.{Tempo, XSRandom}
  * Created by davi on 21/05/14.
  */
 trait IELMTrait extends IteratedBuildELM {
+
+  def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = ???
+
+  def updateAll(model: Model, fast_mutable: Boolean)(patterns: Seq[Pattern]) = ???
 
   def build(trSet: Seq[Pattern]) = {
     val rnd = new XSRandom(seed)

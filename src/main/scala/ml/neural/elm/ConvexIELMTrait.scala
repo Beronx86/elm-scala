@@ -17,12 +17,19 @@ Copyright (C) 2014 Davi Pereira dos Santos
 */
 package ml.neural.elm
 
+import ml.Pattern
+import ml.models.Model
 import ml.mtj.ResizableDenseMatrix
 
 /**
  * Created by davi on 21/05/14.
  */
 trait ConvexIELMTrait extends IteratedBuildELM {
+
+  def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = ???
+
+  def updateAll(model: Model, fast_mutable: Boolean)(patterns: Seq[Pattern]) = ???
+
   def updateNetwork(l: Int, weights: Array[Double], beta: Array[Double], Beta: ResizableDenseMatrix, Alfat: ResizableDenseMatrix) {
     val nclasses = Beta.numColumns()
     val natts = Alfat.numColumns()
@@ -43,4 +50,4 @@ trait ConvexIELMTrait extends IteratedBuildELM {
       i += 1
     }
   }
-}//rnd ok
+}

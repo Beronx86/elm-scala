@@ -115,6 +115,10 @@ trait ConvergentELM extends ELM {
         }
         c += 1
       }
+      if (cmax == -1) {
+        println("Probably there is a NaN in the PredictionMatrix. This usually occurs when attributes are not properly standardized.")
+        sys.exit(0)
+      }
       if (Y.get(i, cmax) == 1) hits += 1
       i += 1
     }

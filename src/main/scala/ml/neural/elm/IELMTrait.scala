@@ -31,8 +31,6 @@ trait IELMTrait extends IteratedBuildELM {
 
   def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = ???
 
-  def updateAll(model: Model, fast_mutable: Boolean)(patterns: Seq[Pattern]) = ???
-
   def build(trSet: Seq[Pattern]) = {
     val rnd = new XSRandom(seed)
     Tempo.start

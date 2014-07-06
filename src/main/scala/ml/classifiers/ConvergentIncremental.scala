@@ -98,6 +98,5 @@ trait ConvergentIncremental extends ConvergentELM {
     ELMIncModel(rnd, Alfat, biases, Beta1, P1, m.N + 1, newXt, newY)
   }
 
-  def updateAll(model: Model, fastAndCheap: Boolean = false)(patterns: Seq[Pattern]) =
-    patterns.foldLeft(model)((m, p) => update(m, fastAndCheap = true)(p))
+  //  def updateAll(model: Model, fastAndCheap: Boolean = false)(patterns: Seq[Pattern]) =    patterns.foldLeft(model)((m, p) => update(m, fastAndCheap = true)(p))
 }

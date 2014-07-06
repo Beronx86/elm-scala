@@ -31,5 +31,4 @@ package ml.neural.elm
 //  //todo: this trait would disappear
 //  def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = build(pattern +: cast2batmodel(model).training_set)
 //
-//  def updateAll(model: Model, fast_mutable: Boolean)(patterns: Seq[Pattern]) = build(patterns ++ cast2batmodel(model).training_set)
 //}

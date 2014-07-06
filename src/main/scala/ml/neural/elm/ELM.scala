@@ -144,8 +144,6 @@ trait ELM extends Learner {
   //
   //  def expected_change(model: Model)(pattern: Pattern): Double = ???
   //
-  //  def updateAll(model: Model, fast_mutable: Boolean)(patterns: Seq[Pattern]): Model = ???
-  //
   //
   //
   //

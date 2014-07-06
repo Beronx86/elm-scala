@@ -32,6 +32,4 @@ case class EMELM(Lbuild: Int, seed: Int = 42, notes: String = "") extends Conver
     println("EM-ELM does not accept update() for now. It could perform an entire rebuild.")
     sys.exit(0)
   }
-
-  def updateAll(model: Model, fast_mutable: Boolean)(patterns: Seq[Pattern]) = update(null)(null)
 }

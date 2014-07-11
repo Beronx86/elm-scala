@@ -54,6 +54,8 @@ trait ELMModel extends Model {
   lazy val L = Alfat.numRows()
   lazy val I = Math.identity(N)
 
+  def output(pattern: Pattern) = ELMUtils.test(pattern, Alfat, biases, Beta).getData
+
   def distribution(pattern: Pattern) = ELMUtils.distribution(ELMUtils.test(pattern, Alfat, biases, Beta))
 }
 

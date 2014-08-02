@@ -19,9 +19,11 @@ package ml.classifiers
 
 import ml.Pattern
 import ml.models.{ELMSimpleModel, Model}
-import ml.neural.elm.IELMTrait
+import ml.neural.elm.{Data, IELMTrait}
 import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
-import util.XSRandom
+import util.{Datasets, XSRandom}
+
+import scala.util.Random
 
 /**
  * Created by davi on 24/05/14.
@@ -32,9 +34,20 @@ case class EIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: 
   val CANDIDATES = 10
   val Lbuild = -1
 
-  def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = ???
+  def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
+    val m = cast(model)
+    val newE = m.e.zip(pattern.weighted_label_array) map { case (dv, v) => Data.appendToVector(dv, v)}
+    val newX = Data.appendRowToMatrix(m.X, pattern.array)
+    val newTmp = new DenseVector(newX.numRows())
+    val newRnd = m.rnd.clone()
 
-  protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector) = createNodeAmongCandidates(rnd, X, e, tmp)
+    val (weights, bias, h, beta) = createNodeAmongCandidates(newRnd, newX, newE, newTmp)
+    val newAlfat = Data.appendRowToMatrix(m.Alfat, weights)
+    val newBiases = Data.appendToArray(m.biases, bias)
+    val newBeta = Data.appendRowToMatrix(m.Beta, beta)
+
+    ELMSimpleModel(newRnd, newAlfat, newBiases, newBeta, newX, newE)
+  }
 
   /**
    * Mutate e, tmp, tmp2 and rnd
@@ -80,4 +93,25 @@ case class EIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: 
     e.zip(newe).foreach { case (a, b) => a.set(b)}
     (weights, bias, h, beta)
   }
+
+  protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector) = createNodeAmongCandidates(rnd, X, e, tmp)
+}
+
+
+object EIELMincTest extends App {
+  //  val patts0 = new Random(0).shuffle(Datasets.patternsFromSQLite("/home/davi/wcs/ucipp/uci")("gas-drift").right.get.take(1000000))
+  val patts0 = new Random(0).shuffle(Datasets.arff(true)("/home/davi/wcs/ucipp/uci/abalone-11class.arff").right.get.take(200000))
+  //  val patts0 = new Random(0).shuffle(Datasets.arff(true)("/home/davi/wcs/ucipp/uci/iris.arff").right.get.take(200000))
+  val filter = Datasets.zscoreFilter(patts0)
+  val patts = Datasets.applyFilterChangingOrder(patts0, filter)
+
+  val n = patts.length / 2
+  val tr = patts.take(n)
+  val ts = patts.drop(n)
+
+  var m = EIELM(n).build(tr.take(2))
+  tr.drop(2).foreach(x => m = EIELM(n).update(m)(x))
+
+  println(s"${m.accuracy(ts)}")
+
 }

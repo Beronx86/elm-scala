@@ -21,7 +21,7 @@ import ml.Pattern
 import ml.models.{ELMSimpleModel, Model}
 import ml.neural.elm.{Data, IELMTrait}
 import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
-import util.{Datasets, XSRandom}
+import util.{Tempo, Datasets, XSRandom}
 
 import scala.util.Random
 
@@ -80,7 +80,7 @@ case class IELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: (
 
 object IELMincTest extends App {
   //  val patts0 = new Random(0).shuffle(Datasets.patternsFromSQLite("/home/davi/wcs/ucipp/uci")("gas-drift").right.get.take(1000000))
-  val patts0 = new Random(0).shuffle(Datasets.arff(true)("/home/davi/wcs/ucipp/uci/abalone-11class.arff").right.get.take(200000))
+  val patts0 = new Random(0).shuffle(Datasets.arff(true)("/home/davi/wcs/ucipp/uci/banana.arff").right.get.take(200000))
   //  val patts0 = new Random(0).shuffle(Datasets.arff(true)("/home/davi/wcs/ucipp/uci/iris.arff").right.get.take(200000))
   val filter = Datasets.zscoreFilter(patts0)
   val patts = Datasets.applyFilterChangingOrder(patts0, filter)
@@ -89,9 +89,42 @@ object IELMincTest extends App {
   val tr = patts.take(n)
   val ts = patts.drop(n)
 
-  var m = IELM(n).build(tr.take(10))
-  tr.drop(10).foreach(x => m = IELM(n).update(m)(x))
+  val l = NB() //KNN(5,"eucl",patts)
 
+  Tempo.start
+  var m = IELM(n).build(tr.take(2))
+  tr.drop(2).foreach(x => m = IELM(n).update(m)(x))
+  Tempo.print_stop
+  println(s"${m.accuracy(ts)}")
+
+  Tempo.start
+  var m2 = l.build(tr.take(2))
+  tr.drop(2).foreach(x => m2 = l.update(m2)(x))
+  Tempo.print_stop
+  println(s"${m2.accuracy(ts)}")
+
+  Tempo.start
+  m = IELM(n).build(tr)
+  Tempo.print_stop
+  println(s"${m.accuracy(ts)}")
+
+  println("")
+
+  Tempo.start
+  m = IELM(n).build(tr.take(2))
+  tr.drop(2).foreach(x => m = IELM(n).update(m)(x))
+  Tempo.print_stop
+  println(s"${m.accuracy(ts)}")
+
+  Tempo.start
+  m2 = l.build(tr.take(2))
+  tr.drop(2).foreach(x => m2 = l.update(m2)(x))
+  Tempo.print_stop
+  println(s"${m2.accuracy(ts)}")
+
+  Tempo.start
+  m = IELM(n).build(tr)
+  Tempo.print_stop
   println(s"${m.accuracy(ts)}")
 
 }

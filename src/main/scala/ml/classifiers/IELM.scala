@@ -17,6 +17,7 @@ Copyright (C) 2014 Davi Pereira dos Santos
 */
 package ml.classifiers
 
+import ml.Pattern
 import ml.models.Model
 import ml.neural.elm.IELMTrait
 import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
@@ -29,14 +30,16 @@ case class IELM(Lbuild: Int, seed: Int = 42, notes: String = "", callf: Boolean 
   extends IELMTrait {
   override val toString = "IELM_" + notes
 
-  protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Array[DenseVector], tmp: DenseVector) = {
+  def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = ???
+
+  protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector) = {
     val (weights, bias, newRnd) = newNode(X.numColumns(), rnd)
     rnd.setSeed(newRnd.getSeed)
     val (h, beta) = addNode(weights, bias, X, e, tmp)
     (weights, bias, h, beta)
   }
 
-  def addNode(weights: Array[Double], bias: Double, X: DenseMatrix, e: Array[DenseVector], tmp: DenseVector) = {
+  def addNode(weights: Array[Double], bias: Double, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector) = {
     val nclasses = e.size
     //Generate node and calculate h.
     val alfa = new DenseVector(weights, false)

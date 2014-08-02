@@ -29,19 +29,18 @@ import util.{Tempo, XSRandom}
  */
 trait IELMTrait extends IteratedBuildELM {
 
-  def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = ???
-
   def build(trSet: Seq[Pattern]) = {
     val rnd = new XSRandom(seed)
     Tempo.start
     val ninsts = checkEmptyness(trSet: Seq[Pattern])
+    val L = if (Lbuild == -1) ninsts else Lbuild
     val natts = trSet.head.nattributes
     val nclasses = trSet.head.nclasses
     val X = patterns2matrix(trSet, ninsts)
-    val biases = Array.fill(Lbuild)(0d)
-    val Alfat = new ResizableDenseMatrix(Lbuild, natts)
-    val Beta = new ResizableDenseMatrix(Lbuild, nclasses)
-    val H = new ResizableDenseMatrix(ninsts, Lbuild)
+    val biases = Array.fill(L)(0d)
+    val Alfat = new ResizableDenseMatrix(L, natts)
+    val Beta = new ResizableDenseMatrix(L, nclasses)
+    val H = new ResizableDenseMatrix(ninsts, L)
     H.resizeCols(0)
     val e = patterns2t(trSet, ninsts)
     var l = 0
@@ -49,7 +48,7 @@ trait IELMTrait extends IteratedBuildELM {
     if (callf) {
       Alfat.resizeRows(0)
       Beta.resizeRows(0)
-      while (l < Lbuild) {
+      while (l < L) {
         val (weights, bias, h, beta) = buildCore(rnd, X, e, tmp)
         biases(l) = bias
         l += 1
@@ -57,10 +56,10 @@ trait IELMTrait extends IteratedBuildELM {
         Beta.addRow(beta)
         val te = Tempo.stop
         Tempo.start
-        f(ELMSimpleModel(rnd.clone(), Alfat, biases, Beta, ninsts), te)
+        f(ELMSimpleModel(rnd.clone(), Alfat, biases, Beta, X, e), te)
       }
     } else {
-      while (l < Lbuild) {
+      while (l < L) {
         val (weights, bias, h, beta) = buildCore(rnd, X, e, tmp)
         H.addCol(h) //vantagem do I-ELM: H vem pronto e não muda
         biases(l) = bias
@@ -71,15 +70,8 @@ trait IELMTrait extends IteratedBuildELM {
       Alfat.resizeRows(l)
       Beta.resizeRows(l)
     }
-    ELMSimpleModel(rnd, Alfat, biases, Beta, ninsts) //todo: se nao crescer, manter P e H anteriores?
+    ELMSimpleModel(rnd, Alfat, biases, Beta, X, e) //todo: se nao crescer, manter P e H anteriores?
   }
 
-  protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Array[DenseVector], tmp: DenseVector): (Array[Double], Double, DenseVector, Array[Double])
-
-  //
-  //
-  //
-
+  protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector): (Array[Double], Double, DenseVector, Array[Double])
 }
-
-//rnd ok

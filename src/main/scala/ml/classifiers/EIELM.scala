@@ -17,6 +17,7 @@ Copyright (C) 2014 Davi Pereira dos Santos
 */
 package ml.classifiers
 
+import ml.Pattern
 import ml.models.{ELMSimpleModel, Model}
 import ml.neural.elm.IELMTrait
 import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
@@ -30,13 +31,15 @@ case class EIELM(Lbuild: Int, seed: Int = 42, notes: String = "", callf: Boolean
   override val toString = "EIELM_" + notes
   val CANDIDATES = 10
 
-  protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Array[DenseVector], tmp: DenseVector) = createNodeAmongCandidates(rnd, X, e, tmp)
+  def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = ???
+
+  protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector) = createNodeAmongCandidates(rnd, X, e, tmp)
 
   /**
    * Mutate e, tmp, tmp2 and rnd
    * @return
    */
-  def createNodeAmongCandidates(rnd: XSRandom, X: DenseMatrix, e: Array[DenseVector], tmp: DenseVector) = {
+  def createNodeAmongCandidates(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector) = {
     val nclasses = e.size
     val natts = X.numColumns()
     val ninsts = X.numRows()
@@ -77,5 +80,3 @@ case class EIELM(Lbuild: Int, seed: Int = 42, notes: String = "", callf: Boolean
     (weights, bias, h, beta)
   }
 }
-
-//rnd ok

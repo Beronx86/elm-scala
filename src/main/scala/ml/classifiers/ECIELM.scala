@@ -57,12 +57,12 @@ case class ECIELM(Lbuild: Int, seed: Int = 42, notes: String = "", callf: Boolea
       l += 1
       val te = Tempo.stop
       Tempo.start
-      f(ELMSimpleModel(rnd.clone(), Alfat, biases, Beta, ninsts), te)
+      f(ELMSimpleModel(rnd.clone(), Alfat, biases, Beta, null, null), te)
     }
     //    Alfat.resizeRows(l)
     //    Beta.resizeRows(l)
     //    ELMModel(Alfat, biases.take(Beta.numRows()), new DenseMatrix(1, 1), Beta)
-    val model = ELMSimpleModel(rnd, Alfat, biases, Beta, ninsts)
+    val model = ELMSimpleModel(rnd, Alfat, biases, Beta, null, null)
     model
   }
 

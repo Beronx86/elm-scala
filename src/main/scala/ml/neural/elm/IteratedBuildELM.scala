@@ -17,7 +17,7 @@ Copyright (C) 2014 Davi Pereira dos Santos
 */
 package ml.neural.elm
 
-import ml.models.ELMSimpleModel
+import ml.models.{Model, ELMSimpleModel}
 import util.XSRandom
 
 /**
@@ -26,7 +26,7 @@ import util.XSRandom
 trait IteratedBuildELM extends ELM {
   //BatchELM {
   //todo: correct this, extending BatchELM is very inefficient for update() on incremental-friendly classifiers (I-ELM?)!
-val f: (ELMSimpleModel, Double) => Unit
+  val f: (ELMSimpleModel, Double) => Unit
   val Lbuild: Int
   val callf: Boolean
 
@@ -40,5 +40,11 @@ val f: (ELMSimpleModel, Double) => Unit
     val w = Array.fill(natts)(newRnd.nextDouble() * 2 - 1)
     val b = newRnd.nextDouble() * 2 - 1
     (w, b, newRnd)
+  }
+
+  protected def cast(model: Model) = model match {
+    case m: ELMSimpleModel => m
+    case _ => println("IteratedBuild ELMs require ELMSimpleModels.")
+      sys.exit(0)
   }
 }

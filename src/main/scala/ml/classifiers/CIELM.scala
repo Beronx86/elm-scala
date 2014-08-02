@@ -55,11 +55,11 @@ case class CIELM(Lbuild: Int, seed: Int = 42, notes: String = "", callf: Boolean
       l += 1
       val te = Tempo.stop
       Tempo.start
-      f(ELMSimpleModel(newRnd, Alfat, biases, Beta, ninsts), te)
+      f(ELMSimpleModel(newRnd, Alfat, biases, Beta, null, null), te)
     }
     //    Alfat.resizeRows(l)
     //    Beta.resizeRows(l)
-    val model = ELMSimpleModel(rnd, Alfat, biases, Beta, ninsts)
+    val model = ELMSimpleModel(rnd, Alfat, biases, Beta, null, null)
     model
   }
 

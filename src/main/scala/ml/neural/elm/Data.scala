@@ -147,7 +147,7 @@ object Data {
     while (c < w) {
       val d = c * (h + 1)
       System.arraycopy(d0, c * h, d1, d, h)
-      d1(d) = vec(c)
+      d1(d + h) = vec(c)
       c += 1
     }
     newM

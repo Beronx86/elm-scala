@@ -20,7 +20,7 @@ package ml.classifiers
 import ml.Pattern
 import ml.models.{ELMSimpleModel, Model}
 import ml.mtj.ResizableDenseMatrix
-import ml.neural.elm.ConvexIELMTrait
+import ml.neural.elm.{Data, ConvexIELMTrait}
 import ml.neural.elm.Data._
 import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
 import util.{Tempo, XSRandom}
@@ -29,22 +29,40 @@ import util.{Tempo, XSRandom}
  * CI-ELM
  * Created by davi on 19/05/14.
  */
-case class CIELM(Lbuild: Int, seed: Int = 42, notes: String = "", callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ()) extends ConvexIELMTrait {
+case class CIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ()) extends ConvexIELMTrait {
   override val toString = "CIELM_" + notes
+  val Lbuild = -1
+
+  def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
+    val m = cast(model)
+    val newE = m.e.zip(pattern.weighted_label_array) map { case (dv, v) => Data.appendToVector(dv, v)}
+    val newX = Data.appendRowToMatrix(m.X, pattern.array)
+    val newTmp = new DenseVector(newX.numRows())
+
+    val (weights, bias, newRnd) = newNode(m.Alfat.numColumns(), m.rnd)
+    val newAlfat = Data.appendRowToMatrix(m.Alfat, weights)
+    val newBiases = Data.appendToArray(m.biases, bias)
+    //    val (h, beta) = addNodeForConvexUpdate(weights, bias, newX, newE, newTmp)
+    //    val newBeta = Data.appendRowToMatrix(m.Beta, beta)
+    //
+    //    ELMSimpleModel(newRnd, newAlfat, newBiases, newBeta, newX, newE)
+    ???
+  }
 
   def build(trSet: Seq[Pattern]): Model = {
     Tempo.start
     val rnd = new XSRandom(seed)
     val ninsts = checkEmptyness(trSet)
+    val L = if (Lbuild == -1) ninsts else Lbuild
     val natts = trSet.head.nattributes
     val nclasses = trSet.head.nclasses
     val X = patterns2matrix(trSet, ninsts)
-    val biases = Array.fill(Lbuild)(0d)
-    val Alfat = new ResizableDenseMatrix(Lbuild, natts)
-    val Beta = new ResizableDenseMatrix(Lbuild, nclasses)
+    val biases = Array.fill(L)(0d)
+    val Alfat = new ResizableDenseMatrix(L, natts)
+    val Beta = new ResizableDenseMatrix(L, nclasses)
     val (t, e) = patterns2te(trSet, ninsts)
     var l = 0
-    while (l < Lbuild) {
+    while (l < L) {
       Alfat.resizeRows(l + 1) //needed to call f()
       Beta.resizeRows(l + 1)
       val (weights, b, newRnd) = newNode(natts, rnd)

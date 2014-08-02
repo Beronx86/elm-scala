@@ -34,7 +34,7 @@ object EMELMExample extends App {
     case Left(str) => println("Could not load iris dataset from the program path: " + str); sys.exit(0)
   }
   val currentSeed = 1 + 0 * (System.currentTimeMillis() % 1000000).toInt
-  IELM(Lbuild = 15, seed = currentSeed).build(warmingdata)
+  IELM(seed = currentSeed).build(warmingdata)
 
   println("seed " + currentSeed)
   val dataset = "banana.arff"
@@ -60,16 +60,16 @@ object EMELMExample extends App {
   }
 
 
-//  val LOOos = Datasets.LOO(data) { (tr, p) =>
-//    if (OSELM(20) build tr hit p) 1 else 0
-//  }.sum / data.length.toDouble
-//
-//  val LOOem = Datasets.LOO(data) { (tr, p) =>
-//    if (EMELM(20) build tr hit p) 1 else 0
-//  }.sum / data.length.toDouble
-//
-//  println("os "+ LOOos)
-//  println("em "+ LOOem)
+  //  val LOOos = Datasets.LOO(data) { (tr, p) =>
+  //    if (OSELM(20) build tr hit p) 1 else 0
+  //  }.sum / data.length.toDouble
+  //
+  //  val LOOem = Datasets.LOO(data) { (tr, p) =>
+  //    if (EMELM(20) build tr hit p) 1 else 0
+  //  }.sum / data.length.toDouble
+  //
+  //  println("os "+ LOOos)
+  //  println("em "+ LOOem)
 
   println("When there are no numerical instability, they should behave exactly the same in terms of accuracy.")
 }

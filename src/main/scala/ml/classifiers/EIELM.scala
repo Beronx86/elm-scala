@@ -26,10 +26,11 @@ import util.XSRandom
 /**
  * Created by davi on 24/05/14.
  */
-case class EIELM(Lbuild: Int, seed: Int = 42, notes: String = "", callf: Boolean = false, f: (ELMSimpleModel, Double) => Unit = (tmp: Model, tmpt: Double) => ())
+case class EIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: (ELMSimpleModel, Double) => Unit = (tmp: Model, tmpt: Double) => ())
   extends IELMTrait {
   override val toString = "EIELM_" + notes
   val CANDIDATES = 10
+  val Lbuild = -1
 
   def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = ???
 

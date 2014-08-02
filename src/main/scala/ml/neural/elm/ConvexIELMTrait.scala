@@ -25,9 +25,6 @@ import ml.mtj.ResizableDenseMatrix
  * Created by davi on 21/05/14.
  */
 trait ConvexIELMTrait extends IteratedBuildELM {
-
-  def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = ???
-
   def updateNetwork(l: Int, weights: Array[Double], beta: Array[Double], Beta: ResizableDenseMatrix, Alfat: ResizableDenseMatrix) {
     val nclasses = Beta.numColumns()
     val natts = Alfat.numColumns()

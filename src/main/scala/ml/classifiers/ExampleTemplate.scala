@@ -52,7 +52,7 @@ trait ExampleTemplate {
       case Left(str) => println("Could not load iris dataset from the program path: " + str); sys.exit(0)
     }
     val currentSeed = (System.currentTimeMillis() % 1000000).toInt
-    IELM(Lbuild = 15, seed = currentSeed).build(warmingdata)
+    IELM(seed = currentSeed).build(warmingdata)
 
     util.Datasets.kfoldCV(data, k, parallel)(kfoldIteration)
   }

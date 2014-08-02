@@ -25,27 +25,31 @@ import ml.neural.elm.Data._
 import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
 import util.{Tempo, XSRandom}
 
-case class ECIELM(Lbuild: Int, seed: Int = 42, notes: String = "", callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ()) extends ConvexIELMTrait {
+case class ECIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ()) extends ConvexIELMTrait {
   override val toString = "ECIELM_" + notes
   val CANDIDATES = 10
+  val Lbuild = -1
+
+  def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = ???
 
   override def build(trSet: Seq[Pattern]) = {
     Tempo.start
     val rnd = new XSRandom(seed)
     val ninsts = checkEmptyness(trSet)
+    val L = if (Lbuild == -1) ninsts else Lbuild
     val nclasses = trSet.head.nclasses
     val natts = trSet.head.nattributes
     val X = patterns2matrix(trSet, ninsts)
-    val biases = Array.fill(Lbuild)(0d)
-    val Alfat = new ResizableDenseMatrix(Lbuild, natts)
-    val Beta = new ResizableDenseMatrix(Lbuild, nclasses)
-    val H = new ResizableDenseMatrix(ninsts, Lbuild)
+    val biases = Array.fill(L)(0d)
+    val Alfat = new ResizableDenseMatrix(L, natts)
+    val Beta = new ResizableDenseMatrix(L, nclasses)
+    val H = new ResizableDenseMatrix(ninsts, L)
     H.resizeCols(0)
     val (t, e) = patterns2te(trSet, ninsts)
     var l = 0
     val tmp = new DenseVector(H.numRows())
     val tmp2 = new DenseVector(H.numRows())
-    while (l < Lbuild) {
+    while (l < L) {
       Alfat.resizeRows(l + 1) //needed to call f()
       Beta.resizeRows(l + 1)
       val (weights, bias, h, beta) = createNodeForConvexUpdateAmongCandidates(rnd, X, t, e, tmp, tmp2)

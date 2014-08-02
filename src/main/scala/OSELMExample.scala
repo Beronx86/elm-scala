@@ -38,7 +38,7 @@ object OSELMExample extends App {
     case Left(str) => println("Could not load iris dataset from the program path: " + str); sys.exit(0)
   }
   val currentSeed = (System.currentTimeMillis() % 1000000).toInt
-  IELM(Lbuild = 15, seed = currentSeed).build(warmingdata)
+  IELM(seed = currentSeed).build(warmingdata)
 
 
   val data = Datasets.arff(bina = true)("banana.arff") match {

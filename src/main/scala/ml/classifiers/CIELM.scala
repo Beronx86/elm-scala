@@ -23,7 +23,9 @@ import ml.mtj.ResizableDenseMatrix
 import ml.neural.elm.{Data, ConvexIELMTrait}
 import ml.neural.elm.Data._
 import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
-import util.{Tempo, XSRandom}
+import util.{Datasets, Tempo, XSRandom}
+
+import scala.util.Random
 
 /**
  * CI-ELM
@@ -36,17 +38,16 @@ case class CIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: 
   def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
     val m = cast(model)
     val newE = m.e.zip(pattern.weighted_label_array) map { case (dv, v) => Data.appendToVector(dv, v)}
+    val newT = m.t.zip(pattern.weighted_label_array) map { case (dv, v) => Data.appendToVector(dv, v)}
     val newX = Data.appendRowToMatrix(m.X, pattern.array)
     val newTmp = new DenseVector(newX.numRows())
 
     val (weights, bias, newRnd) = newNode(m.Alfat.numColumns(), m.rnd)
     val newAlfat = Data.appendRowToMatrix(m.Alfat, weights)
     val newBiases = Data.appendToArray(m.biases, bias)
-    //    val (h, beta) = addNodeForConvexUpdate(weights, bias, newX, newE, newTmp)
-    //    val newBeta = Data.appendRowToMatrix(m.Beta, beta)
-    //
-    //    ELMSimpleModel(newRnd, newAlfat, newBiases, newBeta, newX, newE)
-    ???
+    val (h, beta) = addNodeForConvexUpdate(weights, bias, newX, newT, newE)
+    val newBeta = Data.appendRowToMatrix(m.Beta, beta)
+    ELMSimpleModel(newRnd, newAlfat, newBiases, newBeta, newX, newE, newT)
   }
 
   def build(trSet: Seq[Pattern]): Model = {
@@ -62,7 +63,7 @@ case class CIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: 
     val Beta = new ResizableDenseMatrix(L, nclasses)
     val (t, e) = patterns2te(trSet, ninsts)
     var l = 0
-    while (l < L) {
+    if (callf) while (l < L) {
       Alfat.resizeRows(l + 1) //needed to call f()
       Beta.resizeRows(l + 1)
       val (weights, b, newRnd) = newNode(natts, rnd)
@@ -73,11 +74,17 @@ case class CIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: 
       l += 1
       val te = Tempo.stop
       Tempo.start
-      f(ELMSimpleModel(newRnd, Alfat, biases, Beta, null, null), te)
+      f(ELMSimpleModel(newRnd, Alfat, biases, Beta, X, e, t), te)
     }
-    //    Alfat.resizeRows(l)
-    //    Beta.resizeRows(l)
-    val model = ELMSimpleModel(rnd, Alfat, biases, Beta, null, null)
+    else while (l < L) {
+      val (weights, b, newRnd) = newNode(natts, rnd)
+      rnd.setSeed(newRnd.getSeed)
+      val (h, beta) = addNodeForConvexUpdate(weights, b, X, t, e)
+      biases(l) = b
+      updateNetwork(l, weights, beta, Beta, Alfat)
+      l += 1
+    }
+    val model = ELMSimpleModel(rnd, Alfat, biases, Beta, X, e, t)
     model
   }
 
@@ -85,7 +92,7 @@ case class CIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: 
    * Mutate e
    * @return
    */
-  def addNodeForConvexUpdate(weights: Array[Double], bias: Double, X: DenseMatrix, t: Array[DenseVector], e: Array[DenseVector]) = {
+  def addNodeForConvexUpdate(weights: Array[Double], bias: Double, X: DenseMatrix, t: Vector[DenseVector], e: Vector[DenseVector]) = {
     val nclasses = t.size
     //Generate node and calculate h.
     val alfa = new DenseVector(weights, false)
@@ -117,3 +124,55 @@ case class CIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: 
   }
 }
 
+object CIELMincTest extends App {
+  //  val patts0 = new Random(0).shuffle(Datasets.patternsFromSQLite("/home/davi/wcs/ucipp/uci")("gas-drift").right.get.take(1000000))
+  //  val patts0 = new Random(0).shuffle(Datasets.arff(true)("/home/davi/wcs/ucipp/uci/banana.arff").right.get.take(200000))
+  //    val patts0 = new Random(0).shuffle(Datasets.arff(true)("/home/davi/wcs/ucipp/uci/iris.arff").right.get.take(200000))
+  val patts0 = new Random(0).shuffle(Datasets.arff(true)("/home/davi/wcs/ucipp/uci/abalone-11class.arff").right.get.take(200000))
+  val filter = Datasets.zscoreFilter(patts0)
+  val patts = Datasets.applyFilterChangingOrder(patts0, filter)
+
+  val n = patts.length / 2
+  val tr = patts.take(n)
+  val ts = patts.drop(n)
+
+  val l = NB()
+  //KNN(5,"eucl",patts)
+  val tt = patts.head.nclasses
+  Tempo.start
+  var m = CIELM(n).build(tr.take(tt))
+  tr.drop(tt).foreach(x => m = CIELM(n).update(m)(x))
+  Tempo.print_stop
+  println(s"${m.accuracy(ts)}")
+
+  Tempo.start
+  var m2 = l.build(tr.take(tt))
+  tr.drop(tt).foreach(x => m2 = l.update(m2)(x))
+  Tempo.print_stop
+  println(s"${m2.accuracy(ts)}")
+
+  Tempo.start
+  m = CIELM(n).build(tr)
+  Tempo.print_stop
+  println(s"${m.accuracy(ts)}")
+
+  println("")
+
+  Tempo.start
+  m = CIELM(n).build(tr.take(tt))
+  tr.drop(tt).foreach(x => m = CIELM(n).update(m)(x))
+  Tempo.print_stop
+  println(s"${m.accuracy(ts)}")
+
+  Tempo.start
+  m2 = l.build(tr.take(tt))
+  tr.drop(tt).foreach(x => m2 = l.update(m2)(x))
+  Tempo.print_stop
+  println(s"${m2.accuracy(ts)}")
+
+  Tempo.start
+  m = CIELM(n).build(tr)
+  Tempo.print_stop
+  println(s"${m.accuracy(ts)}")
+
+}

@@ -61,12 +61,12 @@ case class ECIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f:
       l += 1
       val te = Tempo.stop
       Tempo.start
-      f(ELMSimpleModel(rnd.clone(), Alfat, biases, Beta, null, null), te)
+      f(ELMSimpleModel(rnd.clone(), Alfat, biases, Beta, X, e, t), te)
     }
     //    Alfat.resizeRows(l)
     //    Beta.resizeRows(l)
     //    ELMModel(Alfat, biases.take(Beta.numRows()), new DenseMatrix(1, 1), Beta)
-    val model = ELMSimpleModel(rnd, Alfat, biases, Beta, null, null)
+    val model = ELMSimpleModel(rnd, Alfat, biases, Beta, X, e, t)
     model
   }
 
@@ -74,7 +74,7 @@ case class ECIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f:
    * Mutate e and rnd
    * @return
    */
-  def createNodeForConvexUpdateAmongCandidates(rnd: XSRandom, X: DenseMatrix, t: Array[DenseVector], e: Array[DenseVector], tmp: DenseVector, tmp2: DenseVector) = {
+  def createNodeForConvexUpdateAmongCandidates(rnd: XSRandom, X: DenseMatrix, t: Vector[DenseVector], e: Vector[DenseVector], tmp: DenseVector, tmp2: DenseVector) = {
     val nclasses = t.size
     val natts = X.numColumns()
     val ninsts = X.numRows()

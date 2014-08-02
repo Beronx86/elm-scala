@@ -42,7 +42,7 @@ case class IELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: (
     val (h, beta) = addNode(weights, bias, newX, newE, newTmp)
     val newBeta = Data.appendRowToMatrix(m.Beta, beta)
 
-    ELMSimpleModel(newRnd, newAlfat, newBiases, newBeta, newX, newE)
+    ELMSimpleModel(newRnd, newAlfat, newBiases, newBeta, newX, newE, null)
   }
 
   protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector) = {
@@ -80,8 +80,8 @@ case class IELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: (
 
 object IELMincTest extends App {
   //  val patts0 = new Random(0).shuffle(Datasets.patternsFromSQLite("/home/davi/wcs/ucipp/uci")("gas-drift").right.get.take(1000000))
-  val patts0 = new Random(0).shuffle(Datasets.arff(true)("/home/davi/wcs/ucipp/uci/banana.arff").right.get.take(200000))
   //  val patts0 = new Random(0).shuffle(Datasets.arff(true)("/home/davi/wcs/ucipp/uci/iris.arff").right.get.take(200000))
+  val patts0 = new Random(0).shuffle(Datasets.arff(true)("/home/davi/wcs/ucipp/uci/abalone-11class.arff").right.get.take(200000))
   val filter = Datasets.zscoreFilter(patts0)
   val patts = Datasets.applyFilterChangingOrder(patts0, filter)
 
@@ -89,17 +89,19 @@ object IELMincTest extends App {
   val tr = patts.take(n)
   val ts = patts.drop(n)
 
-  val l = NB() //KNN(5,"eucl",patts)
+  val l = NB()
+  //KNN(5,"eucl",patts)
+  val tt = patts.head.nclasses
 
   Tempo.start
-  var m = IELM(n).build(tr.take(2))
-  tr.drop(2).foreach(x => m = IELM(n).update(m)(x))
+  var m = IELM(n).build(tr.take(tt))
+  tr.drop(tt).foreach(x => m = IELM(n).update(m)(x))
   Tempo.print_stop
   println(s"${m.accuracy(ts)}")
 
   Tempo.start
-  var m2 = l.build(tr.take(2))
-  tr.drop(2).foreach(x => m2 = l.update(m2)(x))
+  var m2 = l.build(tr.take(tt))
+  tr.drop(tt).foreach(x => m2 = l.update(m2)(x))
   Tempo.print_stop
   println(s"${m2.accuracy(ts)}")
 
@@ -111,14 +113,14 @@ object IELMincTest extends App {
   println("")
 
   Tempo.start
-  m = IELM(n).build(tr.take(2))
-  tr.drop(2).foreach(x => m = IELM(n).update(m)(x))
+  m = IELM(n).build(tr.take(tt))
+  tr.drop(tt).foreach(x => m = IELM(n).update(m)(x))
   Tempo.print_stop
   println(s"${m.accuracy(ts)}")
 
   Tempo.start
-  m2 = l.build(tr.take(2))
-  tr.drop(2).foreach(x => m2 = l.update(m2)(x))
+  m2 = l.build(tr.take(tt))
+  tr.drop(tt).foreach(x => m2 = l.update(m2)(x))
   Tempo.print_stop
   println(s"${m2.accuracy(ts)}")
 

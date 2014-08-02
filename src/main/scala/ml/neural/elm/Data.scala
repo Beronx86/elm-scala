@@ -95,8 +95,8 @@ object Data {
 
   def patterns2te(insts: Seq[Pattern], ninsts: Int) = {
     val nclasses = insts.head.nclasses
-    val t = Array.fill(nclasses)(new DenseVector(ninsts))
-    val e = Array.fill(nclasses)(new DenseVector(ninsts))
+    val t = Vector.fill(nclasses)(new DenseVector(ninsts))
+    val e = Vector.fill(nclasses)(new DenseVector(ninsts))
     0 until nclasses foreach { o =>
       var i = 0
       while (i < ninsts) {

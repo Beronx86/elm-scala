@@ -46,7 +46,7 @@ case class EIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: 
     val newBiases = Data.appendToArray(m.biases, bias)
     val newBeta = Data.appendRowToMatrix(m.Beta, beta)
 
-    ELMSimpleModel(newRnd, newAlfat, newBiases, newBeta, newX, newE)
+    ELMSimpleModel(newRnd, newAlfat, newBiases, newBeta, newX, newE, null)
   }
 
   /**

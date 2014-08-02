@@ -40,8 +40,8 @@ trait IELMTrait extends IteratedBuildELM {
     val biases = Array.fill(L)(0d)
     val Alfat = new ResizableDenseMatrix(L, natts)
     val Beta = new ResizableDenseMatrix(L, nclasses)
-    val H = new ResizableDenseMatrix(ninsts, L)
-    H.resizeCols(0)
+    //    val H = new ResizableDenseMatrix(ninsts, L)
+    //    H.resizeCols(0)
     val e = patterns2t(trSet, ninsts)
     var l = 0
     val tmp = new DenseVector(ninsts)
@@ -56,21 +56,21 @@ trait IELMTrait extends IteratedBuildELM {
         Beta.addRow(beta)
         val te = Tempo.stop
         Tempo.start
-        f(ELMSimpleModel(rnd.clone(), Alfat, biases, Beta, X, e), te)
+        f(ELMSimpleModel(rnd.clone(), Alfat, biases, Beta, X, e, null), te)
       }
     } else {
       while (l < L) {
         val (weights, bias, h, beta) = buildCore(rnd, X, e, tmp)
-        H.addCol(h) //vantagem do I-ELM: H vem pronto e não muda
+        //        H.addCol(h) //vantagem do I-ELM: H vem pronto e não muda
         biases(l) = bias
         Alfat.setRow(l, weights)
         Beta.setRow(l, beta)
         l += 1
       }
-      Alfat.resizeRows(l)
-      Beta.resizeRows(l)
+      //      Alfat.resizeRows(l)
+      //      Beta.resizeRows(l)
     }
-    ELMSimpleModel(rnd, Alfat, biases, Beta, X, e) //todo: se nao crescer, manter P e H anteriores?
+    ELMSimpleModel(rnd, Alfat, biases, Beta, X, e, null) //todo: se nao crescer, manter P e H anteriores?
   }
 
   protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector): (Array[Double], Double, DenseVector, Array[Double])

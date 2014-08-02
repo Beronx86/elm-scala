@@ -31,7 +31,7 @@ trait ExampleTemplate {
     case Left(str) => println("Could not load banana dataset from the program path: " + str); sys.exit(0)
   }).take(1000)
 
-  def kfoldIteration[T](tr: Seq[Pattern], ts: Seq[Pattern], fold: Int, bla: Int)
+  def kfoldIteration[T](tr: => Seq[Pattern], ts: => Seq[Pattern], fold: Int, bla: Int)
 
   def run {
     println(

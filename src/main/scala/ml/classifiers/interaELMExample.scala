@@ -28,7 +28,7 @@ object interaELMExample extends App with ExampleTemplate {
   val k = 2
   val l = 20
 
-  def kfoldIteration[T](tr0: Seq[Pattern], ts: Seq[Pattern], fold: Int, bla: Int) {
+  def kfoldIteration[T](tr0: => Seq[Pattern], ts: => Seq[Pattern], fold: Int, bla: Int) {
     val tr = tr0.take(31533)
 
     //warming up

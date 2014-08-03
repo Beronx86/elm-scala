@@ -18,6 +18,7 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.classifiers
 
 import ml.models.ELMModel
+import util.XSRandom
 
 /**
  * Grows network from 1 to Lmax according to arriving instances.
@@ -29,7 +30,8 @@ case class interaELM(Lmax: Int, seed: Int = 42, notes: String = "") extends inte
 
   protected def modelSelection(model: ELMModel) = {
     //todo: analyse which matrices can be reused along all growing (i.e. they don't change size and need not be kept intact as candidate for the final model)
-    var m = model
+
+    var m = cast(buildCore(1, model.Xt, model.Y, new XSRandom(seed)))
     val (_, best) = (1 to math.min(m.N / 2, Lmax) map { L =>
       if (L > 1) m = growByOne(m)
       val E = errorMatrix(m.H, m.Beta, m.Y)

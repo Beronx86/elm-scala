@@ -32,6 +32,8 @@ case class IELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: (
 
   def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
     val m = cast(model)
+    //    if (math.sqrt(m.N + 1).toInt > math.sqrt(m.N).toInt) {
+
     val newE = m.e.zip(pattern.weighted_label_array) map { case (dv, v) => Data.appendToVector(dv, v)}
     val newX = Data.appendRowToMatrix(m.X, pattern.array)
     val newTmp = new DenseVector(newX.numRows())
@@ -95,38 +97,41 @@ object IELMincTest extends App {
 
   Tempo.start
   var m = IELM(n).build(tr.take(tt))
-  tr.drop(tt).foreach(x => m = IELM(n).update(m)(x))
-  Tempo.print_stop
-  println(s"${m.accuracy(ts)}")
+  tr.drop(tt).foreach {
+    x => m = IELM(n).update(m)(x)
+      println(s"${m.accuracy(ts)}")
 
-  Tempo.start
-  var m2 = l.build(tr.take(tt))
-  tr.drop(tt).foreach(x => m2 = l.update(m2)(x))
+  }
   Tempo.print_stop
-  println(s"${m2.accuracy(ts)}")
-
-  Tempo.start
-  m = IELM(n).build(tr)
-  Tempo.print_stop
-  println(s"${m.accuracy(ts)}")
-
-  println("")
-
-  Tempo.start
-  m = IELM(n).build(tr.take(tt))
-  tr.drop(tt).foreach(x => m = IELM(n).update(m)(x))
-  Tempo.print_stop
-  println(s"${m.accuracy(ts)}")
-
-  Tempo.start
-  m2 = l.build(tr.take(tt))
-  tr.drop(tt).foreach(x => m2 = l.update(m2)(x))
-  Tempo.print_stop
-  println(s"${m2.accuracy(ts)}")
-
-  Tempo.start
-  m = IELM(n).build(tr)
-  Tempo.print_stop
-  println(s"${m.accuracy(ts)}")
+  //
+  //  Tempo.start
+  //  var m2 = l.build(tr.take(tt))
+  //  tr.drop(tt).foreach(x => m2 = l.update(m2)(x))
+  //  Tempo.print_stop
+  //  println(s"${m2.accuracy(ts)}")
+  //
+  //  Tempo.start
+  //  m = IELM(n).build(tr)
+  //  Tempo.print_stop
+  //  println(s"${m.accuracy(ts)}")
+  //
+  //  println("")
+  //
+  //  Tempo.start
+  //  m = IELM(n).build(tr.take(tt))
+  //  tr.drop(tt).foreach(x => m = IELM(n).update(m)(x))
+  //  Tempo.print_stop
+  //  println(s"${m.accuracy(ts)}")
+  //
+  //  Tempo.start
+  //  m2 = l.build(tr.take(tt))
+  //  tr.drop(tt).foreach(x => m2 = l.update(m2)(x))
+  //  Tempo.print_stop
+  //  println(s"${m2.accuracy(ts)}")
+  //
+  //  Tempo.start
+  //  m = IELM(n).build(tr)
+  //  Tempo.print_stop
+  //  println(s"${m.accuracy(ts)}")
 
 }

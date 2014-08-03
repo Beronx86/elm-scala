@@ -141,38 +141,40 @@ object CIELMincTest extends App {
   val tt = patts.head.nclasses
   Tempo.start
   var m = CIELM(n).build(tr.take(tt))
-  tr.drop(tt).foreach(x => m = CIELM(n).update(m)(x))
+  tr.drop(tt).foreach { x =>
+    m = CIELM(n).update(m)(x)
+    println(s"${m.accuracy(ts)}")
+  }
   Tempo.print_stop
-  println(s"${m.accuracy(ts)}")
 
-  Tempo.start
-  var m2 = l.build(tr.take(tt))
-  tr.drop(tt).foreach(x => m2 = l.update(m2)(x))
-  Tempo.print_stop
-  println(s"${m2.accuracy(ts)}")
-
-  Tempo.start
-  m = CIELM(n).build(tr)
-  Tempo.print_stop
-  println(s"${m.accuracy(ts)}")
-
-  println("")
-
-  Tempo.start
-  m = CIELM(n).build(tr.take(tt))
-  tr.drop(tt).foreach(x => m = CIELM(n).update(m)(x))
-  Tempo.print_stop
-  println(s"${m.accuracy(ts)}")
-
-  Tempo.start
-  m2 = l.build(tr.take(tt))
-  tr.drop(tt).foreach(x => m2 = l.update(m2)(x))
-  Tempo.print_stop
-  println(s"${m2.accuracy(ts)}")
-
-  Tempo.start
-  m = CIELM(n).build(tr)
-  Tempo.print_stop
-  println(s"${m.accuracy(ts)}")
+  //  Tempo.start
+  //  var m2 = l.build(tr.take(tt))
+  //  tr.drop(tt).foreach(x => m2 = l.update(m2)(x))
+  //  Tempo.print_stop
+  //  println(s"${m2.accuracy(ts)}")
+  //
+  //  Tempo.start
+  //  m = CIELM(n).build(tr)
+  //  Tempo.print_stop
+  //  println(s"${m.accuracy(ts)}")
+  //
+  //  println("")
+  //
+  //  Tempo.start
+  //  m = CIELM(n).build(tr.take(tt))
+  //  tr.drop(tt).foreach(x => m = CIELM(n).update(m)(x))
+  //  Tempo.print_stop
+  //  println(s"${m.accuracy(ts)}")
+  //
+  //  Tempo.start
+  //  m2 = l.build(tr.take(tt))
+  //  tr.drop(tt).foreach(x => m2 = l.update(m2)(x))
+  //  Tempo.print_stop
+  //  println(s"${m2.accuracy(ts)}")
+  //
+  //  Tempo.start
+  //  m = CIELM(n).build(tr)
+  //  Tempo.print_stop
+  //  println(s"${m.accuracy(ts)}")
 
 }

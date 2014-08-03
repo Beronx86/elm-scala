@@ -18,6 +18,9 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.classifiers
 
 import ml.models.ELMModel
+import util.{Tempo, Datasets}
+
+import scala.util.Random
 
 /**
  * Grows network from 1.

@@ -35,7 +35,8 @@ case class interaELMNoEM(Lmax: Int, seed: Int = 42, notes: String = "") extends 
     val (_, best) = (1 to math.min(m.N / 2, Lmax) map { L =>
       if (L > 1) m = buildCore(L, m.Xt, m.Y, new XSRandom(seed))
       val E = errorMatrix(m.H, m.Beta, m.Y)
-      val press = LOOError(m.Y)(E)(m.HHinv) //PRESS(E)(HHinv)
+      val press = LOOError(m.Y)(E)(m.HHinv)
+      //      val press = PRESS(E)(m.HHinv)
       (press, m)
     }) minBy (_._1)
     best

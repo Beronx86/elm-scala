@@ -35,7 +35,7 @@ import scala.util.Random
  */
 case class IELMScratch(seed: Int = 42, notes: String = "", callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ())
   extends IELMTrait {
-  override val toString = "IELM_" + notes
+  override val toString = "IELMScratch_" + notes
   val Lbuild = -1
   var ps = Seq[Pattern]()
 

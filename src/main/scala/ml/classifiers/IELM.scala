@@ -32,8 +32,7 @@ case class IELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: (
 
   def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
     val m = cast(model)
-    //    if (math.sqrt(m.N + 1).toInt > math.sqrt(m.N).toInt) {
-
+    //    if (math.sqrt(m.N + 1).toInt > math.sqrt(m.N).toInt) build(?) //<- not possible to rebuild, since we don't have Y nor all patterns anymore.
     val newE = m.e.zip(pattern.weighted_label_array) map { case (dv, v) => Data.appendToVector(dv, v)}
     val newX = Data.appendRowToMatrix(m.X, pattern.array)
     val newTmp = new DenseVector(newX.numRows())

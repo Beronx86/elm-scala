@@ -40,7 +40,6 @@ case class CIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: 
     val newE = m.e.zip(pattern.weighted_label_array) map { case (dv, v) => Data.appendToVector(dv, v)}
     val newT = m.t.zip(pattern.weighted_label_array) map { case (dv, v) => Data.appendToVector(dv, v)}
     val newX = Data.appendRowToMatrix(m.X, pattern.array)
-    val newTmp = new DenseVector(newX.numRows())
 
     val (weights, bias, newRnd) = newNode(m.Alfat.numColumns(), m.rnd)
     val newAlfat = Data.appendRowToMatrix(m.Alfat, weights)

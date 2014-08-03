@@ -121,6 +121,20 @@ object Data {
     t
   }
 
+  def Y2t(Y: DenseMatrix) = {
+    val ninsts = Y.numRows()
+    val nclasses = Y.numColumns()
+    val t = Vector.fill(nclasses)(new DenseVector(ninsts))
+    0 until nclasses foreach { o =>
+      var i = 0
+      while (i < ninsts) {
+        t(o).set(i, Y.get(i, o))
+        i += 1
+      }
+    }
+    t
+  }
+
   def appendToVector(vec: DenseVector, v: Double) = {
     val s = vec.size()
     val newVec = new DenseVector(s + 1)

@@ -29,20 +29,12 @@ import util.{Tempo, XSRandom}
  */
 trait IELMTrait extends IteratedBuildELM {
 
-  def build(trSet: Seq[Pattern]) = {
-    val rnd = new XSRandom(seed)
-    Tempo.start
-    val ninsts = checkEmptyness(trSet: Seq[Pattern])
-    val L = if (Lbuild == -1) ninsts else Lbuild
-    val natts = trSet.head.nattributes
-    val nclasses = trSet.head.nclasses
-    val X = patterns2matrix(trSet, ninsts)
+  def bareBuild(ninsts: Int, natts: Int, nclasses: Int, X: DenseMatrix, e: Vector[DenseVector]) = {
+    val L = nclasses
     val biases = Array.fill(L)(0d)
     val Alfat = new ResizableDenseMatrix(L, natts)
     val Beta = new ResizableDenseMatrix(L, nclasses)
-    //    val H = new ResizableDenseMatrix(ninsts, L)
-    //    H.resizeCols(0)
-    val e = patterns2t(trSet, ninsts)
+    val rnd = new XSRandom(seed)
     var l = 0
     val tmp = new DenseVector(ninsts)
     if (callf) {
@@ -54,9 +46,7 @@ trait IELMTrait extends IteratedBuildELM {
         l += 1
         Alfat.addRow(weights)
         Beta.addRow(beta)
-        val te = Tempo.stop
-        Tempo.start
-        f(ELMSimpleModel(rnd.clone(), Alfat, biases, Beta, X, e, null), te)
+        f(ELMSimpleModel(rnd.clone(), Alfat, biases, Beta, X, e, null), -1) //todo: measure time, instead of -1
       }
     } else {
       while (l < L) {
@@ -67,10 +57,23 @@ trait IELMTrait extends IteratedBuildELM {
         Beta.setRow(l, beta)
         l += 1
       }
-      //      Alfat.resizeRows(l)
-      //      Beta.resizeRows(l)
     }
     ELMSimpleModel(rnd, Alfat, biases, Beta, X, e, null) //todo: se nao crescer, manter P e H anteriores?
+  }
+
+  def build(trSet: Seq[Pattern]) = {
+    val nclasses = trSet.head.nclasses
+    if (trSet.size < nclasses) {
+      println("At least |Y| instances required.")
+      sys.exit(0)
+    }
+    val initialTrSet = trSet.take(nclasses)
+    val ninsts = checkEmptyness(initialTrSet: Seq[Pattern])
+    val natts = initialTrSet.head.nattributes
+    val X = patterns2matrix(initialTrSet, ninsts)
+    val e = patterns2t(initialTrSet, ninsts)
+    val firstModel = bareBuild(ninsts, natts, nclasses, X, e)
+    trSet.foldLeft(firstModel)((m, p) => cast(update(m, fast_mutable = true)(p)))
   }
 
   protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector): (Array[Double], Double, DenseVector, Array[Double])

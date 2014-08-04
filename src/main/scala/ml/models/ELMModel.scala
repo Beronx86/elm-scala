@@ -64,6 +64,49 @@ case class ELMSimpleModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Doubl
   val N = X.numRows()
 }
 
+case class ELMSimpleEnsembleModel(rnd: XSRandom, AlfatS: Seq[DenseMatrix], biasesS: Seq[Array[Double]], BetaS: Seq[DenseMatrix], X: DenseMatrix, eS: Seq[Vector[DenseVector]], t: Vector[DenseVector]) extends Model {
+  lazy val M = AlfatS.size
+  lazy val O = BetaS.head.numColumns()
+  val N = X.numRows()
+
+  override def distribution(pattern: Pattern) = {
+    var o = 0
+    var m = 0
+    val res = Array.fill(O)(0d)
+    while (m < M) {
+      val dis = ELMUtils.distribution(ELMUtils.test(pattern, AlfatS(m), biasesS(m), BetaS(m)))
+      o = 0
+      while (o < O) {
+        res(o) += dis(o)
+        o += 1
+      }
+      m += 1
+    }
+    o = 0
+    while (o < O) {
+      res(o) /= M
+      o += 1
+    }
+    res
+  }
+
+  override def output(pattern: Pattern) = {
+    var o = 0
+    var m = 0
+    val res = Array.fill(O)(0d)
+    while (m < M) {
+      val dis = ELMUtils.test(pattern, AlfatS(m), biasesS(m), BetaS(m)).getData
+      o = 0
+      while (o < O) {
+        res(o) += dis(o)
+        o += 1
+      }
+      m += 1
+    }
+    res
+  }
+}
+
 //todo: Xt,Y -> queue[Pattern ou (array,array)] (pra evitar copias de Xt e Y inteiros na memoria; Xt e Y só vão ser needed ao final dos incrementos, podem ser criados inteiros de uma vez from queue)
 case class ELMIncModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], Beta: DenseMatrix,
                        P: DenseMatrix, N: Int, Xt: DenseMatrix, Y: DenseMatrix) extends ELMModel {

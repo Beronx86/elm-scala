@@ -55,48 +55,11 @@ case class IELMScratch(seed: Int = 42, notes: String = "", callf: Boolean = fals
     bareBuild(ninsts, natts, nclasses, X, e)
   }
 
-  //  {
-  //    val m = cast(model)
-  //    val nclasses = pattern.nclasses
-  //    val natts = pattern.nattributes
-  //    val x = pattern.array
-  //    val y = pattern.weighted_label_array
-  //    val X = appendRowToMatrix(m.X, x)
-  //    val Y = appendRowToMatrix(m.Y, y)
-  //    val ninsts = X.numRows()
-  //    val e = Y2t(Y)
-  //    bareBuild(ninsts, natts, nclasses, X, e)
-  //  }
-
   protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector) = {
     val (weights, bias, newRnd) = newNode(X.numColumns(), rnd)
     rnd.setSeed(newRnd.getSeed)
     val (h, beta) = addNode(weights, bias, X, e, tmp)
     (weights, bias, h, beta)
-  }
-
-  def addNode(weights: Array[Double], bias: Double, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector) = {
-    val nclasses = e.size
-    //Generate node and calculate h.
-    val alfa = new DenseVector(weights, false)
-    val beta = new Array[Double](nclasses)
-    val h = feedHidden(X, alfa, bias)
-    var o = 0
-    while (o < nclasses) {
-      tmp.set(h)
-      //Calculate new weight.
-      val nume = e(o).dot(h)
-      val deno = h.dot(h)
-      val b = nume / deno
-      beta(o) = b
-
-      //Recalculate residual error.
-      tmp.scale(-b)
-      e(o).add(tmp)
-
-      o += 1
-    }
-    (h, beta)
   }
 }
 

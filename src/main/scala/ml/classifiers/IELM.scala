@@ -52,30 +52,6 @@ case class IELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: (
     val (h, beta) = addNode(weights, bias, X, e, tmp)
     (weights, bias, h, beta)
   }
-
-  def addNode(weights: Array[Double], bias: Double, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector) = {
-    val nclasses = e.size
-    //Generate node and calculate h.
-    val alfa = new DenseVector(weights, false)
-    val beta = new Array[Double](nclasses)
-    val h = feedHidden(X, alfa, bias)
-    var o = 0
-    while (o < nclasses) {
-      tmp.set(h)
-      //Calculate new weight.
-      val nume = e(o).dot(h)
-      val deno = h.dot(h)
-      val b = nume / deno
-      beta(o) = b
-
-      //Recalculate residual error.
-      tmp.scale(-b)
-      e(o).add(tmp)
-
-      o += 1
-    }
-    (h, beta)
-  }
 }
 
 
@@ -95,19 +71,55 @@ object IELMincTest extends App {
   val tt = patts.head.nclasses
 
   Tempo.start
-  var m = IELM(n).build(tr.take(tt))
-  tr.drop(tt).foreach {
-    x => m = IELM(n).update(m)(x)
-      println(s"${m.accuracy(ts)}")
-
-  }
+  val xx = IELM(1)
+  val s = IELMScratch(1)
+  tr.drop(tt).foreach { x => m = xx.update(m)(x)}
   Tempo.print_stop
-  //
-  //  Tempo.start
-  //  var m2 = l.build(tr.take(tt))
-  //  tr.drop(tt).foreach(x => m2 = l.update(m2)(x))
-  //  Tempo.print_stop
-  //  println(s"${m2.accuracy(ts)}")
+  println(s"${m.accuracy(ts)}")
+
+  Tempo.start
+  val bla = IELM(1)
+  m = s.build(tr.take(tt))
+  tr.drop(tt).foreach { x => m = s.update(m)(x)}
+  Tempo.print_stop
+  println(s"${m.accuracy(ts)}")
+
+  Tempo.start
+  val s2 = IELMScratch(1)
+  var m = xx.build(tr.take(tt))
+  tr.drop(tt).foreach { x => mm = ss.update(mm)(x)}
+  Tempo.print_stop
+  println(s"${m.accuracy(ts)}")
+
+  println("")
+
+  Tempo.start
+  var ss = interawfELM(5, 1)
+  m = bla.build(tr.take(tt))
+  tr.drop(tt).foreach { x => m = bla.update(m)(x)}
+  Tempo.print_stop
+  println(s"${m.accuracy(ts)}")
+  var mm = ss.build(tr.take(tt))
+  Tempo.start
+  m = s2.build(tr.take(tt))
+  tr.drop(tt).foreach { x => m = s2.update(m)(x)}
+  Tempo.print_stop
+  println(s"${m.accuracy(ts)}")
+
+  println("")
+
+  Tempo.start
+  var m2 = l.build(tr.take(tt))
+  tr.drop(tt).foreach(x => m2 = l.update(m2)(x))
+  Tempo.print_stop
+  println(s"${m2.accuracy(ts)}")
+
+  Tempo.start
+  ss = interawfELM(15, 1)
+  mm = ss.build(tr.take(tt))
+  tr.drop(tt).foreach { x => mm = ss.update(mm)(x)}
+  Tempo.print_stop
+  println(s"${m.accuracy(ts)}")
   //
   //  Tempo.start
   //  m = IELM(n).build(tr)

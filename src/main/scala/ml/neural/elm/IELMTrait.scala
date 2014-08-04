@@ -29,6 +29,32 @@ import util.{Tempo, XSRandom}
  */
 trait IELMTrait extends IteratedBuildELM {
 
+  protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector): (Array[Double], Double, DenseVector, Array[Double])
+
+  def addNode(weights: Array[Double], bias: Double, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector) = {
+    val nclasses = e.size
+    //Generate node and calculate h.
+    val alfa = new DenseVector(weights, false)
+    val beta = new Array[Double](nclasses)
+    val h = feedHidden(X, alfa, bias)
+    var o = 0
+    while (o < nclasses) {
+      tmp.set(h)
+      //Calculate new weight.
+      val nume = e(o).dot(h)
+      val deno = h.dot(h)
+      val b = nume / deno
+      beta(o) = b
+
+      //Recalculate residual error.
+      tmp.scale(-b)
+      e(o).add(tmp)
+
+      o += 1
+    }
+    (h, beta)
+  }
+
   def bareBuild(ninsts: Int, natts: Int, nclasses: Int, X: DenseMatrix, e: Vector[DenseVector]) = {
     val L = nclasses
     val biases = Array.fill(L)(0d)
@@ -68,13 +94,11 @@ trait IELMTrait extends IteratedBuildELM {
       sys.exit(0)
     }
     val initialTrSet = trSet.take(nclasses)
-    val ninsts = checkEmptyness(initialTrSet: Seq[Pattern])
     val natts = initialTrSet.head.nattributes
-    val X = patterns2matrix(initialTrSet, ninsts)
-    val e = patterns2t(initialTrSet, ninsts)
-    val firstModel = bareBuild(ninsts, natts, nclasses, X, e)
-    trSet.foldLeft(firstModel)((m, p) => cast(update(m, fast_mutable = true)(p)))
+    val X = patterns2matrix(initialTrSet, nclasses)
+    val e = patterns2t(initialTrSet, nclasses)
+    val firstModel = bareBuild(nclasses, natts, nclasses, X, e)
+    trSet.drop(nclasses).foldLeft(firstModel)((m, p) => cast(update(m, fast_mutable = true)(p)))
   }
 
-  protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector): (Array[Double], Double, DenseVector, Array[Double])
 }

@@ -17,16 +17,25 @@ Copyright (C) 2014 Davi Pereira dos Santos
 */
 package ml.classifiers
 
-import ml.models.ELMModel
+import ml.Pattern
+import ml.models.{ELMModel, ELMIncModel, Model}
+import util.XSRandom
 
 /**
  * Grows network from 1.
  * L changes monotonically.
+ * Attempts at each new instance.
  * @param deltaL
  * @param seed
  */
-case class interawfELM(deltaL: Int, seed: Int = 42, notes: String = "") extends interaTrait {
-  override val toString = s"interawfELM d${deltaL}_" + notes
+case class interawfAlwaysELM(deltaL: Int, seed: Int = 42, notes: String = "") extends interaTrait {
+  override val toString = s"interawAlwaysELM d${deltaL}_" + notes
+
+  override def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
+    val m = super.update(model)(pattern)
+    val gm = modelSelection(m)
+    ELMIncModel(gm.rnd, gm.Alfat, gm.biases, gm.Beta, gm.P, gm.N, gm.Xt, gm.Y)
+  }
 
   protected def modelSelection(model: ELMModel) = {
     //todo: analyse which matrices can be reused along all growing (i.e. they don't change size and need not be kept intact as candidate for the final model)

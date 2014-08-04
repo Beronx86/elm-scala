@@ -17,28 +17,42 @@ Copyright (C) 2014 Davi Pereira dos Santos
 */
 package ml.classifiers
 
-import ml.models.ELMModel
+import ml.Pattern
+import ml.models.{ELMIncModel, Model, ELMModel}
+import util.XSRandom
 
 /**
  * Grows network from 1.
- * L changes monotonically.
+ * L1 changes dynamically in [L0 - deltaL; L0 + deltaL].
+ * Attempts at each new instance.
  * @param deltaL
  * @param seed
  */
-case class interawfELM(deltaL: Int, seed: Int = 42, notes: String = "") extends interaTrait {
-  override val toString = s"interawfELM d${deltaL}_" + notes
+case class interawAlwaysELM(deltaL: Int, seed: Int = 42, notes: String = "") extends interaTrait {
+  override val toString = s"interawAlwaysELM d${deltaL}_" + notes
+
+  override def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
+    val m = super.update(model)(pattern)
+    val gm = modelSelection(m)
+    ELMIncModel(gm.rnd, gm.Alfat, gm.biases, gm.Beta, gm.P, gm.N, gm.Xt, gm.Y)
+  }
 
   protected def modelSelection(model: ELMModel) = {
     //todo: analyse which matrices can be reused along all growing (i.e. they don't change size and need not be kept intact as candidate for the final model)
     var m = model
-    val min = m.L
+    val previousL = m.L
+    val min = math.max(1, m.L - deltaL)
     val max = math.min(m.L + deltaL, m.N)
+    if (m.L != min) m = buildCore(min, m.Xt, m.Y, new XSRandom(seed)) //m entra na dança na vez de L=min no loop
     val (_, best) = (min to max) map { L =>
-      if (L > min) m = growByOne(m)
-      val E = errorMatrix(m.H, m.Beta, m.Y)
-      val press = LOOError(m.Y)(E)(m.HHinv) //PRESS(E)(HHinv)
-      (press, m)
-    } minBy (_._1)
+        if (L > min && previousL != L) m = growByOne(m)
+        val E = errorMatrix(m.H, m.Beta, m.Y)
+        val press = LOOError(m.Y)(E)(m.HHinv)
+        //        val press = PRESS(E)(m.HHinv)
+        //        println("L:" + L) //testando se w is working
+        (press, m)
+      } minBy (_._1)
+    //    println("Lbest:" + best.L) //testando se w is working
     best
   }
 }

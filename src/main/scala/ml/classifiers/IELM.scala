@@ -69,8 +69,8 @@ object IELMincTest extends App {
   val l = NB()
   //KNN(5,"eucl",patts)
   val tt = patts.head.nclasses
-
-  Tempo.start
+  ???
+  //  substituir Tempo.start
   val xx = IELM(1)
   val s = IELMScratch(1)
   tr.drop(tt).foreach { x => m = xx.update(m)(x)}

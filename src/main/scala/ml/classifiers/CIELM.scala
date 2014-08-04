@@ -34,6 +34,20 @@ case class CIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: 
   override val toString = "CIELM_" + notes
   val Lbuild = -1
 
+  def build(trSet: Seq[Pattern]): Model = {
+    val nclasses = trSet.head.nclasses
+    if (trSet.size < nclasses) {
+      println("At least |Y| instances required.")
+      sys.exit(1)
+    }
+    val initialTrSet = trSet.take(nclasses)
+    val natts = initialTrSet.head.nattributes
+    val X = patterns2matrix(initialTrSet, nclasses)
+    val (t, e) = patterns2te(initialTrSet, nclasses)
+    val firstModel = bareBuild(nclasses, natts, nclasses, X, e, t)
+    trSet.drop(nclasses).foldLeft(firstModel)((m, p) => cast(update(m, fast_mutable = true)(p)))
+  }
+
   def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
     val m = cast(model)
     val newE = m.e.zip(pattern.weighted_label_array) map { case (dv, v) => Data.appendToVector(dv, v)}
@@ -46,44 +60,6 @@ case class CIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: 
     val (h, beta) = addNodeForConvexUpdate(weights, bias, newX, newT, newE)
     val newBeta = Data.appendRowToMatrix(m.Beta, beta)
     ELMSimpleModel(newRnd, newAlfat, newBiases, newBeta, newX, newE, newT)
-  }
-
-  def build(trSet: Seq[Pattern]): Model = {
-    Tempo.start
-    val rnd = new XSRandom(seed)
-    val ninsts = checkEmptyness(trSet)
-    val L = if (Lbuild == -1) ninsts else Lbuild
-    val natts = trSet.head.nattributes
-    val nclasses = trSet.head.nclasses
-    val X = patterns2matrix(trSet, ninsts)
-    val biases = Array.fill(L)(0d)
-    val Alfat = new ResizableDenseMatrix(L, natts)
-    val Beta = new ResizableDenseMatrix(L, nclasses)
-    val (t, e) = patterns2te(trSet, ninsts)
-    var l = 0
-    if (callf) while (l < L) {
-      Alfat.resizeRows(l + 1) //needed to call f()
-      Beta.resizeRows(l + 1)
-      val (weights, b, newRnd) = newNode(natts, rnd)
-      rnd.setSeed(newRnd.getSeed)
-      val (h, beta) = addNodeForConvexUpdate(weights, b, X, t, e)
-      biases(l) = b
-      updateNetwork(l, weights, beta, Beta, Alfat)
-      l += 1
-      val te = Tempo.stop
-      Tempo.start
-      f(ELMSimpleModel(newRnd, Alfat, biases, Beta, X, e, t), te)
-    }
-    else while (l < L) {
-      val (weights, b, newRnd) = newNode(natts, rnd)
-      rnd.setSeed(newRnd.getSeed)
-      val (h, beta) = addNodeForConvexUpdate(weights, b, X, t, e)
-      biases(l) = b
-      updateNetwork(l, weights, beta, Beta, Alfat)
-      l += 1
-    }
-    val model = ELMSimpleModel(rnd, Alfat, biases, Beta, X, e, t)
-    model
   }
 
   /**
@@ -119,6 +95,37 @@ case class CIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: 
       o += 1
     }
     (h, beta)
+  }
+
+  def bareBuild(ninsts: Int, natts: Int, nclasses: Int, X: DenseMatrix, e: Vector[DenseVector], t: Vector[DenseVector]) = {
+    val L = nclasses
+    val rnd = new XSRandom(seed)
+    val biases = Array.fill(L)(0d)
+    val Alfat = new ResizableDenseMatrix(L, natts)
+    val Beta = new ResizableDenseMatrix(L, nclasses)
+    var l = 0
+    if (callf) while (l < L) {
+      Alfat.resizeRows(l + 1) //needed to call f()
+      Beta.resizeRows(l + 1)
+      val (weights, b, newRnd) = newNode(natts, rnd)
+      rnd.setSeed(newRnd.getSeed)
+      val (h, beta) = addNodeForConvexUpdate(weights, b, X, t, e)
+      biases(l) = b
+      updateNetwork(l, weights, beta, Beta, Alfat)
+      l += 1
+      val te = Tempo.stop
+      Tempo.start
+      f(ELMSimpleModel(newRnd, Alfat, biases, Beta, X, e, t), te)
+    }
+    else while (l < L) {
+      val (weights, b, newRnd) = newNode(natts, rnd)
+      rnd.setSeed(newRnd.getSeed)
+      val (h, beta) = addNodeForConvexUpdate(weights, b, X, t, e)
+      biases(l) = b
+      updateNetwork(l, weights, beta, Beta, Alfat)
+      l += 1
+    }
+    ELMSimpleModel(rnd, Alfat, biases, Beta, X, e, t)
   }
 }
 

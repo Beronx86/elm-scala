@@ -27,6 +27,7 @@ import scala.collection.mutable
  */
 object Math extends Lock {
   val readOnly = true
+  val hardClose = ()
   val IMap = mutable.LinkedHashMap[Int, DenseMatrix]()
 
   /**

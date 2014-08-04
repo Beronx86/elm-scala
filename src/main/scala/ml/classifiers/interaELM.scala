@@ -30,9 +30,11 @@ case class interaELM(Lmax: Int, seed: Int = 42, notes: String = "") extends inte
 
   protected def modelSelection(model: ELMModel) = {
     //todo: analyse which matrices can be reused along all growing (i.e. they don't change size and need not be kept intact as candidate for the final model)
+    val previousE = errorMatrix(model.H, model.Beta, model.Y)
+    val previousError = LOOError(model.Y)(previousE)(model.HHinv) //PRESS(previousE)(HHinv)
 
     var m = cast(buildCore(1, model.Xt, model.Y, new XSRandom(seed)))
-    val (_, best) = (1 to math.min(m.N / 2, Lmax) map { L =>
+    val (_, best) = (previousError, model) +: (1 to math.min(m.N / 2, Lmax) map { L =>
       if (L > 1) m = growByOne(m)
       val E = errorMatrix(m.H, m.Beta, m.Y)
       val press = LOOError(m.Y)(E)(m.HHinv) //PRESS(E)(HHinv)

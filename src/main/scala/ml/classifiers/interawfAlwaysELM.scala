@@ -39,18 +39,15 @@ case class interawfAlwaysELM(deltaL: Int, seed: Int = 42, notes: String = "") ex
 
   protected def modelSelection(model: ELMModel) = {
     //todo: analyse which matrices can be reused along all growing (i.e. they don't change size and need not be kept intact as candidate for the final model)
-    val previousE = errorMatrix(model.H, model.Beta, model.Y)
-    val previousError = LOOError(model.Y)(previousE)(model.HHinv) //PRESS(previousE)(HHinv)
-
     var m = model
     val min = m.L
     val max = math.min(m.L + deltaL, m.N)
-    val (_, best) = (previousError, model) +: ((min to max) map { L =>
+    val (_, best) = (min to max) map { L =>
       if (L > min) m = growByOne(m)
       val E = errorMatrix(m.H, m.Beta, m.Y)
       val press = LOOError(m.Y)(E)(m.HHinv) //PRESS(E)(HHinv)
       (press, m)
-    }) minBy (_._1)
+    } minBy (_._1)
     best
   }
 }

@@ -31,22 +31,19 @@ case class interawELM(deltaL: Int, seed: Int = 42, notes: String = "") extends i
 
   protected def modelSelection(model: ELMModel) = {
     //todo: analyse which matrices can be reused along all growing (i.e. they don't change size and need not be kept intact as candidate for the final model)
-    val previousE = errorMatrix(model.H, model.Beta, model.Y)
-    val previousError = LOOError(model.Y)(previousE)(model.HHinv) //PRESS(previousE)(HHinv)
-
     var m = model
     val previousL = m.L
     val min = math.max(1, m.L - deltaL)
     val max = math.min(m.L + deltaL, m.N)
     if (m.L != min) m = buildCore(min, m.Xt, m.Y, new XSRandom(seed)) //m entra na dança na vez de L=min no loop
-    val (_, best) = (previousError, model) +: ((min to max) map { L =>
+    val (_, best) = (min to max) map { L =>
         if (L > min && previousL != L) m = growByOne(m)
         val E = errorMatrix(m.H, m.Beta, m.Y)
         val press = LOOError(m.Y)(E)(m.HHinv)
         //        val press = PRESS(E)(m.HHinv)
         //        println("L:" + L) //testando se w is working
         (press, m)
-      }) minBy (_._1)
+      } minBy (_._1)
     //    println("Lbest:" + best.L) //testando se w is working
     best
   }

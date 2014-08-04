@@ -65,6 +65,7 @@ case class ELMSimpleModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Doubl
 }
 
 case class ELMSimpleEnsembleModel(rnd: XSRandom, AlfatS: Seq[DenseMatrix], biasesS: Seq[Array[Double]], BetaS: Seq[DenseMatrix], X: DenseMatrix, eS: Seq[Vector[DenseVector]], t: Vector[DenseVector]) extends Model {
+  lazy val L = BetaS.head.numRows()
   lazy val M = AlfatS.size
   lazy val O = BetaS.head.numColumns()
   val N = X.numRows()

@@ -32,7 +32,7 @@ trait ELM extends Learner {
   val seed: Int
   if (seed == 0) {
     println("Seed cannot be 0 because the fast random algorithm (XS) would produce only 0s.")
-    sys.exit(0)
+    sys.exit(1)
   }
 
   def EMC(model: Model)(patterns: Seq[Pattern]) = ???
@@ -50,7 +50,7 @@ trait ELM extends Learner {
     val ninsts = trSet.length
     if (ninsts == 0) {
       println("ERROR: Empty training set.")
-      sys.exit(0)
+      sys.exit(1)
     }
     ninsts
   }

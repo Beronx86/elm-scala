@@ -90,7 +90,7 @@ trait IELMTrait extends IteratedBuildELM {
     val nclasses = trSet.head.nclasses
     if (trSet.size < nclasses) {
       println("At least |Y| instances required.")
-      sys.exit(0)
+      sys.exit(1)
     }
     val initialTrSet = trSet.take(nclasses)
     val natts = initialTrSet.head.nattributes

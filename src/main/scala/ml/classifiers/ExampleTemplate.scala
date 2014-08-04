@@ -28,7 +28,7 @@ trait ExampleTemplate {
   val parallel: Boolean
   lazy val data = (Datasets.arff(bina = true)(dataset + ".arff") match {
     case Right(x) => x
-    case Left(str) => println("Could not load banana dataset from the program path: " + str); sys.exit(0)
+    case Left(str) => println("Could not load banana dataset from the program path: " + str); sys.exit(1)
   }).take(1000)
 
   def kfoldIteration[T](tr: => Seq[Pattern], ts: => Seq[Pattern], fold: Int, bla: Int)
@@ -49,7 +49,7 @@ trait ExampleTemplate {
     println("Warming up JVM-BLAS interface...")
     val warmingdata = Datasets.arff(bina = true)("banana.arff") match {
       case Right(x) => x
-      case Left(str) => println("Could not load iris dataset from the program path: " + str); sys.exit(0)
+      case Left(str) => println("Could not load iris dataset from the program path: " + str); sys.exit(1)
     }
     val currentSeed = (System.currentTimeMillis() % 1000000).toInt
     IELM(seed = currentSeed).build(warmingdata)

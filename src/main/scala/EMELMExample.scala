@@ -31,7 +31,7 @@ object EMELMExample extends App {
   println("Warming up JVM-BLAS interface...")
   val warmingdata = Datasets.arff(bina = true)("banana.arff") match {
     case Right(x) => x
-    case Left(str) => println("Could not load iris dataset from the program path: " + str); sys.exit(0)
+    case Left(str) => println("Could not load iris dataset from the program path: " + str); sys.exit(1)
   }
   val currentSeed = 1 + 0 * (System.currentTimeMillis() % 1000000).toInt
   IELM(seed = currentSeed).build(warmingdata)
@@ -40,7 +40,7 @@ object EMELMExample extends App {
   val dataset = "banana.arff"
   val data = (Datasets.arff(bina = true)(dataset) match {
     case Right(x) => x
-    case Left(str) => println("Could not load " + dataset + " dataset from the program path: " + str); sys.exit(0)
+    case Left(str) => println("Could not load " + dataset + " dataset from the program path: " + str); sys.exit(1)
   }).take(1000)
 
   util.Datasets.kfoldCV(data, k = 10, parallel = false) { (trainingSet, testingSet, fold, _) =>

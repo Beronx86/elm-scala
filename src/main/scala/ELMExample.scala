@@ -32,7 +32,7 @@ object ELMExample extends App {
 
   val warmingdata = Datasets.arff(bina = true)("banana.arff") match {
     case Right(x) => x
-    case Left(str) => println("Could not load banana dataset from the program path: " + str); sys.exit(0)
+    case Left(str) => println("Could not load banana dataset from the program path: " + str); sys.exit(1)
   }
   val currentSeed = (System.currentTimeMillis() % 1000000).toInt
 
@@ -53,7 +53,7 @@ object ELMExample extends App {
     println("Comparing all ELMs in " + dataset + " dataset...")
     val data = Datasets.arff(bina = true)(dataset) match {
       case Right(x) => x
-      case Left(str) => println("Could not load iris dataset from the program path: " + str); sys.exit(0)
+      case Left(str) => println("Could not load iris dataset from the program path: " + str); sys.exit(1)
     }
     elms foreach { elm =>
       println(elm)

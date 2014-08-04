@@ -32,12 +32,19 @@ case class EMELM(patterns: Seq[Pattern], seed: Int, SVD: Boolean = false) {
   val nclasses = patterns.head.nclasses
   val ninsts = patterns.length
   val rnd = new XSRandom(seed)
-
+  /**
+   * Depends on: mH, mHinv, hiddenLayer, biases
+   * Changes: hiddenLayer, biases, mH, mHinv, outputLayert
+   */
+  val HHinv = new DenseMatrix(ninsts, ninsts)
+  val I = Matrices.identity(ninsts)
+  val lastAddedHColumnt = new DenseMatrix(1, ninsts)
+  val tmp2 = new DenseVector(1)
+  patterns2matrices(patterns)
   protected val T = new DenseMatrix(ninsts, nclasses)
   protected val Tt = new DenseMatrix(nclasses, ninsts)
   protected val inputLayer = new DenseMatrix(ninsts, nattributes)
   protected val inputLayert = new DenseMatrix(nattributes, ninsts)
-  patterns2matrices(patterns)
   var (hiddenLayer, biases, mH, mHinv, outputLayert, p) = {
     val (hiddenLayer, neuron, biases) = addNeuron(new DenseMatrix(0, nattributes), new DenseVector(0))
     val (mH, h) = resizeH(new DenseMatrix(ninsts, 0), neuron, biases)
@@ -77,26 +84,9 @@ case class EMELM(patterns: Seq[Pattern], seed: Int, SVD: Boolean = false) {
       tmp
     } catch {
       case e: MatrixSingularException => println("L=" + A.numRows() + "N=" + ninsts + ". Singular matrix:\n" + A)
-        sys.exit(0)
+        sys.exit(1)
     }
   }
-
-  protected def updateOutputLayer(hiddenLayer: DenseMatrix, Hinv: DenseMatrix) = {
-    val outputLayer = new DenseMatrix(hiddenLayer.numRows(), nclasses) //LxO
-    val outputLayert = new DenseMatrix(nclasses, hiddenLayer.numRows()) //OxL
-    Hinv.mult(T, outputLayer)
-    outputLayer.transpose(outputLayert)
-    outputLayert
-  }
-
-  /**
-   * Depends on: mH, mHinv, hiddenLayer, biases
-   * Changes: hiddenLayer, biases, mH, mHinv, outputLayert
-   */
-  val HHinv = new DenseMatrix(ninsts, ninsts)
-  val I = Matrices.identity(ninsts)
-  val lastAddedHColumnt = new DenseMatrix(1, ninsts)
-  val tmp2 = new DenseVector(1)
 
   def grow() {
     mH.mult(mHinv, HHinv) //64
@@ -144,6 +134,14 @@ case class EMELM(patterns: Seq[Pattern], seed: Int, SVD: Boolean = false) {
     //    Tempo.print_stop
   }
 
+  protected def updateOutputLayer(hiddenLayer: DenseMatrix, Hinv: DenseMatrix) = {
+    val outputLayer = new DenseMatrix(hiddenLayer.numRows(), nclasses) //LxO
+    val outputLayert = new DenseMatrix(nclasses, hiddenLayer.numRows()) //OxL
+    Hinv.mult(T, outputLayer)
+    outputLayer.transpose(outputLayert)
+    outputLayert
+  }
+
   private def stackUD(U: DenseMatrix, D: DenseMatrix) = {
     val UD = new DenseMatrix(U.numRows + 1, ninsts)
     var i = 0
@@ -189,6 +187,8 @@ case class EMELM(patterns: Seq[Pattern], seed: Int, SVD: Boolean = false) {
     (newH, h)
   }
 
+  protected def sigm2(x: Double) = (1.0 / (1 + math.exp(-x)) - 0.5) * 2d
+
   protected def addNeuron(hiddenLayer: DenseMatrix, biases: DenseVector) = {
     val newHiddenLayer = new DenseMatrix(hiddenLayer.numRows + 1, nattributes)
     val newBiases = new DenseVector(biases.size + 1)
@@ -215,17 +215,68 @@ case class EMELM(patterns: Seq[Pattern], seed: Int, SVD: Boolean = false) {
     (newHiddenLayer, newNeuron, newBiases)
   }
 
-  protected def sigm2(x: Double) = (1.0 / (1 + math.exp(-x)) - 0.5) * 2d
+  def accuracy(testSet: Seq[Pattern]) = hits(testSet) / testSet.length.toDouble
+
+  def hits(testSet: Seq[Pattern]) = testSet count hit
+
+  def hit(pattern: Pattern) = predict(pattern) == pattern.label
+
+  def predict(pattern: Pattern) = {
+    val data = output(pattern)
+    var max = Double.MinValue
+    var pred = 0
+    var j = 0
+    while (j < nclasses) {
+      val v = data(j)
+      if (v > max) {
+        pred = j
+        max = v
+      }
+      j += 1
+    }
+    pred
+  }
+
+  def distribution(pattern: Pattern) = {
+    val data = squashedOutput(pattern)
+    val Tinc = new DenseVector(data, false)
+    val sum = data.sum
+    Tinc.scale(1 / sum)
+    data.toList
+  }
+
+  def squashedOutput(pattern: Pattern) = {
+    val Ox1 = output(pattern)
+
+    //Aplica sigmoide na camada de saida.
+    var i = 0
+    var v = 0d
+    while (i < Ox1.size) {
+      v = sigm(Ox1(i) * 2 - 1)
+      Ox1(i) = v
+      i += 1
+    }
+    Ox1
+  }
 
   protected def sigm(x: Double) = 1.0 / (1 + math.exp(-x))
 
-  private def pinvpre(H0: DenseMatrix, H0T: DenseMatrix, H0TH0: DenseMatrix) = {
-    val tmp_LxL = new DenseMatrix(H0.numColumns, H0.numColumns)
-    val I = Matrices.identity(H0.numColumns)
-    H0TH0.solve(I, tmp_LxL)
-    val pseudo_inverse = new DenseMatrix(H0.numColumns, H0.numRows)
-    tmp_LxL.mult(H0T, pseudo_inverse)
-    pseudo_inverse
+  def output(pattern: Pattern) = {
+    val Lx1 = new DenseVector(mH.numColumns())
+    hiddenLayer.mult(pattern.arraymtj, Lx1) //LxE Ex1 = Lx1
+    Lx1.add(biases) //Lx1
+
+    //Aplica sigmoide na camada oculta.
+    var i = 0
+    var v = 0d
+    while (i < mH.numColumns()) {
+      v = sigm2(Lx1.get(i))
+      Lx1.set(i, v)
+      i += 1
+    }
+    val Ox1 = new DenseVector(nclasses)
+    outputLayert.mult(Lx1, Ox1)
+    Ox1.getData
   }
 
   protected def patterns2matrices(insts: Seq[Pattern]) {
@@ -251,66 +302,13 @@ case class EMELM(patterns: Seq[Pattern], seed: Int, SVD: Boolean = false) {
     T.transpose(Tt)
   }
 
-  def output(pattern: Pattern) = {
-    val Lx1 = new DenseVector(mH.numColumns())
-    hiddenLayer.mult(pattern.arraymtj, Lx1) //LxE Ex1 = Lx1
-    Lx1.add(biases) //Lx1
-
-    //Aplica sigmoide na camada oculta.
-    var i = 0
-    var v = 0d
-    while (i < mH.numColumns()) {
-      v = sigm2(Lx1.get(i))
-      Lx1.set(i, v)
-      i += 1
-    }
-    val Ox1 = new DenseVector(nclasses)
-    outputLayert.mult(Lx1, Ox1)
-    Ox1.getData
-  }
-
-  def squashedOutput(pattern: Pattern) = {
-    val Ox1 = output(pattern)
-
-    //Aplica sigmoide na camada de saida.
-    var i = 0
-    var v = 0d
-    while (i < Ox1.size) {
-      v = sigm(Ox1(i) * 2 - 1)
-      Ox1(i) = v
-      i += 1
-    }
-    Ox1
-  }
-
-  def predict(pattern: Pattern) = {
-    val data = output(pattern)
-    var max = Double.MinValue
-    var pred = 0
-    var j = 0
-    while (j < nclasses) {
-      val v = data(j)
-      if (v > max) {
-        pred = j
-        max = v
-      }
-      j += 1
-    }
-    pred
-  }
-
-  def hit(pattern: Pattern) = predict(pattern) == pattern.label
-
-  def hits(testSet: Seq[Pattern]) = testSet count hit
-
-  def accuracy(testSet: Seq[Pattern]) = hits(testSet) / testSet.length.toDouble
-
-  def distribution(pattern: Pattern) = {
-    val data = squashedOutput(pattern)
-    val Tinc = new DenseVector(data, false)
-    val sum = data.sum
-    Tinc.scale(1 / sum)
-    data.toList
+  private def pinvpre(H0: DenseMatrix, H0T: DenseMatrix, H0TH0: DenseMatrix) = {
+    val tmp_LxL = new DenseMatrix(H0.numColumns, H0.numColumns)
+    val I = Matrices.identity(H0.numColumns)
+    H0TH0.solve(I, tmp_LxL)
+    val pseudo_inverse = new DenseMatrix(H0.numColumns, H0.numRows)
+    tmp_LxL.mult(H0T, pseudo_inverse)
+    pseudo_inverse
   }
 
   private def pinvSVD(H0: DenseMatrix) = {
@@ -344,7 +342,7 @@ object EMTest extends App {
   val dataset = "iris.arff"
   val data = Datasets.arff(bina = true)(dataset) match {
     case Right(x) => x.take(10)
-    case Left(str) => println("Could not load " + dataset + " dataset from the program path: " + str); sys.exit(0)
+    case Left(str) => println("Could not load " + dataset + " dataset from the program path: " + str); sys.exit(1)
   }
   1 to 10 foreach { _ =>
     val e1 = ml.classifiers.EMELM(999, 1)

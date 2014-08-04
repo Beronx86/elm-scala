@@ -45,6 +45,6 @@ trait IteratedBuildELM extends ELM {
   protected def cast(model: Model) = model match {
     case m: ELMSimpleModel => m
     case _ => println("IteratedBuild ELMs require ELMSimpleModels.")
-      sys.exit(0)
+      sys.exit(1)
   }
 }

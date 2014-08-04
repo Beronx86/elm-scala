@@ -25,20 +25,22 @@ import util.XSRandom
  * @param Lmax
  * @param seed
  */
-case class interaELM(Lmax: Int, seed: Int = 42, notes: String = "") extends interaTrait {
-  override val toString = "interaELM_" + notes
+case class interaELMreg(Lmax: Int, seed: Int = 42, notes: String = "") extends interaTrait {
+  override val toString = "interaELMreg_" + notes
 
   protected def modelSelection(model: ELMModel) = {
     //todo: analyse which matrices can be reused along all growing (i.e. they don't change size and need not be kept intact as candidate for the final model)
 
     var m = cast(buildCore(1, model.Xt, model.Y, new XSRandom(seed)))
+    val oldL = m.L
     val Lfim = math.min(m.N / 2, Lmax)
     val (_, best) = (1 to Lfim map { L =>
       if (L > 1) m = growByOne(m)
       val E = errorMatrix(m.H, m.Beta, m.Y)
-      //      val press = PRESS(E)(m.HHinv)
-      val press = LOOError(m.Y)(E)(m.HHinv)
-      (press, m)
+      val press = PRESS(E)(m.HHinv)
+      //      val press = LOOError(m.Y)(E)(m.HHinv)
+      val l = (L - oldL).abs / m.N.toDouble
+      (press + l, m)
     }).sortBy(_._1).head //.take(2).minBy(_._2.L)
     best
   }

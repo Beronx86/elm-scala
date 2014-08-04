@@ -18,11 +18,10 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.neural.elm
 
 import ml.Pattern
-import ml.models.{ELMSimpleEnsembleModel, ELMSimpleModel, Model}
-import ml.mtj.ResizableDenseMatrix
+import ml.models.{ELMSimpleEnsembleModel, Model}
 import ml.neural.elm.Data._
-import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
-import util.{Tempo, XSRandom}
+import no.uib.cipr.matrix.{DenseMatrix, DenseVector, ResizableDenseMatrix}
+import util.XSRandom
 
 /**
  * Created by davi on 21/05/14.
@@ -30,11 +29,11 @@ import util.{Tempo, XSRandom}
 trait IELMTraitEnsemble extends IteratedBuildELM {
   val M: Int
 
-  def bareBuild(ninsts: Int, natts: Int, nclasses: Int, X: DenseMatrix, eS: Seq[Vector[DenseVector]]) = {
+  def bareBuild(ninsts: Int, natts: Int, nclasses: Int, X: DenseMatrix, eS: Array[Vector[DenseVector]]) = {
     val L = nclasses
-    val biasesS = Seq.fill(M)(Array.fill(L)(0d))
-    val AlfatS = Seq.fill(M)(new ResizableDenseMatrix(L, natts))
-    val BetaS = Seq.fill(M)(new ResizableDenseMatrix(L, nclasses))
+    val biasesS = Array.fill(M)(Array.fill(L)(0d))
+    val AlfatS = Array.fill(M)(new ResizableDenseMatrix(L, natts))
+    val BetaS = Array.fill(M)(new ResizableDenseMatrix(L, nclasses))
     val rnd = new XSRandom(seed)
 
     var m = 0
@@ -62,7 +61,7 @@ trait IELMTraitEnsemble extends IteratedBuildELM {
     val initialTrSet = trSet.take(nclasses)
     val natts = initialTrSet.head.nattributes
     val X = patterns2matrix(initialTrSet, nclasses)
-    val eS = Seq.fill(M)(patterns2t(initialTrSet, nclasses))
+    val eS = Array.fill(M)(patterns2t(initialTrSet, nclasses))
     val firstModel = bareBuild(nclasses, natts, nclasses, X, eS)
     trSet.drop(nclasses).foldLeft(firstModel)((m, p) => ensCast(update(m, fast_mutable = true)(p)))
   }

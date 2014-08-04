@@ -19,10 +19,9 @@ package ml.classifiers
 
 import ml.Pattern
 import ml.models.{ELMSimpleModel, Model}
-import ml.mtj.ResizableDenseMatrix
-import ml.neural.elm.{Data, ConvexIELMTrait}
 import ml.neural.elm.Data._
-import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
+import ml.neural.elm.{ConvexIELMTrait, Data}
+import no.uib.cipr.matrix.{ResizableDenseMatrix, DenseMatrix, DenseVector}
 import util.{Datasets, Tempo, XSRandom}
 
 import scala.util.Random

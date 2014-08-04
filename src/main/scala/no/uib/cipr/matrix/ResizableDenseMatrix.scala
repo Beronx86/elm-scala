@@ -15,9 +15,7 @@ Copyright (C) 2014 Davi Pereira dos Santos
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package ml.mtj
-
-import no.uib.cipr.matrix.{DenseVector, DenseMatrix}
+package no.uib.cipr.matrix
 
 class ResizableDenseMatrix(maxRowns: Int, maxColumns: Int) extends DenseMatrix(maxRowns, maxColumns) {
   def setRow(i: Int, a: Array[Double]) {
@@ -26,43 +24,6 @@ class ResizableDenseMatrix(maxRowns: Int, maxColumns: Int) extends DenseMatrix(m
       set(i, j, a(j))
       j += 1
     }
-  }
-
-  //  def setData(data:Array[Double]) {
-  //    this.data
-  //  }
-  def addCol(col: Array[Double]) {
-    numColumns += 1
-    var i = 0
-    while (i < numRows) {
-      set(i, numColumns - 1, col(i))
-      i += 1
-    }
-  }
-
-  def copyTo(m: DenseMatrix, rows: Int = numRows) {
-    var i = 0
-    while (i < rows) {
-      var j = 0
-      while (j < numColumns) {
-        m.set(i, j, this.get(i, j))
-        j += 1
-      }
-      i += 1
-    }
-  }
-
-  def addRow(row: Array[Double]) {
-    val m = new DenseMatrix(numRows + 1, numColumns)
-    copyTo(m)
-    var j = 0
-    while (j < numColumns) {
-      m.set(numRows, j, row(j))
-      j += 1
-    }
-
-    numRows += 1
-    System.arraycopy(m.getData, 0, this.getData, 0, math.min(m.getData.size, getData.size))
   }
 
   def addExtraRow(row: Array[Double]) = {
@@ -80,8 +41,33 @@ class ResizableDenseMatrix(maxRowns: Int, maxColumns: Int) extends DenseMatrix(m
     this.addCol(col.getData)
   }
 
+  //  def setData(data:Array[Double]) {
+  //    this.data
+  //  }
+  def addCol(col: Array[Double]) {
+    numColumns += 1
+    var i = 0
+    while (i < numRows) {
+      set(i, numColumns - 1, col(i))
+      i += 1
+    }
+  }
+
   def addRow(row: DenseVector) {
     this.addRow(row.getData)
+  }
+
+  def addRow(row: Array[Double]) {
+    val m = new DenseMatrix(numRows + 1, numColumns)
+    copyTo(m)
+    var j = 0
+    while (j < numColumns) {
+      m.set(numRows, j, row(j))
+      j += 1
+    }
+
+    numRows += 1
+    System.arraycopy(m.getData, 0, this.getData, 0, math.min(m.getData.size, getData.size))
   }
 
   def resizeRows(rows: Int) {
@@ -89,6 +75,18 @@ class ResizableDenseMatrix(maxRowns: Int, maxColumns: Int) extends DenseMatrix(m
     copyTo(m, math.min(rows, numRows))
     numRows = rows
     System.arraycopy(m.getData, 0, this.getData, 0, math.min(m.getData.size, getData.size))
+  }
+
+  def copyTo(m: DenseMatrix, rows: Int = numRows) {
+    var i = 0
+    while (i < rows) {
+      var j = 0
+      while (j < numColumns) {
+        m.set(i, j, this.get(i, j))
+        j += 1
+      }
+      i += 1
+    }
   }
 
   def resizeCols(columns: Int) {

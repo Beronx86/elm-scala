@@ -19,10 +19,9 @@ package ml.classifiers
 
 import ml.Pattern
 import ml.models.{ELMSimpleModel, Model}
-import ml.mtj.ResizableDenseMatrix
 import ml.neural.elm.ConvexIELMTrait
 import ml.neural.elm.Data._
-import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
+import no.uib.cipr.matrix.{ResizableDenseMatrix, DenseMatrix, DenseVector}
 import util.{Tempo, XSRandom}
 
 case class ECIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ()) extends ConvexIELMTrait {

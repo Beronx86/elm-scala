@@ -17,9 +17,7 @@ Copyright (C) 2014 Davi Pereira dos Santos
 */
 package ml.neural.elm
 
-import ml.Pattern
-import ml.models.Model
-import ml.mtj.ResizableDenseMatrix
+import no.uib.cipr.matrix.ResizableDenseMatrix
 
 /**
  * Created by davi on 21/05/14.

@@ -18,11 +18,10 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.neural.elm
 
 import ml.Pattern
-import ml.models.{ELMSimpleModel, Model}
-import ml.mtj.ResizableDenseMatrix
+import ml.models.ELMSimpleModel
 import ml.neural.elm.Data._
-import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
-import util.{Tempo, XSRandom}
+import no.uib.cipr.matrix.{ResizableDenseMatrix, DenseMatrix, DenseVector}
+import util.XSRandom
 
 /**
  * Created by davi on 21/05/14.

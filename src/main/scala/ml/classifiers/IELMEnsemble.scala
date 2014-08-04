@@ -18,12 +18,10 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.classifiers
 
 import ml.Pattern
-import ml.models.{ELMSimpleModel, Model}
-import ml.neural.elm.{IELMTraitEnsemble, Data, IELMTrait}
+import ml.models.{ELMSimpleEnsembleModel, Model}
+import ml.neural.elm.{Data, IELMTraitEnsemble}
 import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
-import util.{Tempo, Datasets, XSRandom}
-
-import scala.util.Random
+import util.XSRandom
 
 case class IELMEnsemble(M: Int = 10, seed: Int = 42, notes: String = "", callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ())
   extends IELMTraitEnsemble {
@@ -31,26 +29,32 @@ case class IELMEnsemble(M: Int = 10, seed: Int = 42, notes: String = "", callf: 
   val Lbuild = -1
 
   def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
-    val m = cast(model)
-    //    if (math.sqrt(m.N + 1).toInt > math.sqrt(m.N).toInt) build(?) //<- not possible to rebuild, since we don't have Y nor all patterns anymore.
-    val newE = m.e.zip(pattern.weighted_label_array) map { case (dv, v) => Data.appendToVector(dv, v)}
+    val m = ensCast(model)
+    val nclasses = m.BetaS.head.numColumns()
+    val L = nclasses + 1
+    val natts = m.X.numColumns()
+    val newBiasesS = new Array[Array[Double]](M)
+    val newAlfatS = new Array[DenseMatrix](M)
+    val newBetaS = new Array[DenseMatrix](M)
+    val newES = new Array[Vector[DenseVector]](M)
+
+    val newTmp = new DenseVector(m.X.numRows() + 1)
     val newX = Data.appendRowToMatrix(m.X, pattern.array)
-    val newTmp = new DenseVector(newX.numRows())
+    var me = 0
+    var newRndG = m.rnd
+    while (me < M) {
+      newES(me) = m.eS(me).zip(pattern.weighted_label_array) map { case (dv, v) => Data.appendToVector(dv, v)}
+      val (weights, bias, newRnd) = newNode(m.AlfatS(me).numColumns(), newRndG)
+      newRndG = newRnd
+      newAlfatS(me) = Data.appendRowToMatrix(m.AlfatS(me), weights)
+      newBiasesS(me) = Data.appendToArray(m.biasesS(me), bias)
+      val (h, beta) = addNode(weights, bias, newX, newES(me), newTmp)
+      newBetaS(me) = Data.appendRowToMatrix(m.BetaS(me), beta)
+      me += 1
+    }
 
-    val (weights, bias, newRnd) = newNode(m.Alfat.numColumns(), m.rnd)
-    val newAlfat = Data.appendRowToMatrix(m.Alfat, weights)
-    val newBiases = Data.appendToArray(m.biases, bias)
-    val (h, beta) = addNode(weights, bias, newX, newE, newTmp)
-    val newBeta = Data.appendRowToMatrix(m.Beta, beta)
 
-    ELMSimpleModel(newRnd, newAlfat, newBiases, newBeta, newX, newE, null)
-  }
-
-  protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector) = {
-    val (weights, bias, newRnd) = newNode(X.numColumns(), rnd)
-    rnd.setSeed(newRnd.getSeed)
-    val (h, beta) = addNode(weights, bias, X, e, tmp)
-    (weights, bias, h, beta)
+    ELMSimpleEnsembleModel(newRndG, newAlfatS, newBiasesS, newBetaS, newX, newES, null)
   }
 
   def addNode(weights: Array[Double], bias: Double, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector) = {
@@ -75,6 +79,13 @@ case class IELMEnsemble(M: Int = 10, seed: Int = 42, notes: String = "", callf: 
       o += 1
     }
     (h, beta)
+  }
+
+  protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector) = {
+    val (weights, bias, newRnd) = newNode(X.numColumns(), rnd)
+    rnd.setSeed(newRnd.getSeed)
+    val (h, beta) = addNode(weights, bias, X, e, tmp)
+    (weights, bias, h, beta)
   }
 }
 

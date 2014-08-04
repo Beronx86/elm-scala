@@ -22,6 +22,7 @@ import util.XSRandom
 
 /**
  * Grows network from 1 to Lmax according to arriving instances.
+ * Penalizes Ls far from last best L.
  * @param Lmax
  * @param seed
  */
@@ -37,8 +38,8 @@ case class interaELMreg(Lmax: Int, seed: Int = 42, notes: String = "") extends i
     val (_, best) = (1 to Lfim map { L =>
       if (L > 1) m = growByOne(m)
       val E = errorMatrix(m.H, m.Beta, m.Y)
-      val press = PRESS(E)(m.HHinv)
-      //      val press = LOOError(m.Y)(E)(m.HHinv)
+      //      val press = PRESS(E)(m.HHinv)
+      val press = LOOError(m.Y)(E)(m.HHinv)
       val l = (L - oldL).abs / m.N.toDouble
       (press + l, m)
     }).sortBy(_._1).head //.take(2).minBy(_._2.L)

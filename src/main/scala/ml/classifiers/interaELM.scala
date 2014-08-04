@@ -22,11 +22,12 @@ import util.XSRandom
 
 /**
  * Grows network from 1 to Lmax according to arriving instances.
+ * Seleciona modelo com L mais próximo do melhor L anterior dentre os primeiros min(take*N/2, take*Lmax) melhores.
  * @param Lmax
  * @param seed
  */
-case class interaELM(Lmax: Int, seed: Int = 42, notes: String = "") extends interaTrait {
-  override val toString = "interaELM_" + notes
+case class interaELM(Lmax: Int, take: Double = 0, seed: Int = 42, notes: String = "") extends interaTrait {
+  override val toString = s"interaELM (${take * 100}pct)_" + notes
 
   protected def modelSelection(model: ELMModel) = {
     //todo: analyse which matrices can be reused along all growing (i.e. they don't change size and need not be kept intact as candidate for the final model)
@@ -36,10 +37,10 @@ case class interaELM(Lmax: Int, seed: Int = 42, notes: String = "") extends inte
     val (_, best) = (1 to Lfim map { L =>
       if (L > 1) m = growByOne(m)
       val E = errorMatrix(m.H, m.Beta, m.Y)
-      //      val press = PRESS(E)(m.HHinv)
-      val press = LOOError(m.Y)(E)(m.HHinv)
+      val press = PRESS(E)(m.HHinv)
+      //      val press = LOOError(m.Y)(E)(m.HHinv)
       (press, m)
-    }).sortBy(_._1).head //.take(2).minBy(_._2.L)
+    }).sortBy(_._1).take(math.max(1, take * Lfim).toInt).minBy(candidate => (model.L - candidate._2.L).abs)
     best
   }
 }

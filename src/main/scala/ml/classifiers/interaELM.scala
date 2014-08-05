@@ -21,8 +21,7 @@ import ml.models.ELMModel
 import util.XSRandom
 
 /**
- * Grows network from 1 to Lmax according to arriving instances.
- * Seleciona modelo com L mais próximo do melhor L anterior dentre os primeiros min(take*N/2, take*Lmax) melhores.
+ * Grows network from 1 to Lmax (or N) according to arriving instances.
  * @param Lmax
  * @param seed
  */
@@ -33,7 +32,7 @@ case class interaELM(Lmax: Int, take: Double = 0, seed: Int = 42, notes: String 
     //todo: analyse which matrices can be reused along all growing (i.e. they don't change size and need not be kept intact as candidate for the final model)
 
     var m = cast(buildCore(1, model.Xt, model.Y, new XSRandom(seed)))
-    val Lfim = math.min(m.N / 2, Lmax)
+    val Lfim = math.min(m.N, Lmax)
     val (_, best) = (1 to Lfim map { L =>
       if (L > 1) m = growByOne(m)
       val E = errorMatrix(m.H, m.Beta, m.Y)

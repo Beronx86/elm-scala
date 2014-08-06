@@ -29,7 +29,6 @@ object Math extends Lock {
   val readOnly = true
   val hardClose = ()
   val IMap = mutable.LinkedHashMap[Int, DenseMatrix]()
-  var running = true
   var fileLocked = false
 
   /**

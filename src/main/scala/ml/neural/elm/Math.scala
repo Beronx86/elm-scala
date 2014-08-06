@@ -29,6 +29,7 @@ object Math extends Lock {
   val readOnly = true
   val hardClose = ()
   val IMap = mutable.LinkedHashMap[Int, DenseMatrix]()
+  var fileLocked = false
 
   /**
    * The identity matrix is immutable by definition.

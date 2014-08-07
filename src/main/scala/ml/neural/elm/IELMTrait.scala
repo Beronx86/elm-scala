@@ -55,7 +55,7 @@ trait IELMTrait extends IteratedBuildELM {
   }
 
   def bareBuild(ninsts: Int, natts: Int, nclasses: Int, X: DenseMatrix, e: Vector[DenseVector]) = {
-    val L = nclasses
+    val L = ninsts
     val biases = Array.fill(L)(0d)
     val Alfat = new ResizableDenseMatrix(L, natts)
     val Beta = new ResizableDenseMatrix(L, nclasses)

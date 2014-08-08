@@ -28,6 +28,7 @@ import scala.util.Random
 
 /**
  * Non-incremental and not resume-safe (it is stateful).
+ * 230 vezes mais lento que IELM (se crescer 1 a cada exemplo)
  * @param seed
  * @param notes
  * @param callf

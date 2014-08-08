@@ -58,92 +58,48 @@ case class IELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: (
 object IELMincTest extends App {
   //  val patts0 = new Random(0).shuffle(Datasets.patternsFromSQLite("/home/davi/wcs/ucipp/uci")("gas-drift").right.get.take(1000000))
   //  val patts0 = new Random(0).shuffle(Datasets.arff(true)("/home/davi/wcs/ucipp/uci/iris.arff").right.get.take(200000))
-  val patts0 = new Random(0).shuffle(Datasets.arff(true)("/home/davi/wcs/ucipp/uci/abalone-11class.arff").right.get.take(200000))
+  val patts0 = new Random(650).shuffle(Datasets.arff(true)("/home/davi/wcs/ucipp/uci/abalone-3class.arff").right.get.take(2000))
   val filter = Datasets.zscoreFilter(patts0)
   val patts = Datasets.applyFilterChangingOrder(patts0, filter)
 
   val n = patts.length / 2
+  val initialN = patts.head.nclasses
   val tr = patts.take(n)
   val ts = patts.drop(n)
 
-  val l = NB()
-  //KNN(5,"eucl",patts)
-  val tt = patts.head.nclasses
-
-  Tempo.t {
-    val l = IELM(1)
-    val s = IELMScratch(1)
-    val m = l.build()
-    tr.drop(tt).foreach { x => m = l.update(m)(x)}
-    println(s"${m.accuracy(ts)}")
+  val li = IELM()
+  val lis = IELMScratch()
+  val lei = EIELM()
+  val lie = IELMEnsemble(10)
+  val lci = CIELM()
+  var mi = li.build(tr.take(initialN))
+  var mis = lis.build(tr.take(initialN))
+  var mei = lei.build(tr.take(initialN))
+  var mie = lie.build(tr.take(initialN))
+  var mci = lci.build(tr.take(initialN))
+  tr.drop(initialN).foreach { x =>
+    mi = li.update(mi)(x)
+    mis = lis.update(mis)(x)
+    mei = lei.update(mei)(x)
+    mie = lie.update(mie)(x)
+    mci = lci.update(mci)(x)
+    println(s"${mi.accuracy(ts)} ${mis.accuracy(ts)} ${mei.accuracy(ts)} ${mie.accuracy(ts)} ${mci.accuracy(ts)}")
   }
 
-  Tempo.start
-  val bla = IELM(1)
-  m = s.build(tr.take(tt))
-  tr.drop(tt).foreach { x => m = s.update(m)(x)}
-  Tempo.print_stop
-  println(s"${m.accuracy(ts)}")
 
-  Tempo.start
-  val s2 = IELMScratch(1)
-  var m = xx.build(tr.take(tt))
-  tr.drop(tt).foreach { x => mm = ss.update(mm)(x)}
-  Tempo.print_stop
-  println(s"${m.accuracy(ts)}")
-
-  println("")
-
-  Tempo.start
-  var ss = interawfELM(5, 1)
-  m = bla.build(tr.take(tt))
-  tr.drop(tt).foreach { x => m = bla.update(m)(x)}
-  Tempo.print_stop
-  println(s"${m.accuracy(ts)}")
-  var mm = ss.build(tr.take(tt))
-  Tempo.start
-  m = s2.build(tr.take(tt))
-  tr.drop(tt).foreach { x => m = s2.update(m)(x)}
-  Tempo.print_stop
-  println(s"${m.accuracy(ts)}")
-
-  println("")
-
-  Tempo.start
-  var m2 = l.build(tr.take(tt))
-  tr.drop(tt).foreach(x => m2 = l.update(m2)(x))
-  Tempo.print_stop
-  println(s"${m2.accuracy(ts)}")
-
-  Tempo.start
-  ss = interawfELM(15, 1)
-  mm = ss.build(tr.take(tt))
-  tr.drop(tt).foreach { x => mm = ss.update(mm)(x)}
-  Tempo.print_stop
-  println(s"${m.accuracy(ts)}")
+  //total times and accs
+  //  Tempo.t {
+  //    val l = IELM(1)
+  //    var m = l.build(tr.take(initialN))
+  //    tr.drop(initialN).foreach { x => m = l.update(m)(x)}
+  //    println(s"${m.accuracy(ts)}")
+  //  }
   //
-  //  Tempo.start
-  //  m = IELM(n).build(tr)
-  //  Tempo.print_stop
-  //  println(s"${m.accuracy(ts)}")
-  //
-  //  println("")
-  //
-  //  Tempo.start
-  //  m = IELM(n).build(tr.take(tt))
-  //  tr.drop(tt).foreach(x => m = IELM(n).update(m)(x))
-  //  Tempo.print_stop
-  //  println(s"${m.accuracy(ts)}")
-  //
-  //  Tempo.start
-  //  m2 = l.build(tr.take(tt))
-  //  tr.drop(tt).foreach(x => m2 = l.update(m2)(x))
-  //  Tempo.print_stop
-  //  println(s"${m2.accuracy(ts)}")
-  //
-  //  Tempo.start
-  //  m = IELM(n).build(tr)
-  //  Tempo.print_stop
-  //  println(s"${m.accuracy(ts)}")
-
+  //  Tempo.t {
+  //    val l = IELMScratch(1)
+  //    var m = l.build(tr.take(initialN))
+  //    tr.drop(initialN).foreach { x => m = l.update(m)(x)}
+  //    println(s"${m.accuracy(ts)}")
+  //  }
 }
+

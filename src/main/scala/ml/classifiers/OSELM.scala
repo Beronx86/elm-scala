@@ -21,6 +21,7 @@ package ml.classifiers
 /**
  * Updates weights at each instance arrival.
  * The topology is fixed.
+ * build() é não continuável, isto é, ele não simula internamente um modelo incremental.
  * @param L
  * @param seed
  */

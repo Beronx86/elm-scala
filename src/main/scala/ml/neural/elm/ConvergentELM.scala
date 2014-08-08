@@ -24,7 +24,7 @@ import no.uib.cipr.matrix.DenseMatrix
 import util.XSRandom
 
 /**
- * Created by davi on 21/05/14.
+ * build() é não continuável, isto é, ele não simula internamente um modelo incremental.
  */
 trait ConvergentELM extends ELM {
   val Lbuild: Int

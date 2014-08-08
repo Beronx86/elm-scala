@@ -33,6 +33,8 @@ object Math extends Lock {
 
   def close() = Unit
 
+  def isOpen() = false
+
   /**
    * The identity matrix is immutable by definition.
    * This function is thread-safe (with global lock).

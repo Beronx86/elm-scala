@@ -24,12 +24,19 @@ import no.uib.cipr.matrix.DenseMatrix
 import util.XSRandom
 
 /**
- * build() é não continuável, isto é, ele não simula internamente um modelo incremental.
+ * build() é continuável, isto é, ele simula internamente um modelo incremental.
  */
 trait ConvergentELM extends ELM {
   val Lbuild: Int
 
   def build(trSet: Seq[Pattern]): Model = {
+    val nclasses = trSet.head.nclasses
+    val initialTrSet = trSet.take(nclasses)
+    val firstModel = batchBuild(initialTrSet)
+    trSet.drop(nclasses).foldLeft(firstModel)((m, p) => cast(update(m, fast_mutable = true)(p)))
+  }
+
+  def batchBuild(trSet: Seq[Pattern]): Model = {
     val rnd = new XSRandom(seed)
     val ninsts = checkEmptyness(trSet)
     checkFullRankness(ninsts)
@@ -71,6 +78,12 @@ trait ConvergentELM extends ELM {
       println("ERROR: Training set size (" + ninsts + ") is lesser than L (" + Lbuild + ")!")
       sys.exit(1)
     }
+  }
+
+  protected def cast(model: Model) = model match {
+    case m: ELMModel => m
+    case _ => println("Convergent ELMs require ELMModels.")
+      sys.exit(1)
   }
 
   def LOOError(model: Model): Double = {
@@ -137,12 +150,6 @@ trait ConvergentELM extends ELM {
     PRESS(errorMatrix(m.H, m.Beta, m.Y))(m.HHinv)
   }
 
-  protected def cast(model: Model) = model match {
-    case m: ELMModel => m
-    case _ => println("Convergent ELMs require ELMModels.")
-      sys.exit(1)
-  }
-
   /**
    * Calculates the PRESS statistic (Prediction REsidual Sum of Squares) for all outputs/classes.
    * (usually for regressors)
@@ -161,6 +168,37 @@ trait ConvergentELM extends ELM {
     while (i < n * nclasses) {
       val v = d(i)
       sum += v * v
+      i += 1
+    }
+    sum
+  }
+
+  protected def errorMatrix(H: DenseMatrix, Beta: DenseMatrix, Y: DenseMatrix) = {
+    val Prediction = new DenseMatrix(H.numRows(), Beta.numColumns())
+    val E = Y.copy()
+    ELMUtils.feedOutput(H, Beta, Prediction)
+    E.add(-1, Prediction)
+    E
+  }
+
+  /**
+   * Calculates the PRE (Prediction REsidual) for all outputs/classes.
+   * (usually for regressors)
+   * @param E matrix of errors (difference between expected and predicted)
+   * @param HHinv
+   * @return
+   */
+  protected def PRE(E: DenseMatrix)(HHinv: DenseMatrix) = {
+    //todo: this can be a little more efficient, because the loop is also inside PRESSMatrix()
+    val n = HHinv.numRows()
+    val nclasses = E.numColumns()
+    val M = PREMatrix(E)(HHinv)
+    var sum = 0d
+    var i = 0
+    val d = M.getData
+    while (i < n * nclasses) {
+      val v = d(i)
+      sum += v
       i += 1
     }
     sum
@@ -196,37 +234,6 @@ trait ConvergentELM extends ELM {
    * @return
    */
   protected def fPRE(HATvalue: Double)(error: Double) = error / (1 - HATvalue)
-
-  protected def errorMatrix(H: DenseMatrix, Beta: DenseMatrix, Y: DenseMatrix) = {
-    val Prediction = new DenseMatrix(H.numRows(), Beta.numColumns())
-    val E = Y.copy()
-    ELMUtils.feedOutput(H, Beta, Prediction)
-    E.add(-1, Prediction)
-    E
-  }
-
-  /**
-   * Calculates the PRE (Prediction REsidual) for all outputs/classes.
-   * (usually for regressors)
-   * @param E matrix of errors (difference between expected and predicted)
-   * @param HHinv
-   * @return
-   */
-  protected def PRE(E: DenseMatrix)(HHinv: DenseMatrix) = {
-    //todo: this can be a little more efficient, because the loop is also inside PRESSMatrix()
-    val n = HHinv.numRows()
-    val nclasses = E.numColumns()
-    val M = PREMatrix(E)(HHinv)
-    var sum = 0d
-    var i = 0
-    val d = M.getData
-    while (i < n * nclasses) {
-      val v = d(i)
-      sum += v
-      i += 1
-    }
-    sum
-  }
 
 }
 

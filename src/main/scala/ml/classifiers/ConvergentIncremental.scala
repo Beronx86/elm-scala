@@ -25,7 +25,7 @@ import ml.neural.elm.{ConvergentELM, ELMUtils}
 import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
 
 /**
- * build() é não continuável, isto é, ele não simula internamente um modelo incremental.
+ * build() é continuável, isto é, ele simula internamente um modelo incremental.
  */
 trait ConvergentIncremental extends ConvergentELM {
   def update(model: Model, fastAndCheap: Boolean = false)(pattern: Pattern) = {

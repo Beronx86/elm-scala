@@ -62,6 +62,24 @@ case class CIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: 
     ELMSimpleModel(newRnd, newAlfat, newBiases, newBeta, newX, newE, newT)
   }
 
+  def bareBuild(ninsts: Int, natts: Int, nclasses: Int, X: DenseMatrix, e: Vector[DenseVector], t: Vector[DenseVector]) = {
+    val L = nclasses
+    val rnd = new XSRandom(seed)
+    val biases = Array.fill(L)(0d)
+    val Alfat = new ResizableDenseMatrix(L, natts)
+    val Beta = new ResizableDenseMatrix(L, nclasses)
+    var l = 0
+    while (l < L) {
+      val (weights, b, newRnd) = newNode(natts, rnd)
+      rnd.setSeed(newRnd.getSeed)
+      val (h, beta) = addNodeForConvexUpdate(weights, b, X, t, e)
+      biases(l) = b
+      updateNetwork(l, weights, beta, Beta, Alfat)
+      l += 1
+    }
+    ELMSimpleModel(rnd, Alfat, biases, Beta, X, e, t)
+  }
+
   /**
    * Mutate e
    * @return
@@ -95,37 +113,6 @@ case class CIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: 
       o += 1
     }
     (h, beta)
-  }
-
-  def bareBuild(ninsts: Int, natts: Int, nclasses: Int, X: DenseMatrix, e: Vector[DenseVector], t: Vector[DenseVector]) = {
-    val L = nclasses
-    val rnd = new XSRandom(seed)
-    val biases = Array.fill(L)(0d)
-    val Alfat = new ResizableDenseMatrix(L, natts)
-    val Beta = new ResizableDenseMatrix(L, nclasses)
-    var l = 0
-    if (callf) while (l < L) {
-      Alfat.resizeRows(l + 1) //needed to call f()
-      Beta.resizeRows(l + 1)
-      val (weights, b, newRnd) = newNode(natts, rnd)
-      rnd.setSeed(newRnd.getSeed)
-      val (h, beta) = addNodeForConvexUpdate(weights, b, X, t, e)
-      biases(l) = b
-      updateNetwork(l, weights, beta, Beta, Alfat)
-      l += 1
-      val te = Tempo.stop
-      Tempo.start
-      f(ELMSimpleModel(newRnd, Alfat, biases, Beta, X, e, t), te)
-    }
-    else while (l < L) {
-      val (weights, b, newRnd) = newNode(natts, rnd)
-      rnd.setSeed(newRnd.getSeed)
-      val (h, beta) = addNodeForConvexUpdate(weights, b, X, t, e)
-      biases(l) = b
-      updateNetwork(l, weights, beta, Beta, Alfat)
-      l += 1
-    }
-    ELMSimpleModel(rnd, Alfat, biases, Beta, X, e, t)
   }
 }
 

@@ -18,6 +18,7 @@ Copyright (C) 2014 Davi Pereira dos Santos
 package ml.neural.elm
 
 import ml.Pattern
+import ml.classifiers.IELMScratch
 import ml.models.ELMSimpleModel
 import ml.neural.elm.Data._
 import no.uib.cipr.matrix.{ResizableDenseMatrix, DenseMatrix, DenseVector}
@@ -97,7 +98,8 @@ trait IELMTrait extends IteratedBuildELM {
     val natts = initialTrSet.head.nattributes
     val X = patterns2matrix(initialTrSet, nclasses)
     val e = patterns2t(initialTrSet, nclasses)
-    val firstModel = bareBuild(nclasses, natts, nclasses, X, e)
+    val trStored = if (this.isInstanceOf[IELMScratch]) initialTrSet else Seq()
+    val firstModel = bareBuild(nclasses, natts, nclasses, X, e, trStored)
     trSet.drop(nclasses).foldLeft(firstModel)((m, p) => cast(update(m, fast_mutable = true)(p)))
   }
 

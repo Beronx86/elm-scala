@@ -29,10 +29,16 @@ case class ECIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f:
   val CANDIDATES = 10
   val Lbuild = -1
 
+  def build(trSet: Seq[Pattern]): Model = {
+    val nclasses = trSet.head.nclasses
+    val initialTrSet = trSet.take(nclasses)
+    val firstModel = batchBuild(initialTrSet)
+    trSet.drop(nclasses).foldLeft(firstModel)((m, p) => cast(update(m, fast_mutable = true)(p)))
+  }
+
   def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = ???
 
-  override def build(trSet: Seq[Pattern]) = {
-    Tempo.start
+  def batchBuild(trSet: Seq[Pattern]) = {
     val rnd = new XSRandom(seed)
     val ninsts = checkEmptyness(trSet)
     val L = if (Lbuild == -1) ninsts else Lbuild
@@ -55,18 +61,11 @@ case class ECIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f:
       H.addCol(h)
       biases(l) = bias
       updateNetwork(l, weights, beta, Beta, Alfat)
-      //      println((1 + l) + ": res. error = " + error + " delta error: " + (deltaerror).formatted("%3.4f"))
-      //            println(PRESSaccuracy(Yt, Beta, H, Ht, P, labels))
       l += 1
-      val te = Tempo.stop
-      Tempo.start
+      val te = -1 //Tempo.stop
       f(ELMSimpleModel(rnd.clone(), Alfat, biases, Beta, X, e, t), te)
     }
-    //    Alfat.resizeRows(l)
-    //    Beta.resizeRows(l)
-    //    ELMModel(Alfat, biases.take(Beta.numRows()), new DenseMatrix(1, 1), Beta)
-    val model = ELMSimpleModel(rnd, Alfat, biases, Beta, X, e, t)
-    model
+    ELMSimpleModel(rnd, Alfat, biases, Beta, X, e, t)
   }
 
   /**

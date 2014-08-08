@@ -29,7 +29,7 @@ import util.XSRandom
  * @param seed
  */
 case class interawfAlwaysELM(deltaL: Int, seed: Int = 42, notes: String = "") extends interaTrait {
-  override val toString = s"interawAlwaysELM d${deltaL}_" + notes
+  override val toString = s"interawfAlwaysELM d${deltaL}_" + notes
 
   override def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
     val m = super.update(model)(pattern)

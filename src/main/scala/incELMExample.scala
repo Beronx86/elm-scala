@@ -37,6 +37,13 @@ object incELMExample extends App {
   val lei = EIELM()
   val lie = IELMEnsemble(10)
   val lci = CIELM()
+
+  var mi = li.build(tr.take(initialN))
+  var mis = lis.build(tr.take(initialN))
+  var mei = lei.build(tr.take(initialN))
+  var mie = lie.build(tr.take(initialN))
+  var mci = lci.build(tr.take(initialN))
+
   val res = tr.drop(initialN).map { x =>
     Stream(mi = li.update(mi)(x),
       mis = lis.update(mis)(x),
@@ -45,11 +52,6 @@ object incELMExample extends App {
       mci = lci.update(mci)(x)).par.toList
     (mi.accuracy(ts), mis.accuracy(ts), mei.accuracy(ts), mie.accuracy(ts), mci.accuracy(ts))
   }
-  var mi = li.build(tr.take(initialN))
-  var mis = lis.build(tr.take(initialN))
-  var mei = lei.build(tr.take(initialN))
-  var mie = lie.build(tr.take(initialN))
-  var mci = lci.build(tr.take(initialN))
 
   res foreach (x => println(s"${x._1} ${x._2} ${x._3} ${x._4} ${x._5}"))
 }

@@ -50,5 +50,6 @@ object incELMExample extends App {
   var mei = lei.build(tr.take(initialN))
   var mie = lie.build(tr.take(initialN))
   var mci = lci.build(tr.take(initialN))
+
   res foreach (x => println(s"${x._1} ${x._2} ${x._3} ${x._4} ${x._5}"))
 }

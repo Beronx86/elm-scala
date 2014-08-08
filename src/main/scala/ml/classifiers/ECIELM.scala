@@ -24,62 +24,35 @@ import ml.neural.elm.Data._
 import no.uib.cipr.matrix.{ResizableDenseMatrix, DenseMatrix, DenseVector}
 import util.{Tempo, XSRandom}
 
+/**
+ * CI-ELM com seleção de nós candidatos
+ * @param seed
+ * @param notes
+ * @param callf
+ * @param f
+ */
 case class ECIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ()) extends ConvexIELMTrait {
   override val toString = "ECIELM_" + notes
   val CANDIDATES = 10
   val Lbuild = -1
 
-  def build(trSet: Seq[Pattern]): Model = {
-    val nclasses = trSet.head.nclasses
-    val initialTrSet = trSet.take(nclasses)
-    val firstModel = batchBuild(initialTrSet)
-    trSet.drop(nclasses).foldLeft(firstModel)((m, p) => cast(update(m, fast_mutable = true)(p)))
+  def grow(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], t: Vector[DenseVector]) = {
+    val tmp = new DenseVector(X.numRows())
+    val tmp2 = new DenseVector(X.numRows())
+    val (newRnd, weights, b, h, beta) = createNodeForConvexUpdateAmongCandidates(rnd, X, t, e, tmp, tmp2)
+    (weights, b, h, beta, newRnd)
   }
 
-  def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = ???
-
-  def batchBuild(trSet: Seq[Pattern]) = {
-    val rnd = new XSRandom(seed)
-    val ninsts = checkEmptyness(trSet)
-    val L = if (Lbuild == -1) ninsts else Lbuild
-    val nclasses = trSet.head.nclasses
-    val natts = trSet.head.nattributes
-    val X = patterns2matrix(trSet, ninsts)
-    val biases = Array.fill(L)(0d)
-    val Alfat = new ResizableDenseMatrix(L, natts)
-    val Beta = new ResizableDenseMatrix(L, nclasses)
-    val H = new ResizableDenseMatrix(ninsts, L)
-    H.resizeCols(0)
-    val (t, e) = patterns2te(trSet, ninsts)
-    var l = 0
-    val tmp = new DenseVector(H.numRows())
-    val tmp2 = new DenseVector(H.numRows())
-    while (l < L) {
-      Alfat.resizeRows(l + 1) //needed to call f()
-      Beta.resizeRows(l + 1)
-      val (weights, bias, h, beta) = createNodeForConvexUpdateAmongCandidates(rnd, X, t, e, tmp, tmp2)
-      H.addCol(h)
-      biases(l) = bias
-      updateNetwork(l, weights, beta, Beta, Alfat)
-      l += 1
-      val te = -1 //Tempo.stop
-      f(ELMSimpleModel(rnd.clone(), Alfat, biases, Beta, X, e, t), te)
-    }
-    ELMSimpleModel(rnd, Alfat, biases, Beta, X, e, t)
-  }
-
-  /**
-   * Mutate e and rnd
-   * @return
-   */
   def createNodeForConvexUpdateAmongCandidates(rnd: XSRandom, X: DenseMatrix, t: Vector[DenseVector], e: Vector[DenseVector], tmp: DenseVector, tmp2: DenseVector) = {
+    val newRnd = rnd.clone()
     val nclasses = t.size
     val natts = X.numColumns()
     val ninsts = X.numRows()
     val candidates = 0 until CANDIDATES map { idx =>
       val newe = Array.fill(nclasses)(new DenseVector(ninsts))
-      val (weights, bias, newRnd) = newNode(natts, rnd)
-      rnd.setSeed(newRnd.getSeed)
+      val (weights, bias, tmpRnd) = newNode(natts, newRnd)
+      newRnd.setSeed(tmpRnd.getSeed)
+
       val alfa = new DenseVector(weights, false)
       val beta = new Array[Double](nclasses)
       val h = feedHidden(X, alfa, bias)
@@ -114,9 +87,6 @@ case class ECIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f:
     val (_, weights, bias, h, beta, newe) = candidates.minBy(_._1)
     //    println("-------xxxxx--------" + candidates.map(_._1))
     e.zip(newe).foreach { case (a, b) => a.set(b)}
-    (weights, bias, h, beta)
+    (newRnd, weights, bias, h, beta)
   }
 }
-
-//rnd ok
-

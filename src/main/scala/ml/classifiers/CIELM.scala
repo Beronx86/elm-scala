@@ -34,85 +34,21 @@ case class CIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: 
   override val toString = "CIELM_" + notes
   val Lbuild = -1
 
-  def build(trSet: Seq[Pattern]): Model = {
-    val nclasses = trSet.head.nclasses
-    if (trSet.size < nclasses) {
-      println("At least |Y| instances required.")
-      sys.exit(1)
-    }
-    val initialTrSet = trSet.take(nclasses)
-    val natts = initialTrSet.head.nattributes
-    val X = patterns2matrix(initialTrSet, nclasses)
-    val (t, e) = patterns2te(initialTrSet, nclasses)
-    val firstModel = bareBuild(nclasses, natts, nclasses, X, e, t)
-    trSet.drop(nclasses).foldLeft(firstModel)((m, p) => cast(update(m, fast_mutable = true)(p)))
-  }
-
-  def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
-    val m = cast(model)
-    val newE = m.e.zip(pattern.weighted_label_array) map { case (dv, v) => Data.appendToVector(dv, v)}
-    val newT = m.t.zip(pattern.weighted_label_array) map { case (dv, v) => Data.appendToVector(dv, v)}
-    val newX = Data.appendRowToMatrix(m.X, pattern.array)
-
-    val (weights, bias, newRnd) = newNode(m.Alfat.numColumns(), m.rnd)
-    val newAlfat = Data.appendRowToMatrix(m.Alfat, weights)
-    val newBiases = Data.appendToArray(m.biases, bias)
-    val (h, beta) = addNodeForConvexUpdate(weights, bias, newX, newT, newE)
-    val newBeta = Data.appendRowToMatrix(m.Beta, beta)
-    ELMSimpleModel(newRnd, newAlfat, newBiases, newBeta, newX, newE, newT)
-  }
-
-  def bareBuild(ninsts: Int, natts: Int, nclasses: Int, X: DenseMatrix, e: Vector[DenseVector], t: Vector[DenseVector]) = {
-    val L = nclasses
-    val rnd = new XSRandom(seed)
-    val biases = Array.fill(L)(0d)
-    val Alfat = new ResizableDenseMatrix(L, natts)
-    val Beta = new ResizableDenseMatrix(L, nclasses)
-    var l = 0
-    while (l < L) {
-      val (weights, b, newRnd) = newNode(natts, rnd)
-      rnd.setSeed(newRnd.getSeed)
-      val (h, beta) = addNodeForConvexUpdate(weights, b, X, t, e)
-      biases(l) = b
-      updateNetwork(l, weights, beta, Beta, Alfat)
-      l += 1
-    }
-    ELMSimpleModel(rnd, Alfat, biases, Beta, X, e, t)
-  }
-
   /**
-   * Mutate e
+   * Não altera rnd.
+   * @param rnd
+   * @param X
+   * @param e
+   * @param t
    * @return
    */
-  def addNodeForConvexUpdate(weights: Array[Double], bias: Double, X: DenseMatrix, t: Vector[DenseVector], e: Vector[DenseVector]) = {
-    val nclasses = t.size
-    //Generate node and calculate h.
-    val alfa = new DenseVector(weights, false)
-    val beta = new Array[Double](nclasses)
-    val h = feedHidden(X, alfa, bias)
-    val hneg = h.copy()
-    hneg.scale(-1)
-    var o = 0
-    while (o < nclasses) {
-      //Calculate new weight.
-      val t_h = t(o).copy()
-      t_h.add(hneg)
-      val a = t_h.copy()
-      a.scale(-1)
-      a.add(e(o))
-      val nume = e(o).dot(a)
-      val deno = a.dot(a)
-      val b = nume / deno
-      beta(o) = b
+  def grow(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], t: Vector[DenseVector]) = {
+    val natts = X.numColumns()
 
-      //Recalculate residual error.
-      e(o).scale(1 - b)
-      t_h.scale(b)
-      e(o).add(t_h)
+    val (weights, bias, newRnd) = newNode(natts, rnd)
+    val (h, beta) = addNodeForConvexUpdate(weights, bias, X, t, e)
 
-      o += 1
-    }
-    (h, beta)
+    (weights, bias, h, beta, newRnd)
   }
 }
 

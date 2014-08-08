@@ -54,7 +54,7 @@ trait IELMTrait extends IteratedBuildELM {
     (h, beta)
   }
 
-  def bareBuild(ninsts: Int, natts: Int, nclasses: Int, X: DenseMatrix, e: Vector[DenseVector]) = {
+  def bareBuild(ninsts: Int, natts: Int, nclasses: Int, X: DenseMatrix, e: Vector[DenseVector], patts: Seq[Pattern] = Seq()) = {
     val L = ninsts
     val biases = Array.fill(L)(0d)
     val Alfat = new ResizableDenseMatrix(L, natts)
@@ -83,7 +83,8 @@ trait IELMTrait extends IteratedBuildELM {
         l += 1
       }
     }
-    ELMSimpleModel(rnd, Alfat, biases, Beta, X, e, null) //todo: se nao crescer, manter P e H anteriores?
+    if (patts.nonEmpty) ELMSimpleModel(rnd, Alfat, biases, Beta, X, e, null, patts)
+    else ELMSimpleModel(rnd, Alfat, biases, Beta, X, e, null)
   }
 
   def build(trSet: Seq[Pattern]) = {

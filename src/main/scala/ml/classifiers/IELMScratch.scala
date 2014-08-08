@@ -27,7 +27,7 @@ import util.{Tempo, Datasets, XSRandom}
 import scala.util.Random
 
 /**
- * Non-incremental and not resume-safe (it is stateful).
+ * Non-incremental.
  * 230 vezes mais lento que IELM (se crescer 1 a cada exemplo)
  * @param seed
  * @param notes
@@ -38,22 +38,19 @@ case class IELMScratch(seed: Int = 42, notes: String = "", callf: Boolean = fals
   extends IELMTrait {
   override val toString = "IELMScratch_" + notes
   val Lbuild = -1
-  var ps = Seq[Pattern]()
 
   override def build(patterns: Seq[Pattern]) = {
-    ps = patterns
-    super.build(ps)
+    super.build(patterns)
   }
 
   def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
-    ps = ps :+ pattern
-    val trSet = ps
+    val trSet = pattern +: cast(model).patterns
     val nclasses = pattern.nclasses
     val ninsts = checkEmptyness(trSet: Seq[Pattern])
     val natts = trSet.head.nattributes
     val X = patterns2matrix(trSet, ninsts)
     val e = patterns2t(trSet, ninsts)
-    bareBuild(ninsts, natts, nclasses, X, e)
+    bareBuild(ninsts, natts, nclasses, X, e, trSet)
   }
 
   protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector) = {

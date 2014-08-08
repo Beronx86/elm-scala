@@ -54,7 +54,7 @@ trait ELMModel extends Model {
 }
 
 //todo: ELMSimpleModel does not need rnd nor N; I and CI-ELM need updateable versions and the creation of proper specific ELMXXXXModels
-case class ELMSimpleModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], Beta: DenseMatrix, X: DenseMatrix, e: Vector[DenseVector], t: Vector[DenseVector]) extends ELMModel {
+case class ELMSimpleModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], Beta: DenseMatrix, X: DenseMatrix, e: Vector[DenseVector], t: Vector[DenseVector], patterns: Seq[Pattern] = Seq()) extends ELMModel {
   val H = null
   val Ht = null
   val Hinv = null

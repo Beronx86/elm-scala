@@ -22,6 +22,7 @@ import ml.models.Model
 
 /**
  * Grows network from 1 to Lmax. *
+ * build() não é continuável, isto é, ele não simula internamente um modelo incremental.
  * @param seed
  */
 // todo: It performs batch learning, i.e. retrains from scratch to accomodate new instances.

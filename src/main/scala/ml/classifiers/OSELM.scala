@@ -18,6 +18,9 @@ Copyright (C) 2014 Davi Pereira dos Santos
 
 package ml.classifiers
 
+import ml.Pattern
+import ml.models.Model
+
 /**
  * Updates weights at each instance arrival.
  * The topology is fixed.
@@ -28,4 +31,6 @@ package ml.classifiers
 case class OSELM(L: Int, seed: Int = 42, notes: String = "") extends ConvergentIncremental {
   override val toString = "OSELM_" + notes
   val Lbuild = L
+
+  override def build(trSet: Seq[Pattern]): Model = batchBuild(trSet)
 }

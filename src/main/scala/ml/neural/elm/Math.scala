@@ -31,6 +31,8 @@ object Math extends Lock {
   val IMap = mutable.LinkedHashMap[Int, DenseMatrix]()
   var fileLocked = false
 
+  def close() = Unit
+
   /**
    * The identity matrix is immutable by definition.
    * This function is thread-safe (with global lock).

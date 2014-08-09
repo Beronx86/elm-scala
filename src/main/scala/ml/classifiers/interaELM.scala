@@ -31,17 +31,17 @@ case class interaELM(Lmax: Int, take: Double = 0, seed: Int = 42, notes: String 
   def modelSelection(model: ELMModel) = {
     //todo: analyse which matrices can be reused along all growing (i.e. they don't change size and need not be kept intact as candidate for the final model)
 
-    var m = cast(buildCore(1, model.Xt, model.Y, new XSRandom(seed)))
+    var m = cast(buildCore(Lbuild, model.Xt, model.Y, new XSRandom(seed)))
     val Lfim = math.min(m.N, Lmax)
-    val (_, l) = (1 to Lfim map { L =>
-      if (L > 1) m = growByOne(m)
+    val (_, l) = (Lbuild to Lfim map { L =>
+      if (L > Lbuild) m = growByOne(m)
       val E = errorMatrix(m.H, m.Beta, m.Y)
       //      val press = PRESS(E)(m.HHinv)
       val press = LOOError(m.Y)(E)(m.HHinv)
       //      println(press + " " + L)
       (press, L)
     }).sortBy(_._1).apply((take * m.N).toInt) //take(66).sortBy(_._2.L).apply(33)
-    val best = cast(if (l != model.L) buildCore(1, model.Xt, model.Y, new XSRandom(seed)) else model)
+    val best = cast(if (l != model.L) buildCore(l, model.Xt, model.Y, new XSRandom(seed)) else model)
     best
   }
 }

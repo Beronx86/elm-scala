@@ -21,26 +21,28 @@ import ml.models.ELMModel
 import util.XSRandom
 
 /**
- * Grows network from 1 to Lmax (or N) according to arriving instances.
- * @param Lmax
+ * Selects best network from 1 to 1 + deltaL (or N / 2, the lesser) at build.
+ * Selects best network from L - deltaL to L + deltaL (or N / 2, the lesser) at update.
+ * The N / 2 limit is to avoid NaNs in LOOError calculation during model selection and numerical instability.
  * @param seed
  */
-case class interaELM(Lmax: Int, take: Double = 0, seed: Int = 42, notes: String = "") extends interaTrait {
-  override val toString = s"interaELM (${take * 100}pct)_" + notes
+case class interaELM(deltaL: Int = 1000, takePct: Double = 0, seed: Int = 42, notes: String = "") extends interaTrait {
+  override val toString = s"interaELM (${takePct * 100}pct)_" + notes
 
   def modelSelection(model: ELMModel) = {
     //todo: analyse which matrices can be reused along all growing (i.e. they don't change size and need not be kept intact as candidate for the final model)
+    val Lini = math.max(Lbuild, model.L - deltaL)
+    val Lfim = math.min(model.N / 2, model.L + deltaL)
 
-    var m = cast(buildCore(Lbuild, model.Xt, model.Y, new XSRandom(seed)))
-    val Lfim = math.min(m.N, Lmax)
-    val (_, l) = (Lbuild to Lfim map { L =>
-      if (L > Lbuild) m = growByOne(m)
+    var m = cast(buildCore(Lini, model.Xt, model.Y, new XSRandom(seed)))
+    val (_, l) = (Lini to Lfim map { L =>
+      if (L > Lini) m = growByOne(m)
       val E = errorMatrix(m.H, m.Beta, m.Y)
       //      val press = PRESS(E)(m.HHinv)
       val press = LOOError(m.Y)(E)(m.HHinv)
       //      println(press + " " + L)
       (press, L)
-    }).sortBy(_._1).apply((take * m.N).toInt) //take(66).sortBy(_._2.L).apply(33)
+    }).sortBy(_._1).take((takePct * deltaL * 2 + 0.001).ceil.toInt).minBy(_._2)
     val best = cast(if (l != model.L) buildCore(l, model.Xt, model.Y, new XSRandom(seed)) else model)
     best
   }

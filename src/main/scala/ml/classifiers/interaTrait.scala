@@ -26,9 +26,15 @@ import ml.models.{ELMIncModel, ELMModel, Model}
 trait interaTrait extends ConvergentIncremental with ConvergentGrowing {
   val Lbuild = 1
 
-  override def build(trSet: Seq[Pattern]): Model = {
-    val model = cast(super.build(trSet))
-    modelSelection(model)
+  def build(trSet: Seq[Pattern]): Model = {
+    val nclasses = trSet.head.nclasses
+    if (trSet.size < nclasses) {
+      println("At least |Y| instances required.")
+      sys.exit(1)
+    }
+    val initialTrSet = trSet.take(nclasses)
+    val firstModel = modelSelection(cast(batchBuild(initialTrSet)))
+    trSet.drop(nclasses).foldLeft(firstModel)((m, p) => cast(update(m, fast_mutable = true)(p)))
   }
 
   override def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {

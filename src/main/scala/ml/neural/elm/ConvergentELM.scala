@@ -29,17 +29,6 @@ import util.XSRandom
 trait ConvergentELM extends ELM {
   val Lbuild: Int
 
-  def build(trSet: Seq[Pattern]): Model = {
-    val nclasses = trSet.head.nclasses
-    if (trSet.size < nclasses) {
-      println("At least |Y| instances required.")
-      sys.exit(1)
-    }
-    val initialTrSet = trSet.take(nclasses)
-    val firstModel = batchBuild(initialTrSet)
-    trSet.drop(nclasses).foldLeft(firstModel)((m, p) => cast(update(m, fast_mutable = true)(p)))
-  }
-
   def batchBuild(trSet: Seq[Pattern]): Model = {
     val rnd = new XSRandom(seed)
     val ninsts = checkEmptyness(trSet)
@@ -120,6 +109,7 @@ trait ConvergentELM extends ELM {
       c = 0
       while (c < nclasses) {
         val v = PredictionMatrix.get(i, c)
+        //        println(v)
         if (v > max) {
           cmax = c
           max = v
@@ -127,7 +117,8 @@ trait ConvergentELM extends ELM {
         c += 1
       }
       if (cmax == -1) {
-        println("Probably there is a NaN in the PredictionMatrix. This usually occurs when attributes are not properly standardized.")
+        //        throw new Error("Probably there is a NaN in the PredictionMatrix. This usually occurs when attributes are not properly standardized.")
+        println("Probably there is a NaN in the PredictionMatrix. This usually occurs when attributes are not properly standardized or L is close enough to |Y|. Another possibility is a very small |Y|, or not having one of each class at the first elements of the building set (this doesn't happen if one of the implemented ALs is used).")
         sys.exit(1)
       }
       if (Y.get(i, cmax) == 1) hits += 1

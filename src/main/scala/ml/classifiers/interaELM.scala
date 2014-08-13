@@ -26,8 +26,8 @@ import util.XSRandom
  * The N / 2 limit is to avoid NaNs in LOOError calculation during model selection and numerical instability.
  * @param seed
  */
-case class interaELM(deltaL: Int = 1000, takePct: Double = 0, seed: Int = 42, notes: String = "") extends interaTrait {
-  override val toString = s"interaELM (${takePct * 100}pct)_" + notes
+case class interaELM(deltaL: Int = 1000, takeProportion: Double = 0, seed: Int = 42, notes: String = "") extends interaTrait {
+  override val toString = s"interaELM (+-$deltaL; ${takeProportion * 100}pct)_" + notes
 
   def modelSelection(model: ELMModel) = {
     //todo: analyse which matrices can be reused along all growing (i.e. they don't change size and need not be kept intact as candidate for the final model)
@@ -42,7 +42,7 @@ case class interaELM(deltaL: Int = 1000, takePct: Double = 0, seed: Int = 42, no
       val press = LOOError(m.Y)(E)(m.HHinv)
       //      println(press + " " + L)
       (press, L)
-    }).sortBy(_._1).take((takePct * deltaL * 2 + 0.001).ceil.toInt).minBy(_._2)
+    }).sortBy(_._1).take((takeProportion * deltaL * 2 + 0.001).ceil.toInt).minBy(_._2)
     val best = cast(if (l != model.L) buildCore(l, model.Xt, model.Y, new XSRandom(seed)) else model)
     best
   }

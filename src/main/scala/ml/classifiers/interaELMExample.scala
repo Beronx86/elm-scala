@@ -46,10 +46,6 @@ object interaELMExample extends App with ExampleTemplate {
     val mi = i.build(tr)
     Tempo.print_stop
 
-    Tempo.start
-    val i2 = interaELMNoEM(l)
-    val mi2 = i2.build(tr)
-    Tempo.print_stop
 
     val c = C45()
     val mc = c.build(tr)
@@ -70,8 +66,8 @@ object interaELMExample extends App with ExampleTemplate {
     }.sum / tr.length.toDouble
     //        println("LOOPRESSos: " + o.LOOError(mo) + "  LOOPRESSi: " + i.LOOError(mi) + "  LOOos: " + LOOos + "  LOOi: " + LOOi)
 
-    println(s"ii(${mii.asInstanceOf[ELMModel].L}): ${mii.accuracy(ts)} \ti(${mi.asInstanceOf[ELMModel].L}): ${mi.accuracy(ts)} \ti2(${mi2.asInstanceOf[ELMModel].L}): ${mi2.accuracy(ts)} \tc(-}): ${mc.accuracy(ts)}\to(${mo.asInstanceOf[ELMModel].L}): ${mo.accuracy(ts)}\te(${me.asInstanceOf[ELMModel].L}): " + me.accuracy(ts))
-    println(s"PRESSii: ${ii.PRESS(mii)} PRESSi: ${i.PRESS(mi)} PRESSi2: ${i2.PRESS(mi2)} PRESSos: ${o.PRESS(mo)} PRESSem: ${e.PRESS(me)}")
+    println(s"ii(${mii.asInstanceOf[ELMModel].L}): ${mii.accuracy(ts)} \ti(${mi.asInstanceOf[ELMModel].L}): ${mi.accuracy(ts)} \tc(-}): ${mc.accuracy(ts)}\to(${mo.asInstanceOf[ELMModel].L}): ${mo.accuracy(ts)}\te(${me.asInstanceOf[ELMModel].L}): " + me.accuracy(ts))
+    println(s"PRESSii: ${ii.PRESS(mii)} PRESSi: ${i.PRESS(mi)} PRESSos: ${o.PRESS(mo)} PRESSem: ${e.PRESS(me)}")
   }
 
   run

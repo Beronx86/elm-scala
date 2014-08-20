@@ -50,6 +50,22 @@ trait ELMModel extends Model {
 
   def output(pattern: Pattern) = ELMUtils.test(pattern, Alfat, biases, Beta).getData
 
+  def predict(pattern: Pattern) = {
+    val o = ELMUtils.test(pattern, Alfat, biases, Beta).getData
+    val n = o.size
+    var i = 0
+    var c = 0
+    var v = Double.MinValue
+    while (i < n) {
+      if (o(i) > v) {
+        v = o(i)
+        c = i
+      }
+      i += 1
+    }
+    c
+  }
+
   def distribution(pattern: Pattern) = ELMUtils.distribution(ELMUtils.test(pattern, Alfat, biases, Beta))
 }
 
@@ -70,7 +86,9 @@ case class ELMSimpleEnsembleModel(rnd: XSRandom, AlfatS: Seq[DenseMatrix], biase
   lazy val O = BetaS.head.numColumns()
   val N = X.numRows()
 
-  override def distribution(pattern: Pattern) = {
+  def predict(pattern: Pattern) = output(pattern).zipWithIndex.max._2
+
+  def distribution(pattern: Pattern) = {
     var o = 0
     var m = 0
     val res = Array.fill(O)(0d)
@@ -91,7 +109,7 @@ case class ELMSimpleEnsembleModel(rnd: XSRandom, AlfatS: Seq[DenseMatrix], biase
     res
   }
 
-  override def output(pattern: Pattern) = {
+  def output(pattern: Pattern) = {
     var o = 0
     var m = 0
     val res = Array.fill(O)(0d)

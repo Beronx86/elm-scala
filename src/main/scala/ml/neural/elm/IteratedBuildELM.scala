@@ -24,8 +24,6 @@ import util.XSRandom
  * Created by davi on 21/05/14.
  */
 trait IteratedBuildELM extends ELM {
-  //BatchELM {
-  //todo: correct this, extending BatchELM is very inefficient for update() on incremental-friendly classifiers (I-ELM?)!
   val f: (ELMSimpleModel, Double) => Unit
   val Lbuild: Int
   val callf: Boolean

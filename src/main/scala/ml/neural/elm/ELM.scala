@@ -30,10 +30,10 @@ import scala.util.Random
  */
 trait ELM extends Learner {
   val seed: Int
-  if (seed == 0) {
-    println("Seed cannot be 0 because the fast random algorithm (XS) would produce only 0s.")
-    sys.exit(1)
-  }
+  //  if (seed == 0) {
+  //    println("Seed cannot be 0 because the fast random algorithm (XS) would produce only 0s.")
+  //    sys.exit(1)
+  //  }
 
   def EMC(model: Model)(patterns: Seq[Pattern]) = ???
 

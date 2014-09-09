@@ -30,7 +30,7 @@ object ELMExample extends App {
  Refer to LICENSE file for details.
            """)
 
-  val warmingdata = Datasets.arff(bina = true)("banana.arff") match {
+  val warmingdata = Datasets.arff("banana.arff") match {
     case Right(x) => x
     case Left(str) => println("Could not load banana dataset from the program path: " + str); sys.exit(1)
   }
@@ -51,7 +51,7 @@ object ELMExample extends App {
 
   Seq("banana.arff", "iris.arff") foreach { dataset =>
     println("Comparing all ELMs in " + dataset + " dataset...")
-    val data = Datasets.arff(bina = true)(dataset) match {
+    val data = Datasets.arff(dataset) match {
       case Right(x) => x
       case Left(str) => println("Could not load iris dataset from the program path: " + str); sys.exit(1)
     }

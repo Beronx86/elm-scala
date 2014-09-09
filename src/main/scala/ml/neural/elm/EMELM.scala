@@ -340,7 +340,7 @@ case class EMELM(patterns: Seq[Pattern], seed: Int, SVD: Boolean = false) {
 
 object EMTest extends App {
   val dataset = "iris.arff"
-  val data = Datasets.arff(bina = true)(dataset) match {
+  val data = Datasets.arff(dataset) match {
     case Right(x) => x.take(10)
     case Left(str) => println("Could not load " + dataset + " dataset from the program path: " + str); sys.exit(1)
   }

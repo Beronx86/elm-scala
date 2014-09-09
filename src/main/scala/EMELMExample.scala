@@ -29,7 +29,7 @@ object EMELMExample extends App {
            """)
 
   println("Warming up JVM-BLAS interface...")
-  val warmingdata = Datasets.arff(bina = true)("banana.arff") match {
+  val warmingdata = Datasets.arff("banana.arff") match {
     case Right(x) => x
     case Left(str) => println("Could not load iris dataset from the program path: " + str); sys.exit(1)
   }
@@ -38,7 +38,7 @@ object EMELMExample extends App {
 
   println("seed " + currentSeed)
   val dataset = "banana.arff"
-  val data = (Datasets.arff(bina = true)(dataset) match {
+  val data = (Datasets.arff(dataset) match {
     case Right(x) => x
     case Left(str) => println("Could not load " + dataset + " dataset from the program path: " + str); sys.exit(1)
   }).take(1000)

@@ -26,7 +26,7 @@ trait ExampleTemplate {
   val dataset: String
   val k: Int
   val parallel: Boolean
-  lazy val data = (Datasets.arff(bina = true)(dataset + ".arff") match {
+  lazy val data = (Datasets.arff(dataset + ".arff") match {
     case Right(x) => x
     case Left(str) => println("Could not load banana dataset from the program path: " + str); sys.exit(1)
   }).take(1000)
@@ -47,7 +47,7 @@ trait ExampleTemplate {
     println(appPath)
 
     println("Warming up JVM-BLAS interface...")
-    val warmingdata = Datasets.arff(bina = true)("banana.arff") match {
+    val warmingdata = Datasets.arff("banana.arff") match {
       case Right(x) => x
       case Left(str) => println("Could not load iris dataset from the program path: " + str); sys.exit(1)
     }

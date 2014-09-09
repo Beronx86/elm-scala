@@ -100,7 +100,7 @@ case class EIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: 
 
 object EIELMincTest extends App {
   //  val patts0 = new Random(0).shuffle(Datasets.patternsFromSQLite("/home/davi/wcs/ucipp/uci")("gas-drift").right.get.take(1000000))
-  val patts0 = new Random(0).shuffle(Datasets.arff(true)("/home/davi/wcs/ucipp/uci/abalone-11class.arff").right.get.take(200000))
+  val patts0 = new Random(0).shuffle(Datasets.arff("/home/davi/wcs/ucipp/uci/abalone-11class.arff").right.get.take(200000))
   //  val patts0 = new Random(0).shuffle(Datasets.arff(true)("/home/davi/wcs/ucipp/uci/iris.arff").right.get.take(200000))
   val filter = Datasets.zscoreFilter(patts0)
   val patts = Datasets.applyFilterChangingOrder(patts0, filter)

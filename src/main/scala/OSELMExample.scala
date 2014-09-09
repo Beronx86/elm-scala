@@ -33,7 +33,7 @@ object OSELMExample extends App {
   println(appPath)
 
   println("Warming up JVM-BLAS interface...")
-  val warmingdata = Datasets.arff(bina = true)("banana.arff") match {
+  val warmingdata = Datasets.arff("banana.arff") match {
     case Right(x) => x
     case Left(str) => println("Could not load iris dataset from the program path: " + str); sys.exit(1)
   }
@@ -41,7 +41,7 @@ object OSELMExample extends App {
   IELM(seed = currentSeed).build(warmingdata)
 
 
-  val data = Datasets.arff(bina = true)("banana.arff") match {
+  val data = Datasets.arff("banana.arff") match {
     case Right(x) => x
     case Left(str) => println("Could not load banana dataset from the program path: " + str); sys.exit(1)
   }

@@ -26,8 +26,9 @@ import ml.models.Model
  * @param seed
  */
 // todo: It performs batch learning, i.e. retrains from scratch to accomodate new instances.
-case class EMELM(Lbuild: Int, seed: Int = 42, notes: String = "") extends ConvergentGrowing {
-  override val toString = "EMELM_" + notes
+case class EMELM(Lbuild: Int, seed: Int = 42) extends ConvergentGrowing {
+  override val toString = "EMELM"
+  val id = -8
 
   override def build(trSet: Seq[Pattern]): Model = batchBuild(trSet)
 

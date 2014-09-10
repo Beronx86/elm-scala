@@ -31,8 +31,9 @@ import util.{Tempo, XSRandom}
  * @param callf
  * @param f
  */
-case class ECIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ()) extends ConvexIELMTrait {
-  override val toString = "ECIELM_" + notes
+case class ECIELM(seed: Int = 42, callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ()) extends ConvexIELMTrait {
+  override val toString = "ECIELM"
+  val id = 9
   val CANDIDATES = 10
   val Lbuild = -1
 

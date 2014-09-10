@@ -70,7 +70,7 @@ object OSELMExample extends App {
     if (OSELM(10) build tr hit p) 0 else 1
   }.sum / d.length.toDouble
   println("LOO error: " + LOOerror + " \nPRESSLOO: ")
-  interaELM(10, 0.1).build(d)
+  interaELM().build(d)
   val em = EMELM(10)
   val me = em.growTo(10, em.build(d))
   val os = OSELM(10)

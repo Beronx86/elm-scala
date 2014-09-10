@@ -30,8 +30,9 @@ import scala.util.Random
  * CI-ELM
  * Created by davi on 19/05/14.
  */
-case class CIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ()) extends ConvexIELMTrait {
-  override val toString = "CIELM_" + notes
+case class CIELM(seed: Int = 42, callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ()) extends ConvexIELMTrait {
+  override val toString = "CIELM"
+  val id = 8
   val Lbuild = -1
 
   /**
@@ -50,59 +51,4 @@ case class CIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: 
 
     (weights, bias, h, beta, newRnd)
   }
-}
-
-object CIELMincTest extends App {
-  //  val patts0 = new Random(0).shuffle(Datasets.patternsFromSQLite("/home/davi/wcs/ucipp/uci")("gas-drift").right.get.take(1000000))
-  //  val patts0 = new Random(0).shuffle(Datasets.arff(true)("/home/davi/wcs/ucipp/uci/banana.arff").right.get.take(200000))
-  //    val patts0 = new Random(0).shuffle(Datasets.arff(true)("/home/davi/wcs/ucipp/uci/iris.arff").right.get.take(200000))
-  val patts0 = new Random(0).shuffle(Datasets.arff("/home/davi/wcs/ucipp/uci/abalone-11class.arff").right.get.take(200000))
-  val filter = Datasets.zscoreFilter(patts0)
-  val patts = Datasets.applyFilterChangingOrder(patts0, filter)
-
-  val n = patts.length / 2
-  val tr = patts.take(n)
-  val ts = patts.drop(n)
-
-  val l = NB()
-  //KNN(5,"eucl",patts)
-  val tt = patts.head.nclasses
-  Tempo.start
-  var m = CIELM(n).build(tr.take(tt))
-  tr.drop(tt).foreach { x =>
-    m = CIELM(n).update(m)(x)
-    println(s"${m.accuracy(ts)}")
-  }
-  Tempo.print_stop
-
-  //  Tempo.start
-  //  var m2 = l.build(tr.take(tt))
-  //  tr.drop(tt).foreach(x => m2 = l.update(m2)(x))
-  //  Tempo.print_stop
-  //  println(s"${m2.accuracy(ts)}")
-  //
-  //  Tempo.start
-  //  m = CIELM(n).build(tr)
-  //  Tempo.print_stop
-  //  println(s"${m.accuracy(ts)}")
-  //
-  //  println("")
-  //
-  //  Tempo.start
-  //  m = CIELM(n).build(tr.take(tt))
-  //  tr.drop(tt).foreach(x => m = CIELM(n).update(m)(x))
-  //  Tempo.print_stop
-  //  println(s"${m.accuracy(ts)}")
-  //
-  //  Tempo.start
-  //  m2 = l.build(tr.take(tt))
-  //  tr.drop(tt).foreach(x => m2 = l.update(m2)(x))
-  //  Tempo.print_stop
-  //  println(s"${m2.accuracy(ts)}")
-  //
-  //  Tempo.start
-  //  m = CIELM(n).build(tr)
-  //  Tempo.print_stop
-  //  println(s"${m.accuracy(ts)}")
-
 }

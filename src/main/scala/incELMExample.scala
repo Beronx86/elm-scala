@@ -25,7 +25,7 @@ object incELMExample extends App {
   //  val patts0 = new Random(0).shuffle(Datasets.arff(true)("/home/davi/wcs/ucipp/uci/iris.arff").right.get.take(200000))
   val patts0 = new Random(650).shuffle(Datasets.arff("/home/davi/wcs/ucipp/uci/abalone-3class.arff").right.get.take(2000))
   val filter = Datasets.zscoreFilter(patts0)
-  val patts = Datasets.applyFilterChangingOrder(patts0, filter)
+  val patts = Datasets.applyFilter(filter)(patts0)
 
   val n = patts.length / 2
   val initialN = patts.head.nclasses

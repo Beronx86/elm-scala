@@ -28,8 +28,9 @@ import ml.models.Model
  * @param L
  * @param seed
  */
-case class OSELM(L: Int, seed: Int = 42, notes: String = "") extends ConvergentIncremental {
-  override val toString = "OSELM_" + notes
+case class OSELM(L: Int, seed: Int = 42) extends ConvergentIncremental {
+  override val toString = "OSELM"
+  val id = -11
   val Lbuild = L
 
   override def build(trSet: Seq[Pattern]): Model = batchBuild(trSet)

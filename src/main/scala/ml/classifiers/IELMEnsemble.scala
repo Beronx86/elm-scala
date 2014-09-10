@@ -23,9 +23,10 @@ import ml.neural.elm.{Data, IELMTraitEnsemble}
 import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
 import util.XSRandom
 
-case class IELMEnsemble(M: Int = 10, seed: Int = 42, notes: String = "", callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ())
+case class IELMEnsemble(M: Int = 10, seed: Int = 42, callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ())
   extends IELMTraitEnsemble {
-  override val toString = "IELMEnsemble_" + notes
+  override val toString = "IELMEnsemble"
+  val id = -9
   val Lbuild = -1
 
   def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {

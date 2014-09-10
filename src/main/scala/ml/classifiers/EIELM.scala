@@ -21,16 +21,15 @@ import ml.Pattern
 import ml.models.{ELMSimpleModel, Model}
 import ml.neural.elm.{Data, IELMTrait}
 import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
-import util.{Datasets, XSRandom}
-
-import scala.util.Random
+import util.XSRandom
 
 /**
  * Created by davi on 24/05/14.
  */
-case class EIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: (ELMSimpleModel, Double) => Unit = (tmp: Model, tmpt: Double) => ())
+case class EIELM(seed: Int = 42, callf: Boolean = false, f: (ELMSimpleModel, Double) => Unit = (tmp: Model, tmpt: Double) => ())
   extends IELMTrait {
-  override val toString = "EIELM_" + notes
+  override val toString = "EIELM"
+  val id = 7
   val CANDIDATES = 10
   val Lbuild = -1
 
@@ -95,23 +94,4 @@ case class EIELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: 
   }
 
   protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector) = createNodeAmongCandidates(rnd, X, e, tmp)
-}
-
-
-object EIELMincTest extends App {
-  //  val patts0 = new Random(0).shuffle(Datasets.patternsFromSQLite("/home/davi/wcs/ucipp/uci")("gas-drift").right.get.take(1000000))
-  val patts0 = new Random(0).shuffle(Datasets.arff("/home/davi/wcs/ucipp/uci/abalone-11class.arff").right.get.take(200000))
-  //  val patts0 = new Random(0).shuffle(Datasets.arff(true)("/home/davi/wcs/ucipp/uci/iris.arff").right.get.take(200000))
-  val filter = Datasets.zscoreFilter(patts0)
-  val patts = Datasets.applyFilterChangingOrder(patts0, filter)
-
-  val n = patts.length / 2
-  val tr = patts.take(n)
-  val ts = patts.drop(n)
-
-  var m = EIELM(n).build(tr.take(2))
-  tr.drop(2).foreach(x => m = EIELM(n).update(m)(x))
-
-  println(s"${m.accuracy(ts)}")
-
 }

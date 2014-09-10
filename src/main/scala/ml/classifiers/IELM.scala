@@ -21,13 +21,12 @@ import ml.Pattern
 import ml.models.{ELMSimpleModel, Model}
 import ml.neural.elm.{Data, IELMTrait}
 import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
-import util.{Tempo, Datasets, XSRandom}
+import util.XSRandom
 
-import scala.util.Random
-
-case class IELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ())
+case class IELM(seed: Int = 42, callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ())
   extends IELMTrait {
-  override val toString = "IELM_" + notes
+  override val toString = "IELM"
+  val id = 6
   val Lbuild = -1
 
   def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
@@ -52,54 +51,5 @@ case class IELM(seed: Int = 42, notes: String = "", callf: Boolean = false, f: (
     val (h, beta) = addNode(weights, bias, X, e, tmp)
     (weights, bias, h, beta)
   }
-}
-
-
-object IELMincTest extends App {
-  //  val patts0 = new Random(0).shuffle(Datasets.patternsFromSQLite("/home/davi/wcs/ucipp/uci")("gas-drift").right.get.take(1000000))
-  //  val patts0 = new Random(0).shuffle(Datasets.arff(true)("/home/davi/wcs/ucipp/uci/iris.arff").right.get.take(200000))
-  val patts0 = new Random(650).shuffle(Datasets.arff("/home/davi/wcs/ucipp/uci/abalone-3class.arff").right.get.take(2000))
-  val filter = Datasets.zscoreFilter(patts0)
-  val patts = Datasets.applyFilterChangingOrder(patts0, filter)
-
-  val n = patts.length / 2
-  val initialN = patts.head.nclasses
-  val tr = patts.take(n)
-  val ts = patts.drop(n)
-
-  val li = IELM()
-  val lis = IELMScratch()
-  val lei = EIELM()
-  val lie = IELMEnsemble(10)
-  val lci = CIELM()
-  var mi = li.build(tr.take(initialN))
-  var mis = lis.build(tr.take(initialN))
-  var mei = lei.build(tr.take(initialN))
-  var mie = lie.build(tr.take(initialN))
-  var mci = lci.build(tr.take(initialN))
-  tr.drop(initialN).foreach { x =>
-    mi = li.update(mi)(x)
-    mis = lis.update(mis)(x)
-    mei = lei.update(mei)(x)
-    mie = lie.update(mie)(x)
-    mci = lci.update(mci)(x)
-    println(s"${mi.accuracy(ts)} ${mis.accuracy(ts)} ${mei.accuracy(ts)} ${mie.accuracy(ts)} ${mci.accuracy(ts)}")
-  }
-
-
-  //total times and accs
-  //  Tempo.t {
-  //    val l = IELM(1)
-  //    var m = l.build(tr.take(initialN))
-  //    tr.drop(initialN).foreach { x => m = l.update(m)(x)}
-  //    println(s"${m.accuracy(ts)}")
-  //  }
-  //
-  //  Tempo.t {
-  //    val l = IELMScratch(1)
-  //    var m = l.build(tr.take(initialN))
-  //    tr.drop(initialN).foreach { x => m = l.update(m)(x)}
-  //    println(s"${m.accuracy(ts)}")
-  //  }
 }
 

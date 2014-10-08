@@ -150,5 +150,3 @@ trait ELM extends Learner {
   //
   //  def build(trSet: Seq[Pattern]): ELMModel
 }
-
-//rnd ok

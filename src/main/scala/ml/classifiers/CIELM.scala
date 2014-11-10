@@ -34,6 +34,7 @@ case class CIELM(seed: Int = 42, callf: Boolean = false, f: (Model, Double) => U
   override val toString = "CIELM"
   val id = 8
   val Lbuild = -1
+  val abr = toString
 
   /**
    * Não altera rnd.

@@ -39,6 +39,7 @@ case class IELMScratch(seed: Int = 42, callf: Boolean = false, f: (Model, Double
   override val toString = "IELMScratch"
   val id = -10
   val Lbuild = -1
+  val abr = toString
 
   override def build(patterns: Seq[Pattern]) = {
     super.build(patterns)

@@ -29,6 +29,7 @@ import ml.models.Model
 case class EMELM(Lbuild: Int, seed: Int = 42) extends ConvergentGrowing {
   override val toString = "EMELM"
   val id = -8
+  val abr = toString
 
   override def build(trSet: Seq[Pattern]): Model = batchBuild(trSet)
 

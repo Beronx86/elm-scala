@@ -28,6 +28,7 @@ case class IELM(seed: Int = 42, callf: Boolean = false, f: (Model, Double) => Un
   override val toString = "IELM"
   val id = 6
   val Lbuild = -1
+  val abr = toString
 
   def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
     val m = cast(model)

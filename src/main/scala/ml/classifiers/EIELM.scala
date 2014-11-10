@@ -32,6 +32,7 @@ case class EIELM(seed: Int = 42, callf: Boolean = false, f: (ELMSimpleModel, Dou
   val id = 7
   val CANDIDATES = 10
   val Lbuild = -1
+  val abr = toString
 
   def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
     val m = cast(model)

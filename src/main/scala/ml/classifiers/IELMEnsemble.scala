@@ -28,6 +28,7 @@ case class IELMEnsemble(M: Int = 10, seed: Int = 42, callf: Boolean = false, f: 
   override val toString = "IELMEnsemble"
   val id = -9
   val Lbuild = -1
+  val abr = toString
 
   def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
     val m = ensCast(model)

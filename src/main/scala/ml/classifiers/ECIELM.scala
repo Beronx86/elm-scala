@@ -36,6 +36,7 @@ case class ECIELM(seed: Int = 42, callf: Boolean = false, f: (Model, Double) => 
   val id = 9
   val CANDIDATES = 10
   val Lbuild = -1
+  val abr = toString
 
   def grow(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], t: Vector[DenseVector]) = {
     val tmp = new DenseVector(X.numRows())

@@ -29,6 +29,7 @@ import util.XSRandom
 case class interaELM(seed: Int = 42, deltaL: Int = 10, takeProportion: Double = 0.1) extends interaTrait {
   override val toString = s"interaELM (+-$deltaL; ${takeProportion * 100}pct)"
   val id = if (deltaL == 10 && takeProportion == 0.1) 10 else throw new Error("Parametros inesperaos para interaELM.")
+  val abr = "intera"
 
   def modelSelection(model: ELMModel) = {
     //todo: analyse which matrices can be reused along all growing (i.e. they don't change size and need not be kept intact as candidate for the final model)

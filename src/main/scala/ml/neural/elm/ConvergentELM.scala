@@ -39,6 +39,16 @@ trait ConvergentELM extends ELM {
     buildCore(Lbuild, Xt, Y, rnd)
   }
 
+   def batchBuildMultilabel(trSet: Seq[Pattern], labels: Seq[Seq[Double]]): Model = {
+      val rnd = new XSRandom(seed)
+      val ninsts = checkEmptyness(trSet)
+      checkFullRankness(ninsts)
+      val t = patterns2matrices(trSet, ninsts)
+      val Xt = t._1
+      val Y = t._2
+      buildCore(Lbuild, Xt, Y, rnd)
+   }
+
   protected def buildCore(L: Int, Xt: DenseMatrix, Y: DenseMatrix, rnd: XSRandom) = {
     val ninsts = Xt.numColumns()
     val natts = Xt.numRows()
@@ -192,7 +202,7 @@ trait ConvergentELM extends ELM {
    * @return
    */
   protected def PRESS(E: DenseMatrix)(HHinv: DenseMatrix) = {
-    //todo: this can be a little more efficient, because the loop is also inside PRESSMatrix()
+     //todo: this can be a little more efficient, because the loop is also inside PREMatrix()
     val n = HHinv.numRows()
     val nclasses = E.numColumns()
     val M = PREMatrix(E)(HHinv)
@@ -215,7 +225,7 @@ trait ConvergentELM extends ELM {
    * @return
    */
   protected def PRE(E: DenseMatrix)(HHinv: DenseMatrix) = {
-    //todo: this can be a little more efficient, because the loop is also inside PRESSMatrix()
+     //todo: this can be a little more efficient, because the loop is also inside PREMatrix()
     val n = HHinv.numRows()
     val nclasses = E.numColumns()
     val M = PREMatrix(E)(HHinv)

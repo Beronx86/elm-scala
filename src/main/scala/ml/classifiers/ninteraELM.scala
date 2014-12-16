@@ -22,33 +22,33 @@ import ml.models.{ELMIncModel, ELMModel, Model}
 import util.XSRandom
 
 case class ninteraELM(seed: Int = 42, deltaL: Int = 10) extends interaTrait {
-  override val toString = s"ninteraELM (+-$deltaL)"
-  val id = if (deltaL == 10) 11 else throw new Error("Parametros inesperados para interaELM.")
-  val abr = "nintera"
+   override val toString = s"ninteraELM (+-$deltaL)"
+   val id = if (deltaL == 10) 11 else throw new Error("Parametros inesperados para interaELM.")
+   val abr = "nintera"
 
-  override def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
-    val m = super.update(model)(pattern)
-    if (m.N % 4 == 0) {
-      val gm = modelSelection(m)
-      ELMIncModel(gm.rnd, gm.Alfat, gm.biases, gm.Beta, gm.P, gm.N, gm.Xt, gm.Y)
-    } else m
-  }
+   override def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
+      val m = super.update(model)(pattern)
+      if (m.N % 4 == 0) {
+         val gm = modelSelection(m)
+         ELMIncModel(gm.rnd, gm.Alfat, gm.biases, gm.Beta, gm.P, gm.N, gm.Xt, gm.Y)
+      } else m
+   }
 
-  def modelSelection(model: ELMModel) = {
-    //todo: analyse which matrices can be reused along all growing (i.e. they don't change size and need not be kept intact as candidate for the final model)
-    val Lini = math.max(Lbuild, model.L - deltaL)
-    val Lfim = math.min(model.N / 2, model.L + deltaL)
+   def modelSelection(model: ELMModel) = {
+      //todo: analyse which matrices can be reused along all growing (i.e. they don't change size and need not be kept intact as candidate for the final model)
+      val Lini = math.max(Lbuild, model.L - deltaL)
+      val Lfim = math.min(model.N / 2, model.L + deltaL)
 
-    var m = cast(buildCore(Lini, model.Xt, model.Y, new XSRandom(seed)))
-    val (_, l) = (Lini to Lfim map { L =>
-      if (L > Lini) m = growByOne(m)
-      val E = errorMatrix(m.H, m.Beta, m.Y)
-      //      val press = PRESS(E)(m.HHinv)
-      val press = LOOError(m.Y)(E)(m.HHinv)
-      //      println(press + " " + L)
-      (press, L)
-    }).sortBy(_._1).head
-    val best = cast(if (l != model.L) buildCore(l, model.Xt, model.Y, new XSRandom(seed)) else model)
-    best
-  }
+      var m = cast(buildCore(Lini, model.Xt, model.Y, new XSRandom(seed)))
+      val (_, l) = (Lini to Lfim map { L =>
+         if (L > Lini) m = growByOne(m)
+         val E = errorMatrix(m.H, m.Beta, m.Y)
+         val press = PRESS(E)(m.HHinv)
+         //      val press = LOOError(m.Y)(E)(m.HHinv)
+         //      println(press + " " + L)
+         (press, L)
+      }).sortBy(_._1).head
+      val best = cast(if (l != model.L) buildCore(l, model.Xt, model.Y, new XSRandom(seed)) else model)
+      best
+   }
 }

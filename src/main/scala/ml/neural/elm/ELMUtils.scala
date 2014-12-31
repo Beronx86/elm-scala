@@ -35,11 +35,16 @@ object ELMUtils {
   }
 
   def test(patt: Pattern, Alfat: DenseMatrix, biases: Array[Double], Beta: DenseMatrix) = {
-    val (h, hm) = feedHiddenv(new DenseVector(patt.array, false), Alfat, biases)
-    val O = feedOutput(hm, Beta)
+     val O = output(patt, Alfat, biases, Beta)
     applyOnMatrix(O, sigm)
     O
   }
+
+   def output(patt: Pattern, Alfat: DenseMatrix, biases: Array[Double], Beta: DenseMatrix) = {
+      val (h, hm) = feedHiddenv(new DenseVector(patt.array, false), Alfat, biases)
+      val O = feedOutput(hm, Beta)
+      O
+   }
 
   def feedOutput(H: DenseMatrix, Beta: DenseMatrix): DenseMatrix = {
     val Y = new DenseMatrix(H.numRows(), Beta.numColumns())

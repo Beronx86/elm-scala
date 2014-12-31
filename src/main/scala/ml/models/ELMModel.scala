@@ -24,130 +24,130 @@ import no.uib.cipr.matrix.{DenseVector, DenseMatrix}
 import util.XSRandom
 
 trait ELMModel extends Model {
-  lazy val HHinv = {
-    val r = new DenseMatrix(H.numRows(), H.numRows())
-    H.mult(Hinv, r)
-    r
-  }
-  lazy val L = Alfat.numRows()
-  lazy val I = Math.identity(N)
-  val rnd: XSRandom
-  //needed by test()
-  val biases: Array[Double]
-  val Alfat: DenseMatrix
-  val Beta: DenseMatrix
-  //needed by P and Hinv
-  val H: DenseMatrix
-  val Ht: DenseMatrix
-  //needed by grow()
-  val Xt: DenseMatrix
-  val N: Int
-  val Hinv: DenseMatrix
-  //needed by modelSelection() and grow()
-  val Y: DenseMatrix
-  //needed by update()
-  val P: DenseMatrix
+   lazy val HHinv = {
+      val r = new DenseMatrix(H.numRows(), H.numRows())
+      H.mult(Hinv, r)
+      r
+   }
+   lazy val L = Alfat.numRows()
+   lazy val I = Math.identity(N)
+   val rnd: XSRandom
+   //needed by test()
+   val biases: Array[Double]
+   val Alfat: DenseMatrix
+   val Beta: DenseMatrix
+   //needed by P and Hinv
+   val H: DenseMatrix
+   val Ht: DenseMatrix
+   //needed by grow()
+   val Xt: DenseMatrix
+   val N: Int
+   val Hinv: DenseMatrix
+   //needed by modelSelection() and grow()
+   val Y: DenseMatrix
+   //needed by update()
+   val P: DenseMatrix
 
-  def output(pattern: Pattern) = ELMUtils.test(pattern, Alfat, biases, Beta).getData
+   def output(pattern: Pattern) = ELMUtils.output(pattern, Alfat, biases, Beta).getData
 
-  def predict(pattern: Pattern) = {
-    val o = ELMUtils.test(pattern, Alfat, biases, Beta).getData
-    val n = o.size
-    var i = 0
-    var c = 0
-    var v = Double.MinValue
-    while (i < n) {
-      if (o(i) > v) {
-        v = o(i)
-        c = i
+   def predict(pattern: Pattern) = {
+      val o = ELMUtils.test(pattern, Alfat, biases, Beta).getData
+      val n = o.size
+      var i = 0
+      var c = 0
+      var v = Double.MinValue
+      while (i < n) {
+         if (o(i) > v) {
+            v = o(i)
+            c = i
+         }
+         i += 1
       }
-      i += 1
-    }
-    c
-  }
+      c
+   }
 
-  def distribution(pattern: Pattern) = ELMUtils.distribution(ELMUtils.test(pattern, Alfat, biases, Beta))
+   def distribution(pattern: Pattern) = ELMUtils.distribution(ELMUtils.test(pattern, Alfat, biases, Beta))
 }
 
 //todo: ELMSimpleModel does not need rnd nor N; I and CI-ELM need updateable versions and the creation of proper specific ELMXXXXModels
 case class ELMSimpleModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], Beta: DenseMatrix, X: DenseMatrix, e: Vector[DenseVector], t: Vector[DenseVector], patterns: Seq[Pattern] = Seq()) extends ELMModel {
-  val H = null
-  val Ht = null
-  val Hinv = null
-  val P = null
-  val Y = null
-  val Xt = null
-  val N = X.numRows()
+   val H = null
+   val Ht = null
+   val Hinv = null
+   val P = null
+   val Y = null
+   val Xt = null
+   val N = X.numRows()
 }
 
 case class ELMSimpleEnsembleModel(rnd: XSRandom, AlfatS: Seq[DenseMatrix], biasesS: Seq[Array[Double]], BetaS: Seq[DenseMatrix], X: DenseMatrix, eS: Seq[Vector[DenseVector]], t: Vector[DenseVector]) extends Model {
-  lazy val L = BetaS.head.numRows()
-  lazy val M = AlfatS.size
-  lazy val O = BetaS.head.numColumns()
-  val N = X.numRows()
+   lazy val L = BetaS.head.numRows()
+   lazy val M = AlfatS.size
+   lazy val O = BetaS.head.numColumns()
+   val N = X.numRows()
 
-  def predict(pattern: Pattern) = output(pattern).zipWithIndex.max._2
+   def predict(pattern: Pattern) = output(pattern).zipWithIndex.max._2
 
-  def distribution(pattern: Pattern) = {
-    var o = 0
-    var m = 0
-    val res = Array.fill(O)(0d)
-    while (m < M) {
-      val dis = ELMUtils.distribution(ELMUtils.test(pattern, AlfatS(m), biasesS(m), BetaS(m)))
+   def distribution(pattern: Pattern) = {
+      var o = 0
+      var m = 0
+      val res = Array.fill(O)(0d)
+      while (m < M) {
+         val dis = ELMUtils.distribution(ELMUtils.test(pattern, AlfatS(m), biasesS(m), BetaS(m)))
+         o = 0
+         while (o < O) {
+            res(o) += dis(o)
+            o += 1
+         }
+         m += 1
+      }
       o = 0
       while (o < O) {
-        res(o) += dis(o)
-        o += 1
+         res(o) /= M
+         o += 1
       }
-      m += 1
-    }
-    o = 0
-    while (o < O) {
-      res(o) /= M
-      o += 1
-    }
-    res
-  }
+      res
+   }
 
-  def output(pattern: Pattern) = {
-    var o = 0
-    var m = 0
-    val res = Array.fill(O)(0d)
-    while (m < M) {
-      val dis = ELMUtils.test(pattern, AlfatS(m), biasesS(m), BetaS(m)).getData
-      o = 0
-      while (o < O) {
-        res(o) += dis(o)
-        o += 1
+   def output(pattern: Pattern) = {
+      var o = 0
+      var m = 0
+      val res = Array.fill(O)(0d)
+      while (m < M) {
+         val dis = ELMUtils.test(pattern, AlfatS(m), biasesS(m), BetaS(m)).getData
+         o = 0
+         while (o < O) {
+            res(o) += dis(o)
+            o += 1
+         }
+         m += 1
       }
-      m += 1
-    }
-    res
-  }
+      res
+   }
 }
 
 //todo: Xt,Y -> queue[Pattern ou (array,array)] (pra evitar copias de Xt e Y inteiros na memoria; Xt e Y só vão ser needed ao final dos incrementos, podem ser criados inteiros de uma vez from queue)
 case class ELMIncModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], Beta: DenseMatrix,
                        P: DenseMatrix, N: Int, Xt: DenseMatrix, Y: DenseMatrix) extends ELMModel {
-  lazy val H = tupleHHt._1
-  lazy val Ht = tupleHHt._2
-  lazy val Hinv = {
-    val m = new DenseMatrix(L, N)
-    P.mult(Ht, m)
-    m
-  }
-  private lazy val tupleHHt = ELMUtils.feedHiddent(Xt, Alfat, biases)
+   lazy val H = tupleHHt._1
+   lazy val Ht = tupleHHt._2
+   lazy val Hinv = {
+      val m = new DenseMatrix(L, N)
+      P.mult(Ht, m)
+      m
+   }
+   private lazy val tupleHHt = ELMUtils.feedHiddent(Xt, Alfat, biases)
 }
 
 case class ELMGroModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], Beta: DenseMatrix,
                        Xt: DenseMatrix, Y: DenseMatrix, H: DenseMatrix, Hinv: DenseMatrix) extends ELMModel {
-  lazy val P = ELMUtils.calculateP(H, Ht)
-  lazy val Ht = {
-    val m = new DenseMatrix(H.numColumns(), H.numRows())
-    H.transpose(m)
-    m
-  }
-  val N = H.numRows()
+   lazy val P = ELMUtils.calculateP(H, Ht)
+   lazy val Ht = {
+      val m = new DenseMatrix(H.numColumns(), H.numRows())
+      H.transpose(m)
+      m
+   }
+   val N = H.numRows()
 }
 
 case class ELMConvergentModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Double], Beta: DenseMatrix,

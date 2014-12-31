@@ -40,6 +40,7 @@ trait ConvergentELM extends ELM {
    }
 
    def batchBuildMultilabel(trSet: Seq[Pattern], labels: Seq[Seq[Double]]): Model = {
+      ??? //não testado, pois o batchBuild normal é capaz de fazer multilabel
       val rnd = new XSRandom(seed)
       val ninsts = checkEmptyness(trSet)
       checkFullRankness(ninsts)

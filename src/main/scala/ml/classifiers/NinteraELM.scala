@@ -21,7 +21,7 @@ import ml.Pattern
 import ml.models.{ELMIncModel, ELMModel, Model}
 import util.XSRandom
 
-case class ninteraELM(seed: Int = 42, deltaL: Int = 10) extends interaTrait {
+case class NinteraELM(seed: Int = 42, deltaL: Int = 10) extends interaTrait {
    override val toString = s"ninteraELM (+-$deltaL)"
    val id = if (deltaL == 10) 11 else throw new Error("Parametros inesperados para interaELM.")
    val abr = "nintera"

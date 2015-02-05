@@ -24,7 +24,7 @@ import util.XSRandom
 case class NinteraELM(seed: Int = 42, deltaL: Int = 10) extends interaTrait {
    override val toString = s"ninteraELM (+-$deltaL)"
    val id = if (deltaL == 10) 11 else throw new Error("Parametros inesperados para interaELM.")
-   val abr = "nintera"
+   val abr = "ELM"
 
    override def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
       val m = super.update(model)(pattern)

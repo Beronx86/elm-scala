@@ -51,4 +51,21 @@ case class NinteraELM(seed: Int = 42, deltaL: Int = 10) extends interaTrait {
       val best = cast(if (l != model.L) buildCore(l, model.Xt, model.Y, new XSRandom(seed)) else model)
       best
    }
+
+   def modelSelectionFull(model: ELMModel) = {
+      val Lini = 1
+      val Lfim = model.N / 5
+
+      var m = cast(buildCore(Lini, model.Xt, model.Y, new XSRandom(seed)))
+      val (_, l) = (Lini to Lfim by (model.N / 25) map { L =>
+         if (L > Lini) m = growByOne(m)
+         val E = errorMatrix(m.H, m.Beta, m.Y)
+         val press = PRESS(E)(m.HHinv)
+         //      val press = LOOError(m.Y)(E)(m.HHinv)
+         println(press + " " + L)
+         (press, L)
+      }).sortBy(_._1).take(3).minBy(_._2)
+      val best = cast(if (l != model.L) buildCore(l, model.Xt, model.Y, new XSRandom(seed)) else model)
+      best
+   }
 }

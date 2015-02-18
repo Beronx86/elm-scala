@@ -41,8 +41,17 @@ case class IELMBatch(seed: Int = 42, callf: Boolean = false, f: (Model, Double) 
   val Lbuild = -1
   val abr = toString
 
-  override def build(patterns: Seq[Pattern]) = {
-    super.build(patterns)
+   override def build(trSet: Seq[Pattern]) = {
+      val nclasses = trSet.head.nclasses
+      val n = trSet.size
+      if (trSet.size < nclasses) {
+         println("At least |Y| instances required.")
+         sys.exit(1)
+      }
+      val natts = trSet.head.nattributes
+      val X = patterns2matrix(trSet, n)
+      val e = patterns2t(trSet, n)
+      bareBuild(n, natts, nclasses, X, e, trSet)
   }
 
   def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {

@@ -34,10 +34,10 @@ import scala.util.Random
  * @param callf
  * @param f
  */
-case class IELMScratch(seed: Int = 42, callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ())
+case class IELMBatch(seed: Int = 42, callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ())
   extends IELMTrait {
-  override val toString = "IELMScratch"
-  val id = -10
+   override val toString = "IELMBatch"
+   val id = 99801
   val Lbuild = -1
   val abr = toString
 

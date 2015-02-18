@@ -21,37 +21,37 @@ Copyright (C) 2014 Davi Pereira dos Santos
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 object incELMExample extends App {
-  //  val patts0 = new Random(0).shuffle(Datasets.patternsFromSQLite("/home/davi/wcs/ucipp/uci")("gas-drift").right.get.take(1000000))
-  //  val patts0 = new Random(0).shuffle(Datasets.arff(true)("/home/davi/wcs/ucipp/uci/iris.arff").right.get.take(200000))
-  val patts0 = new Random(650).shuffle(Datasets.arff("/home/davi/wcs/ucipp/uci/abalone-3class.arff").right.get.take(2000))
-  val filter = Datasets.zscoreFilter(patts0)
-  val patts = Datasets.applyFilter(filter)(patts0)
+   //  val patts0 = new Random(0).shuffle(Datasets.patternsFromSQLite("/home/davi/wcs/ucipp/uci")("gas-drift").right.get.take(1000000))
+   //  val patts0 = new Random(0).shuffle(Datasets.arff(true)("/home/davi/wcs/ucipp/uci/iris.arff").right.get.take(200000))
+   val patts0 = new Random(650).shuffle(Datasets.arff("/home/davi/wcs/ucipp/uci/abalone-3class.arff").right.get.take(2000))
+   val filter = Datasets.zscoreFilter(patts0)
+   val patts = Datasets.applyFilter(filter)(patts0)
 
-  val n = patts.length / 2
-  val initialN = patts.head.nclasses
-  val tr = patts.take(n).toStream
-  val ts = patts.drop(n)
+   val n = patts.length / 2
+   val initialN = patts.head.nclasses
+   val tr = patts.take(n).toStream
+   val ts = patts.drop(n)
 
-  val li = IELM()
-  val lis = IELMScratch()
-  val lei = EIELM()
-  val lie = IELMEnsemble(10)
-  val lci = CIELM()
+   val li = IELM()
+   val lis = IELMBatch()
+   val lei = EIELM()
+   val lie = IELMEnsemble(10)
+   val lci = CIELM()
 
-  var mi = li.build(tr.take(initialN))
-  var mis = lis.build(tr.take(initialN))
-  var mei = lei.build(tr.take(initialN))
-  var mie = lie.build(tr.take(initialN))
-  var mci = lci.build(tr.take(initialN))
+   var mi = li.build(tr.take(initialN))
+   var mis = lis.build(tr.take(initialN))
+   var mei = lei.build(tr.take(initialN))
+   var mie = lie.build(tr.take(initialN))
+   var mci = lci.build(tr.take(initialN))
 
-  val res = tr.drop(initialN).map { x =>
-    Stream(mi = li.update(mi)(x),
-      mis = lis.update(mis)(x),
-      mei = lei.update(mei)(x),
-      mie = lie.update(mie)(x),
-      mci = lci.update(mci)(x)).par.toList
-    (mi.accuracy(ts), mis.accuracy(ts), mei.accuracy(ts), mie.accuracy(ts), mci.accuracy(ts))
-  }
+   val res = tr.drop(initialN).map { x =>
+      Stream(mi = li.update(mi)(x),
+         mis = lis.update(mis)(x),
+         mei = lei.update(mei)(x),
+         mie = lie.update(mie)(x),
+         mci = lci.update(mci)(x)).par.toList
+      (mi.accuracy(ts), mis.accuracy(ts), mei.accuracy(ts), mie.accuracy(ts), mci.accuracy(ts))
+   }
 
-  res foreach (x => println(s"${x._1} ${x._2} ${x._3} ${x._4} ${x._5}"))
+   res foreach (x => println(s"${x._1} ${x._2} ${x._3} ${x._4} ${x._5}"))
 }

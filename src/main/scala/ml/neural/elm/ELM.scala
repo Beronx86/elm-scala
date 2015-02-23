@@ -58,9 +58,7 @@ trait ELM extends Learner {
       val n = B.getData.size
       var i = 0
       var g = 0d
-      println(s"$A \n $B     $n")
       while (i < n) {
-         println(s"$i")
          val d = a(i) - b(i)
          g += d * d
          i += 1

@@ -24,33 +24,33 @@ import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
 import util.XSRandom
 
 case class IELM(seed: Int = 42, callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ())
-  extends IELMTrait {
-  override val toString = "IELM"
-  val id = 6
-  val Lbuild = -1
-  val abr = toString
+   extends IELMTrait {
+   override val toString = "IELM"
+   val id = 6
+   val Lbuild = -1
+   val abr = toString
 
-  def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
-    val m = cast(model)
-    //    if (math.sqrt(m.N + 1).toInt > math.sqrt(m.N).toInt) build(?) //<- not possible to rebuild, since we don't have Y nor all patterns anymore. But do we have t? No.
-    val newE = m.e.zip(pattern.weighted_label_array) map { case (dv, v) => Data.appendToVector(dv, v)}
-    val newX = Data.appendRowToMatrix(m.X, pattern.array)
-    val newTmp = new DenseVector(newX.numRows())
+   def update(model: Model, fast_mutable: Boolean, semcrescer: Boolean = false)(pattern: Pattern) = {
+      val m = cast(model)
+      //    if (math.sqrt(m.N + 1).toInt > math.sqrt(m.N).toInt) build(?) //<- not possible to rebuild, since we don't have Y nor all patterns anymore. But do we have t? No.
+      val newE = m.e.zip(pattern.weighted_label_array) map { case (dv, v) => Data.appendToVector(dv, v)}
+      val newX = Data.appendRowToMatrix(m.X, pattern.array)
+      val newTmp = new DenseVector(newX.numRows())
 
-    val (weights, bias, newRnd) = newNode(m.Alfat.numColumns(), m.rnd)
-    val newAlfat = Data.appendRowToMatrix(m.Alfat, weights)
-    val newBiases = Data.appendToArray(m.biases, bias)
-    val (h, beta) = addNode(weights, bias, newX, newE, newTmp)
-    val newBeta = Data.appendRowToMatrix(m.Beta, beta)
+      val (weights, bias, newRnd) = newNode(m.Alfat.numColumns(), m.rnd)
+      val newAlfat = Data.appendRowToMatrix(m.Alfat, weights)
+      val newBiases = Data.appendToArray(m.biases, bias)
+      val (h, beta) = addNode(weights, bias, newX, newE, newTmp)
+      val newBeta = Data.appendRowToMatrix(m.Beta, beta)
 
-    ELMSimpleModel(newRnd, newAlfat, newBiases, newBeta, newX, newE, null)
-  }
+      ELMSimpleModel(newRnd, newAlfat, newBiases, newBeta, newX, newE, null)
+   }
 
-  protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector) = {
-    val (weights, bias, newRnd) = newNode(X.numColumns(), rnd)
-    rnd.setSeed(newRnd.getSeed)
-    val (h, beta) = addNode(weights, bias, X, e, tmp)
-    (weights, bias, h, beta)
-  }
+   protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector) = {
+      val (weights, bias, newRnd) = newNode(X.numColumns(), rnd)
+      rnd.setSeed(newRnd.getSeed)
+      val (h, beta) = addNode(weights, bias, X, e, tmp)
+      (weights, bias, h, beta)
+   }
 }
 

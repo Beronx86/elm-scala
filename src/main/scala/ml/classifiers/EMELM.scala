@@ -27,14 +27,14 @@ import ml.models.Model
  */
 // todo: It performs batch learning, i.e. retrains from scratch to accomodate new instances.
 case class EMELM(Lbuild: Int, seed: Int = 42) extends ConvergentGrowing {
-  override val toString = "EMELM"
-  val id = -8
-  val abr = toString
+   override val toString = "EMELM"
+   val id = -8
+   val abr = toString
 
-  override def build(trSet: Seq[Pattern]): Model = batchBuild(trSet)
+   override def build(trSet: Seq[Pattern]): Model = batchBuild(trSet)
 
-  def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
-    println("EM-ELM does not accept update() for now. It could perform an entire rebuild.")
-    sys.exit(1)
-  }
+   def update(model: Model, fast_mutable: Boolean, semcrescer: Boolean = false)(pattern: Pattern) = {
+      println("EM-ELM does not accept update() for now. It could perform an entire rebuild.")
+      sys.exit(1)
+   }
 }

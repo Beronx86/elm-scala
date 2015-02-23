@@ -50,15 +50,15 @@ case class CIELMBatch(seed: Int = 42, callf: Boolean = false, f: (Model, Double)
       val natts = trSet.head.nattributes
       val X = patterns2matrix(trSet, n)
       val (t, e) = patterns2te(trSet, n)
-      bareBuild(n, n, natts, nclasses, X, e, t)
+      bareBuild(n, natts, nclasses, X, e, t)
    }
 
-   override def update(model: Model, fast_mutable: Boolean = false)(pattern: Pattern) = {
+   override def update(model: Model, fast_mutable: Boolean = false, semcrescer: Boolean = false)(pattern: Pattern) = {
       val m = cast(model)
       val newE = m.e.zip(pattern.weighted_label_array) map { case (dv, v) => Data.appendToVector(dv, v)}
       val newT = m.t.zip(pattern.weighted_label_array) map { case (dv, v) => Data.appendToVector(dv, v)}
       val newX = Data.appendRowToMatrix(m.X, pattern.array)
-      if (fast_mutable) bareBuild(m.N, m.N + 1, newX.numColumns(), pattern.nclasses, newX, newE, newT)
-      else bareBuild(m.N + 1, m.N + 1, newX.numColumns(), pattern.nclasses, newX, newE, newT)
+      if (semcrescer) bareBuild(m.N, newX.numColumns(), pattern.nclasses, newX, newE, newT)
+      else bareBuild(m.N + 1, newX.numColumns(), pattern.nclasses, newX, newE, newT)
    }
 }

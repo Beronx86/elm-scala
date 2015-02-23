@@ -37,9 +37,9 @@ trait interaTrait extends ConvergentIncremental with ConvergentGrowing {
       trSet.drop(nclasses).foldLeft(firstModel)((m, p) => cast(update(m, fast_mutable = true)(p)))
    }
 
-   override def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
+   override def update(model: Model, fast_mutable: Boolean, semcrescer: Boolean = false)(pattern: Pattern) = {
       val m = super.update(model)(pattern)
-      if (math.sqrt(m.N + 1).toInt > math.sqrt(m.N).toInt && !fast_mutable) {
+      if (math.sqrt(m.N + 1).toInt > math.sqrt(m.N).toInt && !semcrescer) {
          val gm = modelSelection(m)
          ELMIncModel(gm.rnd, gm.Alfat, gm.biases, gm.Beta, gm.P, gm.N, gm.Xt, gm.Y)
       } else m

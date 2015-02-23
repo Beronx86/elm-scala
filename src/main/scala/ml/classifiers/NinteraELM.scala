@@ -26,9 +26,9 @@ case class NinteraELM(seed: Int = 42, deltaL: Int = 10) extends interaTrait {
    val id = if (deltaL == 10) 11 else throw new Error("Parametros inesperados para interaELM.")
    val abr = "ELM"
 
-   override def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
-      val m = super.update(model, fast_mutable = true)(pattern) //gambiarra
-      if (m.N % 4 == 0 && !fast_mutable) {
+   override def update(model: Model, fast_mutable: Boolean, semcrescer: Boolean = false)(pattern: Pattern) = {
+      val m = super.update(model, fast_mutable = false, semcrescer)(pattern) //gambiarra
+      if (m.N % 4 == 0 && !semcrescer) {
          val gm = modelSelection(m)
          ELMIncModel(gm.rnd, gm.Alfat, gm.biases, gm.Beta, gm.P, gm.N, gm.Xt, gm.Y)
       } else m

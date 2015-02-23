@@ -35,11 +35,11 @@ import scala.util.Random
  * @param f
  */
 case class IELMBatch(seed: Int = 42, callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ())
-  extends IELMTrait {
+   extends IELMTrait {
    override val toString = "IELMBatch"
    val id = 99801
-  val Lbuild = -1
-  val abr = toString
+   val Lbuild = -1
+   val abr = toString
 
    override def build(trSet: Seq[Pattern]) = {
       val nclasses = trSet.head.nclasses
@@ -52,24 +52,24 @@ case class IELMBatch(seed: Int = 42, callf: Boolean = false, f: (Model, Double) 
       val X = patterns2matrix(trSet, n)
       val e = patterns2t(trSet, n)
       bareBuild(n, natts, nclasses, X, e, trSet)
-  }
+   }
 
-  def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
-    val trSet = pattern +: cast(model).patterns
-    val nclasses = pattern.nclasses
-    val ninsts = checkEmptyness(trSet: Seq[Pattern])
-    val natts = trSet.head.nattributes
-    val X = patterns2matrix(trSet, ninsts)
-    val e = patterns2t(trSet, ninsts)
-    bareBuild(ninsts, natts, nclasses, X, e, trSet)
-  }
+   def update(model: Model, fast_mutable: Boolean, semcrescer: Boolean = false)(pattern: Pattern) = {
+      val trSet = pattern +: cast(model).patterns
+      val nclasses = pattern.nclasses
+      val ninsts = checkEmptyness(trSet: Seq[Pattern])
+      val natts = trSet.head.nattributes
+      val X = patterns2matrix(trSet, ninsts)
+      val e = patterns2t(trSet, ninsts)
+      bareBuild(ninsts, natts, nclasses, X, e, trSet)
+   }
 
-  protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector) = {
-    val (weights, bias, newRnd) = newNode(X.numColumns(), rnd)
-    rnd.setSeed(newRnd.getSeed)
-    val (h, beta) = addNode(weights, bias, X, e, tmp)
-    (weights, bias, h, beta)
-  }
+   protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector) = {
+      val (weights, bias, newRnd) = newNode(X.numColumns(), rnd)
+      rnd.setSeed(newRnd.getSeed)
+      val (h, beta) = addNode(weights, bias, X, e, tmp)
+      (weights, bias, h, beta)
+   }
 }
 
 

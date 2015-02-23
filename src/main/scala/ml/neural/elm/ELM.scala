@@ -45,14 +45,18 @@ trait ELM extends Learner {
       }
       val m = cast(model)
       val p = m.distribution(pattern)
-      (0 until pattern.nclasses map { c =>
+      var s = 0d
+      var c = 0
+      while (c < pattern.nclasses) {
          val artp = pattern.relabeled_reweighted(c, pattern.instance_weight, new_missed = false)
-         val m2 = cast(update(m, fast_mutable = true)(artp)) //gambiarra de usar fast_mutable como indicador de "não cresça a rede"
-         p(c) * dist(m.Beta, m2.Beta)
-      }).sum
+         val m2 = cast(update(m, fast_mutable = false, semcrescer = true)(artp)) //gambiarra de usar fast_mutable como indicador de "não cresça a rede"
+         s += p(c) * grad(m.Beta, m2.Beta)
+         c += 1
+      }
+      s
    }
 
-   def dist(A: DenseMatrix, B: DenseMatrix) = {
+   def grad(A: DenseMatrix, B: DenseMatrix) = {
       val a = A.getData
       val b = B.getData
       val n = B.getData.size

@@ -27,72 +27,72 @@ import util.XSRandom
  * Created by davi on 24/05/14.
  */
 case class EIELM(seed: Int = 42, callf: Boolean = false, f: (ELMSimpleModel, Double) => Unit = (tmp: Model, tmpt: Double) => ())
-  extends IELMTrait {
-  override val toString = "EIELM"
-  val id = 7
-  val CANDIDATES = 10
-  val Lbuild = -1
-  val abr = toString
+   extends IELMTrait {
+   override val toString = "EIELM"
+   val id = 7
+   val CANDIDATES = 10
+   val Lbuild = -1
+   val abr = toString
 
-  def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
-    val m = cast(model)
-    val newE = m.e.zip(pattern.weighted_label_array) map { case (dv, v) => Data.appendToVector(dv, v)}
-    val newX = Data.appendRowToMatrix(m.X, pattern.array)
-    val newTmp = new DenseVector(newX.numRows())
-    val newRnd = m.rnd.clone()
+   def update(model: Model, fast_mutable: Boolean, semcrescer: Boolean = false)(pattern: Pattern) = {
+      val m = cast(model)
+      val newE = m.e.zip(pattern.weighted_label_array) map { case (dv, v) => Data.appendToVector(dv, v)}
+      val newX = Data.appendRowToMatrix(m.X, pattern.array)
+      val newTmp = new DenseVector(newX.numRows())
+      val newRnd = m.rnd.clone()
 
-    val (weights, bias, h, beta) = createNodeAmongCandidates(newRnd, newX, newE, newTmp)
-    val newAlfat = Data.appendRowToMatrix(m.Alfat, weights)
-    val newBiases = Data.appendToArray(m.biases, bias)
-    val newBeta = Data.appendRowToMatrix(m.Beta, beta)
+      val (weights, bias, h, beta) = createNodeAmongCandidates(newRnd, newX, newE, newTmp)
+      val newAlfat = Data.appendRowToMatrix(m.Alfat, weights)
+      val newBiases = Data.appendToArray(m.biases, bias)
+      val newBeta = Data.appendRowToMatrix(m.Beta, beta)
 
-    ELMSimpleModel(newRnd, newAlfat, newBiases, newBeta, newX, newE, null)
-  }
+      ELMSimpleModel(newRnd, newAlfat, newBiases, newBeta, newX, newE, null)
+   }
 
-  /**
-   * Mutate e, tmp, tmp2 and rnd
-   * @return
-   */
-  def createNodeAmongCandidates(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector) = {
-    val nclasses = e.size
-    val natts = X.numColumns()
-    val ninsts = X.numRows()
-    val candidates = 0 until CANDIDATES map { idx =>
-      val newe = Array.fill(nclasses)(new DenseVector(ninsts))
-      val (weights, bias, newRnd) = newNode(natts, rnd)
-      rnd.setSeed(newRnd.getSeed)
-      val alfa = new DenseVector(weights, false)
-      val beta = new Array[Double](nclasses)
-      val h = feedHidden(X, alfa, bias)
-      var o = 0
-      while (o < nclasses) {
-        tmp.set(h)
-        val neweo = newe(o)
-        neweo.set(e(o))
+   /**
+    * Mutate e, tmp, tmp2 and rnd
+    * @return
+    */
+   def createNodeAmongCandidates(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector) = {
+      val nclasses = e.size
+      val natts = X.numColumns()
+      val ninsts = X.numRows()
+      val candidates = 0 until CANDIDATES map { idx =>
+         val newe = Array.fill(nclasses)(new DenseVector(ninsts))
+         val (weights, bias, newRnd) = newNode(natts, rnd)
+         rnd.setSeed(newRnd.getSeed)
+         val alfa = new DenseVector(weights, false)
+         val beta = new Array[Double](nclasses)
+         val h = feedHidden(X, alfa, bias)
+         var o = 0
+         while (o < nclasses) {
+            tmp.set(h)
+            val neweo = newe(o)
+            neweo.set(e(o))
 
-        //Calculate new weight.
-        val nume = neweo.dot(h)
-        val deno = h.dot(h)
-        val b = nume / deno
-        beta(o) = b
+            //Calculate new weight.
+            val nume = neweo.dot(h)
+            val deno = h.dot(h)
+            val b = nume / deno
+            beta(o) = b
 
-        //Recalculate residual error.
-        tmp.scale(-b)
-        neweo.add(tmp)
+            //Recalculate residual error.
+            tmp.scale(-b)
+            neweo.add(tmp)
 
-        o += 1
+            o += 1
+         }
+         //todo: check if this is the correct way to aggregate multiclass errors and propagate to CIELM or others
+         val err = newe.map { x =>
+            val sq = x.dot(x)
+            sq * sq
+         }.sum
+         (err, weights, bias, h, beta, newe)
       }
-      //todo: check if this is the correct way to aggregate multiclass errors and propagate to CIELM or others
-      val err = newe.map { x =>
-        val sq = x.dot(x)
-        sq * sq
-      }.sum
-      (err, weights, bias, h, beta, newe)
-    }
-    val (_, weights, bias, h, beta, newe) = candidates.minBy(_._1)
-    e.zip(newe).foreach { case (a, b) => a.set(b)}
-    (weights, bias, h, beta)
-  }
+      val (_, weights, bias, h, beta, newe) = candidates.minBy(_._1)
+      e.zip(newe).foreach { case (a, b) => a.set(b)}
+      (weights, bias, h, beta)
+   }
 
-  protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector) = createNodeAmongCandidates(rnd, X, e, tmp)
+   protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector) = createNodeAmongCandidates(rnd, X, e, tmp)
 }

@@ -48,7 +48,7 @@ trait ConvexIELMTrait extends IteratedBuildELM {
       }
    }
 
-   def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
+   def update(model: Model, fast_mutable: Boolean, semcrescer: Boolean = false)(pattern: Pattern) = {
       val m = cast(model)
       val newE = m.e.zip(pattern.weighted_label_array) map { case (dv, v) => Data.appendToVector(dv, v)}
       val newT = m.t.zip(pattern.weighted_label_array) map { case (dv, v) => Data.appendToVector(dv, v)}
@@ -72,13 +72,13 @@ trait ConvexIELMTrait extends IteratedBuildELM {
       val natts = initialTrSet.head.nattributes
       val X = patterns2matrix(initialTrSet, nclasses)
       val (t, e) = patterns2te(initialTrSet, nclasses)
-      val firstModel = bareBuild(nclasses, nclasses, natts, nclasses, X, e, t)
+      val firstModel = bareBuild(nclasses, natts, nclasses, X, e, t)
       trSet.drop(nclasses).foldLeft(firstModel)((m, p) => cast(update(m, fast_mutable = true)(p)))
    }
 
    def grow(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], t: Vector[DenseVector]): (Array[Double], Double, DenseVector, Array[Double], XSRandom)
 
-   def bareBuild(L: Int, ninsts: Int, natts: Int, nclasses: Int, X: DenseMatrix, e: Vector[DenseVector], t: Vector[DenseVector]) = {
+   def bareBuild(L: Int, natts: Int, nclasses: Int, X: DenseMatrix, e: Vector[DenseVector], t: Vector[DenseVector]) = {
       val biases = Array.fill(L)(0d)
       val Alfat = new ResizableDenseMatrix(L, natts)
       val Beta = new ResizableDenseMatrix(L, nclasses)

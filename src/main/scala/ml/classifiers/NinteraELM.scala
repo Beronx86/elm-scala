@@ -27,8 +27,8 @@ case class NinteraELM(seed: Int = 42, deltaL: Int = 10) extends interaTrait {
    val abr = "ELM"
 
    override def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
-      val m = super.update(model)(pattern)
-      if (m.N % 4 == 0) {
+      val m = super.update(model, fast_mutable = true)(pattern) //gambiarra
+      if (m.N % 4 == 0 && !fast_mutable) {
          val gm = modelSelection(m)
          ELMIncModel(gm.rnd, gm.Alfat, gm.biases, gm.Beta, gm.P, gm.N, gm.Xt, gm.Y)
       } else m

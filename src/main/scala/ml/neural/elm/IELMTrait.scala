@@ -19,7 +19,7 @@ package ml.neural.elm
 
 import ml.Pattern
 import ml.classifiers.IELMBatch
-import ml.models.ELMSimpleModel
+import ml.models.{Model, ELMSimpleModel}
 import ml.neural.elm.Data._
 import no.uib.cipr.matrix.{ResizableDenseMatrix, DenseMatrix, DenseVector}
 import util.XSRandom

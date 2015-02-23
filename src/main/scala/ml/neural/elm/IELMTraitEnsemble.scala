@@ -27,50 +27,50 @@ import util.XSRandom
  * Created by davi on 21/05/14.
  */
 trait IELMTraitEnsemble extends IteratedBuildELM {
-  val M: Int
+   val M: Int
 
-  def bareBuild(ninsts: Int, natts: Int, nclasses: Int, X: DenseMatrix, eS: Array[Vector[DenseVector]]) = {
-    val L = nclasses
-    val biasesS = Array.fill(M)(Array.fill(L)(0d))
-    val AlfatS = Array.fill(M)(new ResizableDenseMatrix(L, natts))
-    val BetaS = Array.fill(M)(new ResizableDenseMatrix(L, nclasses))
-    val rnd = new XSRandom(seed)
+   def bareBuild(ninsts: Int, natts: Int, nclasses: Int, X: DenseMatrix, eS: Array[Vector[DenseVector]]) = {
+      val L = nclasses
+      val biasesS = Array.fill(M)(Array.fill(L)(0d))
+      val AlfatS = Array.fill(M)(new ResizableDenseMatrix(L, natts))
+      val BetaS = Array.fill(M)(new ResizableDenseMatrix(L, nclasses))
+      val rnd = new XSRandom(seed)
 
-    var m = 0
-    while (m < M) {
-      var l = 0
-      val tmp = new DenseVector(ninsts)
-      while (l < L) {
-        val (weights, bias, h, beta) = buildCore(rnd, X, eS(m), tmp)
-        biasesS(m)(l) = bias
-        AlfatS(m).setRow(l, weights)
-        BetaS(m).setRow(l, beta)
-        l += 1
+      var m = 0
+      while (m < M) {
+         var l = 0
+         val tmp = new DenseVector(ninsts)
+         while (l < L) {
+            val (weights, bias, h, beta) = buildCore(rnd, X, eS(m), tmp)
+            biasesS(m)(l) = bias
+            AlfatS(m).setRow(l, weights)
+            BetaS(m).setRow(l, beta)
+            l += 1
+         }
+         m += 1
       }
-      m += 1
-    }
-    ELMSimpleEnsembleModel(rnd, AlfatS, biasesS, BetaS, X, eS, null)
-  }
+      ELMSimpleEnsembleModel(rnd, AlfatS, biasesS, BetaS, X, eS, null)
+   }
 
-  def build(trSet: Seq[Pattern]) = {
-    val nclasses = trSet.head.nclasses
-    if (trSet.size < nclasses) {
-      println("At least |Y| instances required.")
-      sys.exit(1)
-    }
-    val initialTrSet = trSet.take(nclasses)
-    val natts = initialTrSet.head.nattributes
-    val X = patterns2matrix(initialTrSet, nclasses)
-    val eS = Array.fill(M)(patterns2t(initialTrSet, nclasses))
-    val firstModel = bareBuild(nclasses, natts, nclasses, X, eS)
-    trSet.drop(nclasses).foldLeft(firstModel)((m, p) => ensCast(update(m, fast_mutable = true)(p)))
-  }
+   def build(trSet: Seq[Pattern]) = {
+      val nclasses = trSet.head.nclasses
+      if (trSet.size < nclasses) {
+         println("At least |Y| instances required.")
+         sys.exit(1)
+      }
+      val initialTrSet = trSet.take(nclasses)
+      val natts = initialTrSet.head.nattributes
+      val X = patterns2matrix(initialTrSet, nclasses)
+      val eS = Array.fill(M)(patterns2t(initialTrSet, nclasses))
+      val firstModel = bareBuild(nclasses, natts, nclasses, X, eS)
+      trSet.drop(nclasses).foldLeft(firstModel)((m, p) => ensCast(update(m, fast_mutable = true)(p)))
+   }
 
-  protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector): (Array[Double], Double, DenseVector, Array[Double])
+   protected def buildCore(rnd: XSRandom, X: DenseMatrix, e: Vector[DenseVector], tmp: DenseVector): (Array[Double], Double, DenseVector, Array[Double])
 
-  protected def ensCast(model: Model) = model match {
-    case m: ELMSimpleEnsembleModel => m
-    case _ => println("IELMTraitEnsemble ELMs require ELMSimpleEnsembleModels.")
-      sys.exit(1)
-  }
+   protected def ensCast(model: Model) = model match {
+      case m: ELMSimpleEnsembleModel => m
+      case _ => println("IELMTraitEnsemble ELMs require ELMSimpleEnsembleModels.")
+         sys.exit(1)
+   }
 }

@@ -24,28 +24,28 @@ import ml.models.{ELMIncModel, ELMModel, Model}
  * Growing + OS-ELM.
  */
 trait interaTrait extends ConvergentIncremental with ConvergentGrowing {
-  val Lbuild = 1
+   val Lbuild = 1
 
-  def build(trSet: Seq[Pattern]): Model = {
-    val nclasses = trSet.head.nclasses
-    if (trSet.size < nclasses) {
-      println("At least |Y| instances required.")
-      sys.exit(1)
-    }
-    val initialTrSet = trSet.take(nclasses)
-    val firstModel = modelSelection(cast(batchBuild(initialTrSet)))
-    trSet.drop(nclasses).foldLeft(firstModel)((m, p) => cast(update(m, fast_mutable = true)(p)))
-  }
+   def build(trSet: Seq[Pattern]): Model = {
+      val nclasses = trSet.head.nclasses
+      if (trSet.size < nclasses) {
+         println("At least |Y| instances required.")
+         sys.exit(1)
+      }
+      val initialTrSet = trSet.take(nclasses)
+      val firstModel = modelSelection(cast(batchBuild(initialTrSet)))
+      trSet.drop(nclasses).foldLeft(firstModel)((m, p) => cast(update(m, fast_mutable = true)(p)))
+   }
 
-  override def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
-    val m = super.update(model)(pattern)
-    if (math.sqrt(m.N + 1).toInt > math.sqrt(m.N).toInt) {
-      val gm = modelSelection(m)
-      ELMIncModel(gm.rnd, gm.Alfat, gm.biases, gm.Beta, gm.P, gm.N, gm.Xt, gm.Y)
-    } else m
-  }
+   override def update(model: Model, fast_mutable: Boolean)(pattern: Pattern) = {
+      val m = super.update(model)(pattern)
+      if (math.sqrt(m.N + 1).toInt > math.sqrt(m.N).toInt && !fast_mutable) {
+         val gm = modelSelection(m)
+         ELMIncModel(gm.rnd, gm.Alfat, gm.biases, gm.Beta, gm.P, gm.N, gm.Xt, gm.Y)
+      } else m
+   }
 
-  protected def modelSelection(model: ELMModel): ELMModel
+   protected def modelSelection(model: ELMModel): ELMModel
 }
 
 

@@ -58,6 +58,7 @@ case class CIELMBatch(seed: Int = 42, callf: Boolean = false, f: (Model, Double)
       val newE = m.e.zip(pattern.weighted_label_array) map { case (dv, v) => Data.appendToVector(dv, v)}
       val newT = m.t.zip(pattern.weighted_label_array) map { case (dv, v) => Data.appendToVector(dv, v)}
       val newX = Data.appendRowToMatrix(m.X, pattern.array)
-      bareBuild(m.N + 1, m.N + 1, newX.numColumns(), pattern.nclasses, newX, newE, newT)
+      if (fast_mutable) bareBuild(m.N, m.N + 1, newX.numColumns(), pattern.nclasses, newX, newE, newT)
+      else bareBuild(m.N + 1, m.N + 1, newX.numColumns(), pattern.nclasses, newX, newE, newT)
    }
 }

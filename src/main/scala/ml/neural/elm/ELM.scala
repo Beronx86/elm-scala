@@ -19,7 +19,7 @@ package ml.neural.elm
 
 import ml.Pattern
 import ml.classifiers.Learner
-import ml.models.Model
+import ml.models.{ELMModel, Model}
 import ml.neural.elm.Math._
 import no.uib.cipr.matrix.{DenseMatrix, DenseVector}
 
@@ -32,14 +32,41 @@ trait ELM extends Learner {
    val boundaryType = "flexível"
    val attPref = "numérico"
    val seed: Int
+
    //  if (seed == 0) {
    //    println("Seed cannot be 0 because the fast random algorithm (XS) would produce only 0s.")
    //    sys.exit(1)
    //  }
+   def expected_change(model: Model)(pattern: Pattern) = {
+      def cast(model: Model) = model match {
+         case m: ELMModel => m
+         case x => println(s"EMC require ELMModels. Not $x")
+            sys.exit(1)
+      }
+      val m = cast(model)
+      val p = m.distribution(pattern)
+      (0 until pattern.nclasses map { c =>
+         val artp = pattern.relabeled_reweighted(c, pattern.instance_weight, new_missed = false)
+         val m2 = cast(update(m, fast_mutable = true)(artp)) //gambiarra de usar fast_mutable como indicador de "não cresça a rede"
+         p(c) * dist(m.Beta, m2.Beta)
+      }).sum
+   }
 
-   def EMC(model: Model)(patterns: Seq[Pattern]) = ???
-
-   def expected_change(model: Model)(pattern: Pattern) = ???
+   def dist(A: DenseMatrix, B: DenseMatrix) = {
+      val a = A.getData
+      val b = B.getData
+      val n = B.getData.size
+      var i = 0
+      var g = 0d
+      println(s"$A \n $B     $n")
+      while (i < n) {
+         println(s"$i")
+         val d = a(i) - b(i)
+         g += d * d
+         i += 1
+      }
+      math.sqrt(g)
+   }
 
    protected def feedHidden(X: DenseMatrix, alfa: DenseVector, bias: Double) = {
       val h = new DenseVector(X.numRows())
@@ -152,3 +179,4 @@ trait ELM extends Learner {
    //
    //  def build(trSet: Seq[Pattern]): ELMModel
 }
+

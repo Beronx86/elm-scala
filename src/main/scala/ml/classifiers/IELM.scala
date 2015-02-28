@@ -25,7 +25,7 @@ import util.XSRandom
 
 case class IELM(seed: Int = 42, callf: Boolean = false, f: (Model, Double) => Unit = (_, _) => ())
    extends IELMTrait {
-   override val toString = "IELM"
+   override val toString = "IELMinc"
    val id = 6
    val Lbuild = -1
    val abr = toString

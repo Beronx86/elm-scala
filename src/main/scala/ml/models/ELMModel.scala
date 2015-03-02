@@ -24,6 +24,7 @@ import no.uib.cipr.matrix.{DenseVector, DenseMatrix}
 import util.XSRandom
 
 trait ELMModel extends Model {
+   def JS(pattern: Pattern) = ???
    lazy val HHinv = {
       val r = new DenseMatrix(H.numRows(), H.numRows())
       H.mult(Hinv, r)
@@ -81,6 +82,7 @@ case class ELMSimpleModel(rnd: XSRandom, Alfat: DenseMatrix, biases: Array[Doubl
 }
 
 case class ELMSimpleEnsembleModel(rnd: XSRandom, AlfatS: Seq[DenseMatrix], biasesS: Seq[Array[Double]], BetaS: Seq[DenseMatrix], X: DenseMatrix, eS: Seq[Vector[DenseVector]], t: Vector[DenseVector]) extends Model {
+   def JS(pattern: Pattern) = ???
    lazy val L = BetaS.head.numRows()
    lazy val M = AlfatS.size
    lazy val O = BetaS.head.numColumns()
